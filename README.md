@@ -19,6 +19,8 @@ The Air Quality Egg dashboard is a [Ruby](http://www.ruby-lang.org/),
 # Sample .env file
 PRODUCT_ID=xxxxxx # get this by logging into Xively.com and creating a product batch (Manage > Add Product Batch)
 API_KEY=xxxxxxx # get this by logging into Xively.com and creating a master key (Settings > Master Keys > Add Master Key
+AIRNOW_USER=xxxxxx # get this from airnowapi.org - required for fetching EPA air quality data
+AIRNOW_PASS=xxxxxx # same as AIRNOW_USER
 ```
 
 The values in this file are required to interact with Xively, but some value
@@ -45,6 +47,11 @@ website running locally on your machine.
 ### Running the tests
 
 `bundle exec rake`
+
+### Importing supporting data - EPA sites
+`foreman run bundle exec rake db:migrate
+`foreman run bundle exec rake airnow:epa_sites:download_from_ftp`
+`foreman run bundle exec rake airnow:epa_sites:import_into_db`
 
 ## Contributing
 

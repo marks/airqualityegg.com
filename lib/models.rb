@@ -12,4 +12,5 @@ ActiveRecord::Base.establish_connection(
 )
 
 class EpaSite < ActiveRecord::Base
+  self.primary_key = 'aqs_id'
 end

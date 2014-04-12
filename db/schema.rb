@@ -16,28 +16,28 @@ ActiveRecord::Schema.define(version: 20140412211106) do
   enable_extension "plpgsql"
 
   create_table "epa_sites", id: false, force: true do |t|
-    t.string   "aqs_id",       limit: 9
-    t.string   "param",        limit: 10
+    t.string   "aqs_id"
+    t.string   "parameter"
     t.integer  "site_code"
-    t.string   "site_name",    limit: 20
-    t.string   "status",       limit: 8
-    t.string   "agency_id",    limit: 4
-    t.string   "agency_name",  limit: 60
-    t.string   "epa_region",   limit: 2
+    t.string   "site_name"
+    t.string   "status"
+    t.string   "agency_id"
+    t.string   "agency_name"
+    t.string   "epa_region"
     t.decimal  "lat"
     t.decimal  "lon"
     t.integer  "elevation"
-    t.string   "gmt_offset",   limit: 3
-    t.string   "country_code", limit: 2
+    t.string   "gmt_offset"
+    t.string   "country_code"
     t.integer  "cmsa_code"
-    t.string   "cmsa_name",    limit: 50
+    t.string   "cmsa_name"
     t.integer  "msa_code"
-    t.string   "msa_name",     limit: 50
+    t.string   "msa_name"
     t.integer  "state_code",   limit: 2
-    t.string   "state_name",   limit: 2
-    t.string   "county_code",  limit: 9
-    t.string   "county_name",  limit: 25
-    t.string   "city_code",    limit: 9
+    t.string   "state_name"
+    t.string   "county_code"
+    t.string   "county_name"
+    t.string   "city_code"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
