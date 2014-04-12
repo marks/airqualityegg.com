@@ -12,6 +12,9 @@ gem 'rack-force_domain'
 gem 'memcachier'
 gem 'dalli'
 
+gem "pg"
+gem "activerecord"
+gem "sinatra-activerecord"
 
 group :development do
   gem 'foreman'
@@ -25,3 +28,4 @@ group :development, :test do
   gem 'rack-test'
   gem 'webmock'
 end
+

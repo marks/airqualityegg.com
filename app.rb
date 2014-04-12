@@ -8,6 +8,7 @@ require 'dalli'
 require 'memcachier'
 require 'json'
 
+require './lib/models'
 
 class AirQualityEgg < Sinatra::Base
 
