@@ -15,6 +15,7 @@ gem 'dalli'
 gem "pg"
 gem "activerecord"
 gem "sinatra-activerecord"
+gem 'rake'
 
 group :development do
   gem 'foreman'
@@ -23,7 +24,6 @@ end
 group :development, :test do
   gem 'sinatra-contrib'
   gem 'capybara'
-  gem 'rake'
   gem 'rspec'
   gem 'rack-test'
   gem 'webmock'
