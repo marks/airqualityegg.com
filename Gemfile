@@ -21,11 +21,11 @@ group :development do
   gem 'foreman'
 end
 
+gem 'rspec'
+gem 'rack-test'
 group :development, :test do
   gem 'sinatra-contrib'
   gem 'capybara'
-  gem 'rspec'
-  gem 'rack-test'
   gem 'webmock'
 end
 
