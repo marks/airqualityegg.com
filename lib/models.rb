@@ -1,6 +1,6 @@
 require "sinatra/activerecord"
 
-database = URI.parse("postgres://localhost/airquality" || ENV['DATABASE_URL'])
+database = URI.parse(ENV['DATABASE_URL'] || "postgres://localhost/airquality")
 
 ActiveRecord::Base.establish_connection(
   :adapter  => database.scheme == 'postgres' ? 'postgresql' : database.scheme,
