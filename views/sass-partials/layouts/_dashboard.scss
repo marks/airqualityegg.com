@@ -160,6 +160,16 @@
   color: $color-blue;
 }
 
+.dashboard-xively-link {
+  position: absolute;
+  z-index: 5;
+  bottom: 0;
+
+  .button:hover{
+    color:#FFF;
+  }
+}
+
 //
 // MAP
 //

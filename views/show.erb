@@ -57,6 +57,10 @@
     </div>
   </div>
 
+  <p class="dashboard-xively-link">
+    <a class='button' href='https://xively.com/feeds/<%= @feed.id%>' target='blank'>Full details on Xively.com</a>
+  </p>
+
   <p class="dashboard-updated">Last updated <%= string_to_time(@feed.updated) %></p>
 </section>
 
