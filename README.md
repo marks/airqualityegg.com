@@ -48,7 +48,7 @@ website running locally on your machine.
 
 `bundle exec rake`
 
-### Importing supporting data - EPA sites
+### Importing AirNow monitoring sites and daily data
 `foreman run bundle exec rake db:migrate
 
 `foreman run bundle exec rake airnow:sites:download_from_ftp`
@@ -56,6 +56,13 @@ website running locally on your machine.
 
 `foreman run bundle exec rake airnow:daily_data:download_from_ftp`
 `foreman run bundle exec rake airnow:daily_data:import_into_db`
+
+### To upload local database to Heroku
+
+This must be done because Heroku does not have a writeable filesystem which is required for downloading the FTP files from AirNow
+
+`heroku pg:reset DATABASE_URL`
+`heroku pg:push postgres://localhost/airquality DATABASE_URL`
 
 ## Contributing
 
