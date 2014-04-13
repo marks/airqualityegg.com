@@ -79,7 +79,7 @@ namespace :airnow do
       puts "Inserting/updating sites' data"
       CSV.foreach("tmp/data/#{TODAY}-peak.dat", :col_sep => "|", :encoding => 'ISO8859-1') do |raw_row|
         row = raw_row.map{|v| v.nil? ? nil : v.encode("UTF-8")}
-        data_point = EpaData.find_or_create_by(:date => row[0], :aqs_id => row[0], :parameter => row[3])
+        data_point = EpaData.find_or_create_by(:date => row[0], :aqs_id => row[1], :parameter => row[3])
         data_point.update_attributes!({
           :unit => row[4],
           :value => row[5],
