@@ -14,6 +14,13 @@ ActiveRecord::Base.establish_connection(
 class EpaSite < ActiveRecord::Base
   self.primary_key = 'aqs_id'
   has_many :epa_datas, :foreign_key => :aqs_id
+  
+  scope :active, -> { where(:status => "Active") }
+
+  def to_s
+    site_name
+  end
+
 end
 
 class EpaData < ActiveRecord::Base

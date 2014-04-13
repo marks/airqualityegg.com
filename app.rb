@@ -53,15 +53,14 @@ class AirQualityEgg < Sinatra::Base
 
   # Home page
   get '/' do
-    @local_feed_path = '/all_feeds.json'
+    @local_feed_path = '/all_eggs.json'
     @error = session.delete(:error)
     erb :home
   end
 
-  # Endpoint used by home page
-  get '/all_feeds.json' do
+  get '/all_eggs.json' do
     content_type :json
-    cache_key = "all_feeds"
+    cache_key = "all_eggs"
     cached_data = settings.cache.fetch(cache_key) do
       all_feeds = fetch_all_feeds
       # store in cache and return
@@ -69,6 +68,18 @@ class AirQualityEgg < Sinatra::Base
       all_feeds
     end
     return cached_data
+  end
+
+  get '/all_aqs_sites.json' do
+    content_type :json
+    cache_key = "all_aqs_sites"
+    cached_data = settings.cache.fetch(cache_key) do
+      all_aqs_sites = EpaSite.active.map{|s| {:lat => s.lat, :lng => s.lon, :title => s.to_s, :aqs_id => s.aqs_id}}
+      # store in cache and return
+      settings.cache.set(cache_key, all_aqs_sites, settings.cache_time)
+      all_aqs_sites
+    end
+    return cached_data.to_json
   end
 
   get '/recently_:order.json' do
