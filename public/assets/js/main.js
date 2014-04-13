@@ -14,8 +14,14 @@ var AQE = (function ( $ ) {
   });
 
   var egg_layer = L.layerGroup([]);
+  var egg_heatmap = L.heatLayer([], {radius: 25})
+  var egg_heatmap_layer = L.layerGroup([egg_heatmap])
   var aqs_layer = L.layerGroup([]);
-  var overlays = {"Air Quality Eggs": egg_layer, "AirNow Sites": aqs_layer}
+  var aqs_heatmap = L.heatLayer([], {radius: 25})
+  var aqs_heatmap_layer = L.layerGroup([aqs_heatmap])
+
+
+  var overlays = {"Air Quality Eggs": egg_layer, "Air Quality Eggs Heatmap": egg_heatmap_layer, "AirNow AQS Sites": aqs_layer, "AirNow AQS Sites Heatmap": aqs_heatmap_layer}
 
   initialize()
 
@@ -48,6 +54,22 @@ var AQE = (function ( $ ) {
       })
     }
 
+    //  - load active AQS stations to map      
+    $.getJSON("/all_aqs_sites.json", function(aqs_mapmarkers){
+      for ( var x = 0, len = aqs_mapmarkers.length; x < len; x++ ) {
+        addAQSSiteMapMarker( aqs_mapmarkers[x] );
+      }
+    })
+
+    map.on('overlayadd', function (eventLayer) {
+      if(eventLayer.name == "Air Quality Eggs Heatmap"){
+        egg_heatmap.setLatLngs(egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "1"]}))
+      }
+      if(eventLayer.name == "AirNow AQS Sites Heatmap"){
+        aqs_heatmap.setLatLngs(aqs_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "1"]}))
+      }
+    })
+
     // if on home page:
     if($(".home-map").length != []){
       // show search box
@@ -60,13 +82,6 @@ var AQE = (function ( $ ) {
           })
         })
       })
-      //  - load active AQS stations to map      
-      $.getJSON("/all_aqs_sites.json", function(aqs_mapmarkers){
-        for ( var x = 0, len = aqs_mapmarkers.length; x < len; x++ ) {
-          addAQSSiteMapMarker( aqs_mapmarkers[x] );
-        }
-      })
-
     }
 
   }
