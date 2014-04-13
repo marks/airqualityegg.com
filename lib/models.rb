@@ -13,4 +13,9 @@ ActiveRecord::Base.establish_connection(
 
 class EpaSite < ActiveRecord::Base
   self.primary_key = 'aqs_id'
+  has_many :epa_datas, :foreign_key => :aqs_id
+end
+
+class EpaData < ActiveRecord::Base
+  belongs_to :epa_site, :foreign_key => :aqs_id
 end

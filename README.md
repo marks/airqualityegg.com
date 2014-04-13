@@ -50,8 +50,12 @@ website running locally on your machine.
 
 ### Importing supporting data - EPA sites
 `foreman run bundle exec rake db:migrate
-`foreman run bundle exec rake airnow:epa_sites:download_from_ftp`
-`foreman run bundle exec rake airnow:epa_sites:import_into_db`
+
+`foreman run bundle exec rake airnow:sites:download_from_ftp`
+`foreman run bundle exec rake airnow:sites:import_into_db`
+
+`foreman run bundle exec rake airnow:daily_data:download_from_ftp`
+`foreman run bundle exec rake airnow:daily_data:import_into_db`
 
 ## Contributing
 

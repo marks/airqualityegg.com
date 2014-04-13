@@ -10,10 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140412211106) do
+ActiveRecord::Schema.define(version: 20140413012013) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "epa_data", force: true do |t|
+    t.string   "aqs_id"
+    t.date     "date"
+    t.time     "time"
+    t.string   "parameter"
+    t.string   "unit"
+    t.decimal  "value"
+    t.string   "data_source"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "epa_sites", id: false, force: true do |t|
     t.string   "aqs_id"
