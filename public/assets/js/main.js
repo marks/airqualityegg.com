@@ -2,56 +2,42 @@ var map;
 var AQE = (function ( $ ) {
   "use strict";
 
-
-  // set up google map but do  not show it until markers are loaded
-  var mapOptions = {
-    zoom: 3,
-    mapTypeId: google.maps.MapTypeId.TERRAIN,
-    streetViewControl: false,
-    scrollwheel: false
-  };
-  map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
-  handleNoGeolocation();
-
-  $(".gm-style").hide()
-
-  // Create a search box and link it to the UI element
-  // (via https://developers.google.com/maps/documentation/javascript/examples/places-searchbox)
-  var input = (document.getElementById('pac-input'));
-  map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-  var searchBox = new google.maps.places.SearchBox((input));
-  google.maps.event.addListener(searchBox, 'places_changed', function() {
-    var places = searchBox.getPlaces();
-    map.setCenter(places[0].geometry.location);
-    map.setZoom(10);
+  // set up icons for map
+  var eggIcon = L.icon({
+      iconUrl: '/assets/img/egg-icon.png',
+      iconSize: [19, 20], // size of the icon
   });
 
-  function initialize() {
+  var aqsIcon = L.icon({
+      iconUrl: '/assets/img/blue_dot.png',
+      iconSize: [5, 5], // size of the icon
+  });
 
+  initialize()
+
+  function initialize() {
     // load feeds and then initialize map and add the markers
     if(local_feed_path){
+      // set up leaflet map
+      map = L.map('map_canvas', {scrollWheelZoom: false})
+      handleNoGeolocation();
+      L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+          maxZoom: 18
+      }).addTo(map);
+
       $.getJSON(local_feed_path, function(mapmarkers){
         // if on an egg's page, zoom in close to the egg
         if ( $(".dashboard-map").length && mapmarkers && mapmarkers.length ) {
-          var dashpos = new google.maps.LatLng(mapmarkers[0].lat, mapmarkers[0].lng);
-          map.setCenter(dashpos);
-          map.setZoom(6);
-        }
-        // Try HTML5 geolocation
-        else if(navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(function(position) {
-            var pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-            map.setCenter(pos);
-          });
+          map.setView(L.latLng(mapmarkers[0].lat,mapmarkers[0].lng))          
         }
 
         // add eggs to map
         for ( var x = 0, len = mapmarkers.length; x < len; x++ ) {
-          addEggMapMarker( mapmarkers[x].lat, mapmarkers[x].lng, mapmarkers[x].feed_id );
+          addEggMapMarker(mapmarkers[x]);
         }
 
         $("span#num_eggs").html(mapmarkers.length)
-        $(".gm-style").show()
       })
     }
 
@@ -70,7 +56,7 @@ var AQE = (function ( $ ) {
       //  - load active AQS stations to map      
       $.getJSON("/all_aqs_sites.json", function(aqs_mapmarkers){
         for ( var x = 0, len = aqs_mapmarkers.length; x < len; x++ ) {
-          addAQSSiteMapMarker( aqs_mapmarkers[x].lat, aqs_mapmarkers[x].lng, aqs_mapmarkers[x].aqs_id );
+          addAQSSiteMapMarker( aqs_mapmarkers[x] );
         }
       })
 
@@ -78,92 +64,78 @@ var AQE = (function ( $ ) {
 
   }
 
-  function handleNoGeolocation() {
-    var pos = new google.maps.LatLng(30,-20);
-    map.setCenter(pos);
+
+  function zoomToUserLocation(){
+    if(navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        map.setView([position.coords.latitude,position.coords.longitude],10)
+      });
+    } else {
+      handleNoGeolocation()
+    }    
   }
 
-  function addEggMapMarker(lat, lng, id) {
-    var myLatlng = new google.maps.LatLng(lat, lng);
-    var feed_id = id;
-    var marker = new google.maps.Marker({
-      position: myLatlng,
-      map: map,
-      icon: '/assets/img/egg-icon.png'
-    });
-    google.maps.event.addListener(marker, 'click', function() {
-      var target = '/egg/'+ feed_id;
-      if ( window.location.pathname != target ) {
-        window.location.pathname = target;
-        $(".map").next(".map-overlay").fadeIn(150);
-      }
-    });
+
+  function handleNoGeolocation() {
+    map.setView([46, -24], 2);
+  }
+
+  function addEggMapMarker(details) {
+    var marker = L.marker([details.lat, details.lng],  {icon: eggIcon})
+    marker.bindPopup(details.title+"<br /><a href='/egg/"+details.feed_id+"'>Egg details</a>")
+    marker.addTo(map);
   }
 
   // TODO - refactor
-  function addAQSSiteMapMarker(lat, lng, id) {
-    var myLatlng = new google.maps.LatLng(lat, lng);
-    var aqs_id = id;
-    var marker = new google.maps.Marker({
-      position: myLatlng,
-      map: map,
-      icon: '/assets/img/blue_dot.png'
-    });
-    google.maps.event.addListener(marker, 'click', function() {
-      var target = '/aqs/'+ aqs_id;
-      if ( window.location.pathname != target ) {
-        window.location.pathname = target;
-        $(".map").next(".map-overlay").fadeIn(150);
-      }
-    });
+  function addAQSSiteMapMarker(details) {
+    var marker = L.marker([details.lat, details.lng],  {icon: aqsIcon})
+    marker.bindPopup(details.title+"<br /><a href='/aqs/"+details.aqs_id+"'>AQS details</a>")
+    marker.addTo(map);
   }
 
 
-  if ( $(".home-map").length || $(".dashboard-map").length ) {
-    google.maps.event.addDomListener(window, 'load', initialize);
-  }
 
   //
   // LOCATION PICKER
   //
 
-  var locpic = new GMapsLatLonPicker(),
-      locpicker = $(".gllpLatlonPicker").first(),
-      locsearch = $(".gllpSearchField").first(),
-      locsaved = parseInt($(".location-saved").first().val()),
-      geolocate = function () {
-        navigator.geolocation.getCurrentPosition(function(position) {
-          $(".gllpLatitude").val(position.coords.latitude);
-          $(".gllpLongitude").val(position.coords.longitude);
-          $(".gllpZoom").val(13);
-          locpic.custom_redraw();
-        });
-      };
+  // var locpic = new GMapsLatLonPicker(),
+  //     locpicker = $(".gllpLatlonPicker").first(),
+  //     locsearch = $(".gllpSearchField").first(),
+  //     locsaved = parseInt($(".location-saved").first().val()),
+  //     geolocate = function () {
+  //       navigator.geolocation.getCurrentPosition(function(position) {
+  //         $(".gllpLatitude").val(position.coords.latitude);
+  //         $(".gllpLongitude").val(position.coords.longitude);
+  //         $(".gllpZoom").val(13);
+  //         locpic.custom_redraw();
+  //       });
+  //     };
 
-  if ( locpicker.length ) {
+  // if ( locpicker.length ) {
 
-    locpic.init( locpicker );
+  //   locpic.init( locpicker );
 
-    // search
-    $(".gllpSearchField").keydown(function(event){
-      if(event.keyCode == 13){
-        locpic.performSearch( $(this).val(), false );
-        event.preventDefault();
-      }
-    });
+  //   // search
+  //   $(".gllpSearchField").keydown(function(event){
+  //     if(event.keyCode == 13){
+  //       locpic.performSearch( $(this).val(), false );
+  //       event.preventDefault();
+  //     }
+  //   });
 
-    // HTML5 geolocation
-    if(!locsaved && navigator.geolocation) {
-      geolocate();
-    }
-    if (navigator.geolocation) {
-      $(".find-me").removeClass("hidden").on("click", function(event) {
-        event.preventDefault();
-        geolocate();
-      });
-    }
+  //   // HTML5 geolocation
+  //   if(!locsaved && navigator.geolocation) {
+  //     geolocate();
+  //   }
+  //   if (navigator.geolocation) {
+  //     $(".find-me").removeClass("hidden").on("click", function(event) {
+  //       event.preventDefault();
+  //       geolocate();
+  //     });
+  //   }
 
-  }
+  // }
 
   //
   // CLAIMING FIELD
