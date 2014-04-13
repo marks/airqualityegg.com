@@ -75,7 +75,6 @@ class AirQualityEgg < Sinatra::Base
     cache_key = "all_aqs_sites"
     cached_data = settings.cache.fetch(cache_key) do
       all_aqs_sites = EpaSite.active.map{|s| {:lat => s.lat, :lng => s.lon, :title => s.to_s, :aqs_id => s.aqs_id}}
-      # store in cache and return
       settings.cache.set(cache_key, all_aqs_sites, settings.cache_time)
       all_aqs_sites
     end
