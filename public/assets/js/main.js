@@ -13,18 +13,24 @@ var AQE = (function ( $ ) {
       iconSize: [5, 5], // size of the icon
   });
 
+  var egg_layer = L.layerGroup([]);
+  var aqs_layer = L.layerGroup([]);
+  var overlays = {"Air Quality Eggs": egg_layer, "AirNow Sites": aqs_layer}
+
   initialize()
 
   function initialize() {
     // load feeds and then initialize map and add the markers
     if(local_feed_path){
       // set up leaflet map
-      map = L.map('map_canvas', {scrollWheelZoom: false})
+      map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer]})
       handleNoGeolocation();
       L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
           maxZoom: 18
       }).addTo(map);
+      L.control.layers([], overlays).addTo(map);
+      L.control.locate({locateOptions: {maxZoom: 9}}).addTo(map);
 
       $.getJSON(local_feed_path, function(mapmarkers){
         // if on an egg's page, zoom in close to the egg
@@ -64,18 +70,6 @@ var AQE = (function ( $ ) {
 
   }
 
-
-  function zoomToUserLocation(){
-    if(navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-        map.setView([position.coords.latitude,position.coords.longitude],10)
-      });
-    } else {
-      handleNoGeolocation()
-    }    
-  }
-
-
   function handleNoGeolocation() {
     map.setView([46, -24], 2);
   }
@@ -83,14 +77,14 @@ var AQE = (function ( $ ) {
   function addEggMapMarker(details) {
     var marker = L.marker([details.lat, details.lng],  {icon: eggIcon})
     marker.bindPopup(details.title+"<br /><a href='/egg/"+details.feed_id+"'>Egg details</a>")
-    marker.addTo(map);
+    marker.addTo(egg_layer);
   }
 
   // TODO - refactor
   function addAQSSiteMapMarker(details) {
     var marker = L.marker([details.lat, details.lng],  {icon: aqsIcon})
     marker.bindPopup(details.title+"<br /><a href='/aqs/"+details.aqs_id+"'>AQS details</a>")
-    marker.addTo(map);
+    marker.addTo(aqs_layer);
   }
 
 
