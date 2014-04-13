@@ -51,6 +51,7 @@ var AQE = (function ( $ ) {
         }
 
         $("span#num_eggs").html(mapmarkers.length)
+        $(".gm-style").show()
       })
     }
 
@@ -74,9 +75,6 @@ var AQE = (function ( $ ) {
       })
 
     }
-
-    $(".gm-style").show()
-
 
   }
 
