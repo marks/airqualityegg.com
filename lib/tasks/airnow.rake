@@ -1,5 +1,4 @@
 require 'net/ftp'
-require 'fileutils'
 
 TODAY = Date.today.strftime("%Y%m%d")
 
@@ -9,24 +8,21 @@ namespace :airnow do
   
   namespace :sites do
   
-    desc "Download listing of sites from AirNowAPI.org's FTP site"
-    task :download_from_ftp do |t|
+    desc "Open file that has monitoring site listings from FTP and import into app database"
+    task :import do |t|
       raise "AirNow credentials not set (see README)" unless ENV['AIRNOW_USER'] && ENV['AIRNOW_PASS']
-      FileUtils.mkdir_p
+
       ftp = Net::FTP.new('ftp.airnowapi.org')
       ftp.login(ENV['AIRNOW_USER'], ENV['AIRNOW_PASS'])
-      puts "Downloading file into tmp/data/ dir..."
-      ftp.getbinaryfile('Locations/monitoring_site_locations.dat', 'tmp/data/monitoring_site_locations-latest.dat', 1024)
+      puts "Opening file from FTP..."
+      data = ftp.getbinaryfile('Locations/monitoring_site_locations.dat', nil, 1024)
       ftp.close
-    end
 
-    desc "Import sites into app database"
-    task :import_into_db do |t|
-      puts "Opening and parsing file"
-      puts "#{EpaSite.count} sites currently in EpaSite model"
+      puts "Before: #{EpaSite.count} sites currently in EpaSite model"
+      puts "Parsing file..."
       puts "Inserting/updating sites"
-      CSV.foreach('tmp/data/monitoring_site_locations-latest.dat', :col_sep => "|", :encoding => 'ISO8859-1') do |raw_row|
-        row = raw_row.map{|v| v.nil? ? nil : v.encode("UTF-8")}
+      CSV.parse('tmp/data/monitoring_site_locations-latest.dat', :col_sep => "|", :encoding => 'ISO8859-1') do |row|
+        # row = raw_row.map{|v| v.nil? ? nil : v.encode("UTF-8")}
         site = EpaSite.find_or_create_by(:aqs_id => row[0])
         site.parameter = (site.parameter.to_s.split(",")+[row[1]]).uniq.join(",")
         site.assign_attributes({
@@ -60,25 +56,20 @@ namespace :airnow do
 
   namespace :daily_data do
 
-    desc "Download file that has daily data for each site"
-    task :download_from_ftp do |t|
+    desc "Open file that has daily data for each site from FTP and import into app database"
+    task :download_and_import do |t|
       raise "AirNow credentials not set (see README)" unless ENV['AIRNOW_USER'] && ENV['AIRNOW_PASS']
-      FileUtils.mkdir_p("tmp/data")
+
       ftp = Net::FTP.new('ftp.airnowapi.org')
       ftp.login(ENV['AIRNOW_USER'], ENV['AIRNOW_PASS'])
-      puts "Downloading file into tmp/data/ dir..."
-      ftp.getbinaryfile("DailyData/#{TODAY}-peak.dat", "tmp/data/#{TODAY}-peak.dat", 1024)
+      puts "Opening file from FTP..."
+      data = ftp.getbinaryfile("DailyData/#{TODAY}-peak.dat", nil, 1024)
       ftp.close
-    end
 
-
-    desc "Import site data into app database"
-    task :import_into_db do |t|
-      puts "Opening and parsing file"
-      puts "#{EpaData.count} data points currently in EpaData model"
+      puts "Before: #{EpaData.count} data points currently in EpaData model"
+      puts "Parsing file..."
       puts "Inserting/updating sites' data"
-      CSV.foreach("tmp/data/#{TODAY}-peak.dat", :col_sep => "|", :encoding => 'ISO8859-1') do |raw_row|
-        row = raw_row.map{|v| v.nil? ? nil : v.encode("UTF-8")}
+      CSV.parse(data, :col_sep => "|", :encoding => 'ISO8859-1') do |row|
         data_point = EpaData.find_or_create_by(:date => Time.strptime(row[0], "%m/%d/%y"), :aqs_id => row[1], :parameter => row[3])
         data_point.update_attributes!({
           :unit => row[4],
@@ -86,7 +77,7 @@ namespace :airnow do
           :data_source => row[7]
         })
       end
-      puts "#{EpaData.count} data points in EpaData model now"
+      puts "After: #{EpaData.count} data points in EpaData model now"
     end
 
   end

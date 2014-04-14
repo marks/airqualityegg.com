@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/xively/airqualityegg.com.png?branch=master)](https://travis-ci.org/xively/airqualityegg.com)
+[![Build Status](https://travis-ci.org/marks/airqualityegg.com.png?branch=master)](https://travis-ci.org/xively/airqualityegg.com)
 
-# Airqualityegg.com
+# Fork of AirQualityEgg.com
 
 The Air Quality Egg dashboard is a [Ruby](http://www.ruby-lang.org/), 
 [Sinatra](http://www.sinatrarb.com/) app that provides the web UI for the
@@ -51,21 +51,17 @@ website running locally on your machine.
 `bundle exec rake`
 
 ### Importing AirNow monitoring sites and daily data
-`foreman run bundle exec rake db:migrate
-
-`foreman run bundle exec rake airnow:sites:download_from_ftp`
-`foreman run bundle exec rake airnow:sites:import_into_db`
-
-`foreman run bundle exec rake airnow:daily_data:download_from_ftp`
-`foreman run bundle exec rake airnow:daily_data:import_into_db`
+`foreman run bundle exec rake db:migrate` 
+`foreman run bundle exec rake airnow:sites:import`
+`foreman run bundle exec rake airnow:daily_data:import`
 
 ### To upload local database to Heroku
 
-This must be done because Heroku does not have a writeable filesystem which is required for downloading the FTP files from AirNow
+~~This must be done because Heroku does not have a writeable filesystem which is required for downloading the FTP files from AirNow~~ This is optional.
 
 `heroku pg:reset DATABASE_URL`
 `heroku pg:push postgres://localhost/airquality DATABASE_URL`
-\
+
 Be sure to restart heroku after this as the database socket connection will need to be re-initialized
 
 ## Contributing
