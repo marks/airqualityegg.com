@@ -36,6 +36,7 @@
 
     <div class="current current-right current-temperature">
       <h2 class="current-id heading-narrow">Temperature</h2>
+      <h3 class="current-id-full"><br /></h3>
       <div class="current-value">
         <p class="current-value-measure">
           <span class="current-value-measure-wrap"><%= @temperature ? "#{celsius_to_fahrenheit(@temperature.current_value)} °F" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
@@ -47,6 +48,7 @@
     
     <div class="current current-right current-humidity">
       <h2 class="current-id heading-narrow">Humidity</h2>
+      <h3 class="current-id-full"><br /></h3>
       <div class="current-value">
         <p class="current-value-measure">
           <span class="current-value-measure-wrap"><%= @humidity ? "#{@humidity.current_value} #{@humidity.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
