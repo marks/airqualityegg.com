@@ -52,8 +52,8 @@ website running locally on your machine.
 
 ### Importing AirNow monitoring sites and daily data
 `foreman run bundle exec rake db:migrate` 
-`foreman run bundle exec rake airnow:sites:import`
-`foreman run bundle exec rake airnow:daily_data:import`
+`foreman run bundle exec rake airnow:sites:import` - Using Heroku Scheduler, we run this once a day
+`foreman run bundle exec rake airnow:daily_data:import` - Using Heroku Scheduler, we run this once an hour
 
 ### To upload local database to Heroku
 
