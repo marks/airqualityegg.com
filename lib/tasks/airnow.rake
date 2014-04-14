@@ -75,18 +75,18 @@ namespace :airnow do
     desc "Import site data into app database"
     task :import_into_db do |t|
       puts "Opening and parsing file"
-      puts "#{EpaData.count} sites currently in EpaData model"
+      puts "#{EpaData.count} data points currently in EpaData model"
       puts "Inserting/updating sites' data"
       CSV.foreach("tmp/data/#{TODAY}-peak.dat", :col_sep => "|", :encoding => 'ISO8859-1') do |raw_row|
         row = raw_row.map{|v| v.nil? ? nil : v.encode("UTF-8")}
-        data_point = EpaData.find_or_create_by(:date => row[0], :aqs_id => row[1], :parameter => row[3])
+        data_point = EpaData.find_or_create_by(:date => Time.strptime(row[0], "%m/%d/%y"), :aqs_id => row[1], :parameter => row[3])
         data_point.update_attributes!({
           :unit => row[4],
           :value => row[5],
           :data_source => row[7]
         })
       end
-      puts "#{EpaData.count} sites in EpaData model now"
+      puts "#{EpaData.count} data points in EpaData model now"
     end
 
   end

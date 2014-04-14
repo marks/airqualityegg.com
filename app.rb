@@ -35,7 +35,7 @@ class AirQualityEgg < Sinatra::Base
 
   configure :development do
     register Sinatra::Reloader
-    set :cache_time, 300 # five minutes
+    set :cache_time, 3600*12 # five minutes
   end
 
   helpers do
@@ -93,6 +93,15 @@ class AirQualityEgg < Sinatra::Base
       recently_results
     end
     return cached_data.to_json
+  end
+
+
+  get '/aqs/:aqs_id.json' do
+    content_type :json
+    site = EpaSite.find_by(:aqs_id => params[:aqs_id])
+    data = site.attributes
+    data[:epa_datas] = site.epa_datas.find_by_sql(["SELECT T .* FROM epa_data T INNER JOIN (SELECT epa_data.parameter, MAX (DATE) AS MaxDate FROM epa_data GROUP BY parameter) tm ON T.parameter = tm.parameter AND T.date = tm.MaxDate and T.aqs_id = ?",site.aqs_id]).map(&:attributes)
+    return data.to_json
   end
 
   # Edit egg metadata

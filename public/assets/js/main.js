@@ -7,12 +7,12 @@ var AQE = (function ( $ ) {
       iconUrl: '/assets/img/egg-icon.png',
       iconSize: [19, 20], // size of the icon
   });
-
   var aqsIcon = L.icon({
       iconUrl: '/assets/img/blue_dot.png',
       iconSize: [5, 5], // size of the icon
   });
 
+  // Air Quality Egg and AirNow AWS layers
   var egg_layer = L.layerGroup([]);
   var egg_heatmap = L.heatLayer([], {radius: 25})
   var egg_heatmap_layer = L.layerGroup([egg_heatmap])
@@ -20,8 +20,34 @@ var AQE = (function ( $ ) {
   var aqs_heatmap = L.heatLayer([], {radius: 25})
   var aqs_heatmap_layer = L.layerGroup([aqs_heatmap])
 
+  // OpenWeatherMap Layers
+  var clouds_layer = L.OWM.clouds({opacity: 0.8, legendImagePath: 'files/NT2.png'});
+  var precipitation_layer = L.OWM.precipitation( {opacity: 0.5} );
+  var rain_layer = L.OWM.rain({opacity: 0.5});
+  var snow_layer = L.OWM.snow({opacity: 0.5});
+  var pressure_layer = L.OWM.pressure({opacity: 0.4});
+  var temp_layer = L.OWM.temperature({opacity: 0.5});
+  var wind_layer = L.OWM.wind({opacity: 0.5});
 
-  var overlays = {"Air Quality Eggs": egg_layer, "Air Quality Eggs Heatmap": egg_heatmap_layer, "AirNow AQS Sites": aqs_layer, "AirNow AQS Sites Heatmap": aqs_heatmap_layer}
+  var groupedOverlays = {
+    "Air Quality Eggs": {
+      "Markers": egg_layer,
+      "Heatmap": egg_heatmap_layer
+    },
+    "AirNow AQS Sites": {
+      "Markers": aqs_layer,
+      "Heatmap": aqs_heatmap_layer
+    },
+    "OpenWeatherMap": {
+      "Clouds": clouds_layer,
+      "Precipiration": precipitation_layer,
+      "Rain": rain_layer,
+      "Snow": snow_layer,
+      "Pressure": pressure_layer,
+      "Temperature": temp_layer,
+      "Wind": wind_layer
+    }
+  };
 
   initialize()
 
@@ -35,13 +61,12 @@ var AQE = (function ( $ ) {
           attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
           maxZoom: 18
       }).addTo(map);
-      L.control.layers([], overlays).addTo(map);
+      L.control.groupedLayers([], groupedOverlays).addTo(map);
       L.control.locate({locateOptions: {maxZoom: 9}}).addTo(map);
 
       $.getJSON(local_feed_path, function(mapmarkers){
         // if on an egg's page, zoom in close to the egg
         if ( $(".dashboard-map").length && mapmarkers && mapmarkers.length ) {
-          console.log(mapmarkers[0])
           map.setView([mapmarkers[0].location_lat,mapmarkers[0].location_lon],6)
         }
 
@@ -62,10 +87,10 @@ var AQE = (function ( $ ) {
     })
 
     map.on('overlayadd', function (eventLayer) {
-      if(eventLayer.name == "Air Quality Eggs Heatmap"){
+      if(eventLayer.name == "Heatmap" && eventLayer.group.name == "Air Quality Eggs"){
         egg_heatmap.setLatLngs(egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "1"]}))
       }
-      if(eventLayer.name == "AirNow AQS Sites Heatmap"){
+      if(eventLayer.name == "Heatmap" && eventLayer.group.name == "AirNow AQS Sites"){
         aqs_heatmap.setLatLngs(aqs_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "1"]}))
       }
     })
@@ -92,15 +117,15 @@ var AQE = (function ( $ ) {
 
   function addEggMapMarker(egg) {
     var marker = L.marker([egg.location_lat, egg.location_lon],  {icon: eggIcon})
-    var html = "<table class='popup_metadata' data-feed_id='"+egg.id+"'>"
-    html += "<tr><td>Name </td><td> <a href='/egg/"+egg.id+"'><strong>"+egg.title+"</strong></a></td></tr>"
+    var html = "<div><strong>Air Quality Egg Details</strong><table class='popup_metadata' data-feed_id='"+egg.id+"'>"
+    html += "<tr><td>Name </td><td> <a href='/egg/"+egg.id+"'>"+egg.title+"</a></td></tr>"
     html += "<tr><td>Description </td><td> "+egg.description+"</td></tr>"
     html += "<tr><td>Position </td><td> "+egg.location_exposure+" @ "+egg.location_ele+" elevation</td></tr>"
     html += "<tr><td>Status </td><td> "+egg.status+"</td></tr>"
     html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
     html += "<tr><td>Created </td><td> "+moment(egg.created).fromNow()+"</td></tr>"
     html += "</table><hr /><strong>Latest Readings</strong>"
-    html += "<div id='egg_"+egg.id+"'></div>"
+    html += "<div id='egg_"+egg.id+"'></div></div>"
     marker.bindPopup(html)
     marker.on('click', onEggMapMarkerClick); 
     marker.addTo(egg_layer);
@@ -109,22 +134,19 @@ var AQE = (function ( $ ) {
   function onEggMapMarkerClick(e){
     var feed_id = $(".popup_metadata").data("feed_id")
     $.getJSON("/egg/"+feed_id+".json", function(data){
-      console.log(data)
       var html = ""
-      if(data.datastreams.no2){ html += "NO2: "+data.datastreams.no2.current_value + " " + data.datastreams.no2.unit.label }
-      if(data.datastreams.co){ html += "<br />CO: "+data.datastreams.co.current_value + " " + data.datastreams.co.unit.label}
-      if(data.datastreams.humidity){ html += "<br />Humidity: "+data.datastreams.humidity.current_value + " " + data.datastreams.humidity.unit.label }
-      if(data.datastreams.temperature){ html += "<br />Temperature: "+data.datastreams.temperature.current_value + " " + data.datastreams.temperature.unit.label }
+      if(data.datastreams.no2){ html += "NO2: "+data.datastreams.no2.current_value + " " + data.datastreams.no2.unit.label + " (" + moment(data.datastreams.no2.at).fromNow() +  ")"}
+      if(data.datastreams.co){ html += "<br />CO: "+data.datastreams.co.current_value + " " + data.datastreams.co.unit.label + " (" + moment(data.datastreams.co.at).fromNow() +  ")"}
+      if(data.datastreams.humidity){ html += "<br />Humidity: "+data.datastreams.humidity.current_value + " " + data.datastreams.humidity.unit.label + " (" + moment(data.datastreams.humidity.at).fromNow() +  ")"}
+      if(data.datastreams.temperature){ html += "<br />Temperature: "+data.datastreams.temperature.current_value + " " + data.datastreams.temperature.unit.label  + " (" + moment(data.datastreams.temperature.at).fromNow() +  ")"}
       if(html == ""){html += "<em>No recent data available</em>"}
       $("#egg_"+feed_id).html(html)
     })
   }
 
-
-  // TODO - refactor
   function addAQSSiteMapMarker(aqs) {
     var marker = L.marker([aqs.lat, aqs.lon],  {icon: aqsIcon})
-    var html = "<table class='popup_metadata'>"
+    var html = "<div><strong>AirNow AQS Site Details</strong><table class='popup_metadata' data-aqs_id='"+aqs.aqs_id+"'>"
     html += "<tr><td>Name / Code </td><td> <strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></td></tr>"
     html += "<tr><td>Agency </td><td>"+aqs.agency_name+"</td></tr>"
     html += "<tr><td>Collects </td><td> "+aqs.parameter.split(",").join(", ")+"</td></tr>"
@@ -133,10 +155,25 @@ var AQE = (function ( $ ) {
     if(aqs.cmsa_name){html += "<tr><td>CMSA </td><td> "+aqs.cmsa_name+"</td></tr>"}
     html += "<tr><td>County </td><td> "+aqs.county_name+"</td></tr>"
     html += "<tr><td>Status </td><td> "+aqs.status+"</td></tr>"
-    html += "</table>"
+    html += "</table><hr /><strong>Latest Readings</strong>"
+    html += "<div id='aqs_"+aqs.aqs_id+"'></div></div>"
     marker.bindPopup(html)
+    marker.on('click', onAQSSiteMapMarkerClick); 
     marker.addTo(aqs_layer);
   }
+
+    function onAQSSiteMapMarkerClick(e){
+    var aqs_id = $(".popup_metadata").data("aqs_id")
+    $.getJSON("/aqs/"+aqs_id+".json", function(data){
+      var html = ""
+      $.each(data.epa_datas, function(n,i){
+        html += i.parameter+": "+i.value+" "+i.unit+" ("+moment(i.date).format("MM/DD/YYYY")+")<br />"
+      })
+      if(html == ""){html += "<em>No recent data available</em>"}
+      $("#aqs_"+aqs_id).html(html)
+    })
+  }
+
 
 
 
