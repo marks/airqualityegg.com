@@ -337,12 +337,12 @@ var AQE = (function ( $ ) {
     } else {
       new_series.yAxis = 1;
     }
+
     new_series.data = $(data.datapoints).map(function(n,i){
       var date = new Date(i.at)
       return {x: date.getTime(),y: parseFloat(i.value)}
     })
-    console.log(new_series)
-    // xively.datastream.history("2017904434","CO_raw_00-04-a3-d5-ee-ca_1", {duration:"7days",interval:3600,limit:1000}, function(data){console.log(data)})
+    
     $('#dashboard-xively-chart').highcharts().addSeries(new_series)
   }
 
