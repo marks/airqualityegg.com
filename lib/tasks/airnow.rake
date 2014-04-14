@@ -57,7 +57,7 @@ namespace :airnow do
   namespace :daily_data do
 
     desc "Open file that has daily data for each site from FTP and import into app database"
-    task :download_and_import do |t|
+    task :import do |t|
       raise "AirNow credentials not set (see README)" unless ENV['AIRNOW_USER'] && ENV['AIRNOW_PASS']
 
       ftp = Net::FTP.new('ftp.airnowapi.org')
