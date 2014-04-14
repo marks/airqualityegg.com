@@ -21,6 +21,8 @@ PRODUCT_ID=xxxxxx # get this by logging into Xively.com and creating a product b
 API_KEY=xxxxxxx # get this by logging into Xively.com and creating a master key (Settings > Master Keys > Add Master Key
 AIRNOW_USER=xxxxxx # get this from airnowapi.org - required for fetching EPA air quality data
 AIRNOW_PASS=xxxxxx # same as AIRNOW_USER
+GOOGLE_ANALYTICS_TRACKING_ID=xxxxxx # get from analytics.google.com or don't include and google analytics wont be used
+GOOGLE_ANALYTICS_DOMAIN=xxxxxx # same as GOOGLE_ANALYTICS_TRACKING_ID
 ```
 
 The values in this file are required to interact with Xively, but some value
@@ -63,6 +65,8 @@ This must be done because Heroku does not have a writeable filesystem which is r
 
 `heroku pg:reset DATABASE_URL`
 `heroku pg:push postgres://localhost/airquality DATABASE_URL`
+\
+Be sure to restart heroku after this as the database socket connection will need to be re-initialized
 
 ## Contributing
 
