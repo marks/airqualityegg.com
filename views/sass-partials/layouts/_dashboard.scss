@@ -57,6 +57,10 @@
   line-height: 1em;
   text-transform: uppercase;
   color: $color-blue-alt;
+
+  a.current-external-link{
+    text-transform: none;
+  }
 }
 
 .current-value {

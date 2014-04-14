@@ -12,7 +12,7 @@
     
     <div class="current current-left current-no2">
       <h2 class="current-id">NO2</h2>
-      <h3 class="current-id-full">Nitrogen Dioxide</h3>
+      <h3 class="current-id-full">Nitrogen Dioxide<br /><a class="current-external-link" href="http://www.epa.gov/air/nitrogenoxides/" target="blank">More info at EPA.gov</a></h3>
       <div class="current-value">
         <p class="current-value-measure">
           <span class="current-value-measure-wrap"><%= @no2 ? "#{@no2.current_value} #{@no2.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
@@ -24,7 +24,7 @@
 
     <div class="current current-left current-co">
       <h2 class="current-id">CO</h2>
-      <h3 class="current-id-full">Carbon Monoxide</h3>
+      <h3 class="current-id-full">Carbon Monoxide<br /><a class="current-external-link" href="http://www.epa.gov/airquality/carbonmonoxide/" target="blank">More info at EPA.gov</a></h3>
       <div class="current-value">
         <p class="current-value-measure">
           <span class="current-value-measure-wrap"><%= @co ? "#{@co.current_value} #{@co.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
