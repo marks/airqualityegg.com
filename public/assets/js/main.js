@@ -49,6 +49,8 @@ var AQE = (function ( $ ) {
     }
   };
 
+  xively.setKey( "1bgDuzNfCI94eDrcSN0DJ2Kho7zGmXRsCwGTYTA1ugVuLqDa" ); // (READ ONLY) TODO refactor
+
   initialize()
 
   function initialize() {
@@ -96,7 +98,7 @@ var AQE = (function ( $ ) {
     })
 
     // if on home page:
-    if($(".home-map").length != []){
+    if($(".home-map").length == 1){
       // show search box
       $("#pac-input").show()
       //  - load recently created and updated eggs
@@ -108,6 +110,12 @@ var AQE = (function ( $ ) {
         })
       })
     }
+
+    // if on dashboard
+    if($(".dashboard-map")){
+      graphEggHistoricalData();
+    }
+
 
   }
 
@@ -294,6 +302,49 @@ var AQE = (function ( $ ) {
     }
   });
 
-  //<span class="bubble bubble-error hiden">This field cannot be blank</span>
+  function graphEggHistoricalData(){
+    // create skeleton chart
+    $('#dashboard-xively-chart').highcharts({
+        chart: {
+            type: 'spline',
+            zoomType: 'xy'
+        },
+        title: {
+            text: "Egg's Datastreams"
+        },
+        xAxis: {
+            type: 'datetime',
+        },
+        yAxis: [
+          { title: { text: 'ppb (parts per billion)'}, min: 0},
+          { title: {text: ''}, min: 0, opposite: true }
+        ],
+        series: []
+    });
+
+    $(datastreams).each(function(n,i){
+      xively.datastream.history(feed_id,i, {duration:"14days",interval:7200,limit:1000}, graphEggDatastream)
+    })
+
+  }
+
+  function graphEggDatastream(data){
+    var new_series = {id: data.id, name: data.id.split("_")[0]}
+
+    // put CO and NO2 on yAxisY=0, all others on the second (right) y-axis
+    if(new_series.name == "CO" || new_series.name == "NO2"){
+      new_series.yAxis = 0;
+    } else {
+      new_series.yAxis = 1;
+    }
+    new_series.data = $(data.datapoints).map(function(n,i){
+      var date = new Date(i.at)
+      return {x: date.getTime(),y: parseFloat(i.value)}
+    })
+    console.log(new_series)
+    // xively.datastream.history("2017904434","CO_raw_00-04-a3-d5-ee-ca_1", {duration:"7days",interval:3600,limit:1000}, function(data){console.log(data)})
+    $('#dashboard-xively-chart').highcharts().addSeries(new_series)
+  }
+
 
 })( jQuery );

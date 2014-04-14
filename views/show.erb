@@ -1,3 +1,8 @@
+<script type="text/javascript">
+  var datastreams = <%= @datastreams.to_json %>;
+  var local_feed_path = '<%= @local_feed_path %>';
+  var feed_id = '<%= @feed.id%>';
+</script>
 <section class="claiming clearfix">
   <form class="claiming-form" method="post" action="/register">
     <input class="input claiming-input" type="text" id="serial" name="serial" placeholder="Serial Number">
@@ -58,12 +63,11 @@
       </div>
     </div>
   </div>
-
   <p class="dashboard-xively-link">
     <a class='button' href='https://xively.com/feeds/<%= @feed.id%>' target='blank'>Full details on Xively.com</a>
   </p>
-
   <p class="dashboard-updated">Egg last updated <%= string_to_time(@feed.updated) %></p>
+
 </section>
 
 <section class="dashboard-metadata">
@@ -91,6 +95,6 @@
   <input id="pac-input" class="controls" type="text" placeholder="Zoom to location by searching" style="display:none;">
 </section>
 
-<script type='text/javascript'>
-  var local_feed_path = '<%= @local_feed_path %>'
-</script>
+<section class="">
+    <div id="dashboard-xively-chart"></div>
+</section>

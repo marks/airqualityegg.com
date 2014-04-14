@@ -176,6 +176,7 @@ class AirQualityEgg < Sinatra::Base
     @temperature = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Temperature/)}
     @humidity = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Humidity/)}
     @local_feed_path = "/egg/#{params[:id]}/nearby.json"
+    @datastreams = [@no2.id, @co.id, @temperature.id, @humidity.id]
     erb :show
   end
 
