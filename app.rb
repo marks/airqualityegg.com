@@ -139,6 +139,20 @@ class AirQualityEgg < Sinatra::Base
     redirect "/egg/#{feed_id}"
   end
 
+  get '/egg/:id.json' do
+    content_type :json
+    response = Xively::Client.get(feed_url(params[:id]), :headers => {"X-ApiKey" => $api_key})
+    feed = Xively::Feed.new(response.body)
+    datastreams = feed.datastreams
+    data = feed.attributes
+    data[:datastreams] = {}
+    data[:datastreams][:no2] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=NO2/)}
+    data[:datastreams][:co] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=CO/)}
+    data[:datastreams][:temperature] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Temperature/)}
+    data[:datastreams][:humidity] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Humidity/)}
+    data.to_json
+  end
+
   # View egg dashboard
   get '/egg/:id' do
     response = Xively::Client.get(feed_url(params[:id]), :headers => {"X-ApiKey" => $api_key})

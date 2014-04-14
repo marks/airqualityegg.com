@@ -92,21 +92,39 @@ var AQE = (function ( $ ) {
 
   function addEggMapMarker(egg) {
     var marker = L.marker([egg.location_lat, egg.location_lon],  {icon: eggIcon})
-    var html = "<table class='map_popup'>"
+    var html = "<table class='popup_metadata' data-feed_id='"+egg.id+"'>"
     html += "<tr><td>Name </td><td> <a href='/egg/"+egg.id+"'><strong>"+egg.title+"</strong></a></td></tr>"
     html += "<tr><td>Description </td><td> "+egg.description+"</td></tr>"
     html += "<tr><td>Position </td><td> "+egg.location_exposure+" @ "+egg.location_ele+" elevation</td></tr>"
     html += "<tr><td>Status </td><td> "+egg.status+"</td></tr>"
     html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
     html += "<tr><td>Created </td><td> "+moment(egg.created).fromNow()+"</td></tr>"
+    html += "</table><hr /><strong>Latest Readings</strong>"
+    html += "<div id='egg_"+egg.id+"'></div>"
     marker.bindPopup(html)
+    marker.on('click', onEggMapMarkerClick); 
     marker.addTo(egg_layer);
   }
+
+  function onEggMapMarkerClick(e){
+    var feed_id = $(".popup_metadata").data("feed_id")
+    $.getJSON("/egg/"+feed_id+".json", function(data){
+      console.log(data)
+      var html = ""
+      if(data.datastreams.no2){ html += "NO2: "+data.datastreams.no2.current_value + " " + data.datastreams.no2.unit.label }
+      if(data.datastreams.co){ html += "<br />CO: "+data.datastreams.co.current_value + " " + data.datastreams.co.unit.label}
+      if(data.datastreams.humidity){ html += "<br />Humidity: "+data.datastreams.humidity.current_value + " " + data.datastreams.humidity.unit.label }
+      if(data.datastreams.temperature){ html += "<br />Temperature: "+data.datastreams.temperature.current_value + " " + data.datastreams.temperature.unit.label }
+      if(html == ""){html += "<em>No recent data available</em>"}
+      $("#egg_"+feed_id).html(html)
+    })
+  }
+
 
   // TODO - refactor
   function addAQSSiteMapMarker(aqs) {
     var marker = L.marker([aqs.lat, aqs.lon],  {icon: aqsIcon})
-    var html = "<table class='map_popup'>"
+    var html = "<table class='popup_metadata'>"
     html += "<tr><td>Name / Code </td><td> <strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></td></tr>"
     html += "<tr><td>Agency </td><td>"+aqs.agency_name+"</td></tr>"
     html += "<tr><td>Collects </td><td> "+aqs.parameter.split(",").join(", ")+"</td></tr>"
@@ -115,6 +133,7 @@ var AQE = (function ( $ ) {
     if(aqs.cmsa_name){html += "<tr><td>CMSA </td><td> "+aqs.cmsa_name+"</td></tr>"}
     html += "<tr><td>County </td><td> "+aqs.county_name+"</td></tr>"
     html += "<tr><td>Status </td><td> "+aqs.status+"</td></tr>"
+    html += "</table>"
     marker.bindPopup(html)
     marker.addTo(aqs_layer);
   }
