@@ -15,7 +15,7 @@
       <h3 class="current-id-full">Nitrogen Dioxide</h3>
       <div class="current-value">
         <p class="current-value-measure">
-          <span class="current-value-measure-wrap"><%= @no2 ? @no2.current_value : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap"><%= @no2 ? "#{@no2.current_value} #{@no2.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
         </p>
         <span class="current-gauge"></span>
         <span class="current-gauge-filling current-gauge-green"></span>
@@ -27,7 +27,7 @@
       <h3 class="current-id-full">Carbon Monoxide</h3>
       <div class="current-value">
         <p class="current-value-measure">
-          <span class="current-value-measure-wrap"><%= @co ? @co.current_value : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap"><%= @co ? "#{@co.current_value} #{@co.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
         </p>
         <span class="current-gauge"></span>
         <span class="current-gauge-filling current-gauge-green"></span>
@@ -38,7 +38,7 @@
       <h2 class="current-id heading-narrow">Temperature</h2>
       <div class="current-value">
         <p class="current-value-measure">
-          <span class="current-value-measure-wrap"><%= @temperature ? @temperature.current_value : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap"><%= @temperature ? "#{celsius_to_fahrenheit(@temperature.current_value)} °F" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
         </p>
         <span class="current-gauge"></span>
         <span class="current-gauge-filling"></span>
@@ -49,7 +49,7 @@
       <h2 class="current-id heading-narrow">Humidity</h2>
       <div class="current-value">
         <p class="current-value-measure">
-          <span class="current-value-measure-wrap"><%= @humidity ? @humidity.current_value : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap"><%= @humidity ? "#{@humidity.current_value} #{@humidity.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
         </p>
         <span class="current-gauge"></span>
         <span class="current-gauge-filling"></span>
@@ -61,7 +61,7 @@
     <a class='button' href='https://xively.com/feeds/<%= @feed.id%>' target='blank'>Full details on Xively.com</a>
   </p>
 
-  <p class="dashboard-updated">Last updated <%= string_to_time(@feed.updated) %></p>
+  <p class="dashboard-updated">Egg last updated <%= string_to_time(@feed.updated) %></p>
 </section>
 
 <section class="dashboard-metadata">
