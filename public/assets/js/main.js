@@ -42,7 +42,7 @@ var AQE = (function ( $ ) {
         // if on an egg's page, zoom in close to the egg
         if ( $(".dashboard-map").length && mapmarkers && mapmarkers.length ) {
           console.log(mapmarkers[0])
-          map.setView([mapmarkers[0].lat,mapmarkers[0].lng],6)          
+          map.setView([mapmarkers[0].location_lat,mapmarkers[0].location_lon],6)
         }
 
         // add eggs to map
@@ -54,7 +54,7 @@ var AQE = (function ( $ ) {
       })
     }
 
-    //  - load active AQS stations to map      
+    //  - load active AQS stations to map
     $.getJSON("/all_aqs_sites.json", function(aqs_mapmarkers){
       for ( var x = 0, len = aqs_mapmarkers.length; x < len; x++ ) {
         addAQSSiteMapMarker( aqs_mapmarkers[x] );
@@ -90,16 +90,32 @@ var AQE = (function ( $ ) {
     map.setView([46, -24], 2);
   }
 
-  function addEggMapMarker(details) {
-    var marker = L.marker([details.lat, details.lng],  {icon: eggIcon})
-    marker.bindPopup(details.title+"<br /><a href='/egg/"+details.feed_id+"'>Egg details</a>")
+  function addEggMapMarker(egg) {
+    var marker = L.marker([egg.location_lat, egg.location_lon],  {icon: eggIcon})
+    var html = "<table class='map_popup'>"
+    html += "<tr><td>Name </td><td> <a href='/egg/"+egg.id+"'><strong>"+egg.title+"</strong></a></td></tr>"
+    html += "<tr><td>Description </td><td> "+egg.description+"</td></tr>"
+    html += "<tr><td>Position </td><td> "+egg.location_exposure+" @ "+egg.location_ele+" elevation</td></tr>"
+    html += "<tr><td>Status </td><td> "+egg.status+"</td></tr>"
+    html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
+    html += "<tr><td>Created </td><td> "+moment(egg.created).fromNow()+"</td></tr>"
+    marker.bindPopup(html)
     marker.addTo(egg_layer);
   }
 
   // TODO - refactor
-  function addAQSSiteMapMarker(details) {
-    var marker = L.marker([details.lat, details.lng],  {icon: aqsIcon})
-    marker.bindPopup(details.title+"<br /><a href='/aqs/"+details.aqs_id+"'>AQS details</a>")
+  function addAQSSiteMapMarker(aqs) {
+    var marker = L.marker([aqs.lat, aqs.lon],  {icon: aqsIcon})
+    var html = "<table class='map_popup'>"
+    html += "<tr><td>Name / Code </td><td> <strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></td></tr>"
+    html += "<tr><td>Agency </td><td>"+aqs.agency_name+"</td></tr>"
+    html += "<tr><td>Collects </td><td> "+aqs.parameter.split(",").join(", ")+"</td></tr>"
+    html += "<tr><td>Position </td><td> "+aqs.elevation+" elevation</td></tr>"
+    if(aqs.msa_name){html += "<tr><td>MSA </td><td> "+aqs.msa_name+"</td></tr>"}
+    if(aqs.cmsa_name){html += "<tr><td>CMSA </td><td> "+aqs.cmsa_name+"</td></tr>"}
+    html += "<tr><td>County </td><td> "+aqs.county_name+"</td></tr>"
+    html += "<tr><td>Status </td><td> "+aqs.status+"</td></tr>"
+    marker.bindPopup(html)
     marker.addTo(aqs_layer);
   }
 
@@ -225,4 +241,3 @@ var AQE = (function ( $ ) {
   //<span class="bubble bubble-error hiden">This field cannot be blank</span>
 
 })( jQuery );
-

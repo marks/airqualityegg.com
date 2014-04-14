@@ -74,7 +74,7 @@ class AirQualityEgg < Sinatra::Base
     content_type :json
     cache_key = "all_aqs_sites"
     cached_data = settings.cache.fetch(cache_key) do
-      all_aqs_sites = EpaSite.active.map{|s| {:lat => s.lat, :lng => s.lon, :title => s.to_s, :aqs_id => s.aqs_id}}
+      all_aqs_sites = EpaSite.active.map(&:attributes)
       settings.cache.set(cache_key, all_aqs_sites, settings.cache_time)
       all_aqs_sites
     end
@@ -192,7 +192,7 @@ class AirQualityEgg < Sinatra::Base
   def collect_map_markers(feeds)
     MultiJson.dump(
       feeds.collect do |feed|
-        {:feed_id => feed.id, :lat => feed.location_lat, :lng => feed.location_lon, :title => feed.title}.delete_if {|_,v| v.blank?}
+        feed.attributes.delete_if {|_,v| v.blank?}
       end
     )
   end
