@@ -67,7 +67,7 @@ var AQE = (function ( $ ) {
       $.getJSON(local_feed_path, function(mapmarkers){
         // if on an egg's page, zoom in close to the egg
         if ( $(".dashboard-map").length && mapmarkers && mapmarkers.length ) {
-          map.setView([mapmarkers[0].location_lat,mapmarkers[0].location_lon],6)
+          map.setView([mapmarkers[0].location_lat,mapmarkers[0].location_lon],9)
         }
 
         // add eggs to map
