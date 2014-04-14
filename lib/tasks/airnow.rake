@@ -14,6 +14,7 @@ namespace :airnow do
 
       ftp = Net::FTP.new('ftp.airnowapi.org')
       ftp.login(ENV['AIRNOW_USER'], ENV['AIRNOW_PASS'])
+      ftp.passive = true # for Heroku
       puts "Opening file from FTP..."
       data = ftp.getbinaryfile('Locations/monitoring_site_locations.dat', nil, 1024)
       ftp.close
@@ -62,6 +63,7 @@ namespace :airnow do
 
       ftp = Net::FTP.new('ftp.airnowapi.org')
       ftp.login(ENV['AIRNOW_USER'], ENV['AIRNOW_PASS'])
+      ftp.passive = true # for Heroku
       puts "Opening file from FTP..."
       data = ftp.getbinaryfile("DailyData/#{TODAY}-peak.dat", nil, 1024)
       ftp.close
