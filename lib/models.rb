@@ -33,4 +33,14 @@ end
 
 class EpaData < ActiveRecord::Base
   belongs_to :epa_site, :foreign_key => :aqs_id
+
+  def attributes
+    new_attributes = super
+    if new_attributes["parameter"] == "TEMP" && new_attributes["unit"] == "C"
+      new_attributes["value"] = celsius_to_fahrenheit(new_attributes["value"])
+      new_attributes["unit"] = "°F"
+    end
+    return new_attributes
+  end
+
 end

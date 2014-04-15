@@ -8,6 +8,9 @@ require 'dalli'
 require 'memcachier'
 require 'json'
 
+
+require './lib/helpers'
+include AppHelpers
 require './lib/models'
 
 class AirQualityEgg < Sinatra::Base
@@ -36,19 +39,6 @@ class AirQualityEgg < Sinatra::Base
   configure :development do
     register Sinatra::Reloader
     set :cache_time, 3600*12 # five minutes
-  end
-
-  helpers do
-    def string_to_time(timestamp)
-      Time.parse(timestamp).strftime("%d %b %Y %H:%M:%S")
-      rescue
-      ''
-    end
-
-    def celsius_to_fahrenheit(value)
-      value.to_f * 9 / 5 + 32
-    end
-
   end
 
   # Render css from scss
@@ -164,6 +154,14 @@ class AirQualityEgg < Sinatra::Base
     data[:datastreams][:no2] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=NO2/)}
     data[:datastreams][:co] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=CO/)}
     data[:datastreams][:temperature] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Temperature/)}
+    logger.info(data[:datastreams][:temperature])
+    if data[:datastreams][:temperature] && data[:datastreams][:temperature].unit_symbol == "deg C"
+      data[:datastreams][:temperature].unit_symbol = "°F"
+      data[:datastreams][:temperature].unit_label = "°F"
+      data[:datastreams][:temperature].current_value = celsius_to_fahrenheit(data[:datastreams][:temperature].current_value.to_f)
+      data[:datastreams][:temperature].max_value = celsius_to_fahrenheit(data[:datastreams][:temperature].max_value.to_f)
+      data[:datastreams][:temperature].min_value = celsius_to_fahrenheit(data[:datastreams][:temperature].min_value.to_f)
+    end
     data[:datastreams][:humidity] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Humidity/)}
     data.to_json
   end
