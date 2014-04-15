@@ -112,7 +112,7 @@ var AQE = (function ( $ ) {
     }
 
     // if on dashboard
-    if($(".dashboard-map")){
+    if($(".dashboard-map").length){
       graphEggHistoricalData();
     }
 
@@ -323,14 +323,11 @@ var AQE = (function ( $ ) {
     $('#dashboard-xively-chart').highcharts({
         chart: {
             type: 'spline',
-            zoomType: 'xy'
+            zoomType: 'xy',
         },
-        title: {
-            text: "Egg's Datastreams"
-        },
-        xAxis: {
-            type: 'datetime',
-        },
+        credits: { enabled: false }, 
+        title: { text: "Egg's Datastreams" },
+        xAxis: { type: 'datetime' },
         yAxis: [
           { title: { text: 'ppb (parts per billion)'}, min: 0},
           { title: {text: ''}, min: 0, opposite: true }
