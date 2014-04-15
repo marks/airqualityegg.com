@@ -14,10 +14,10 @@ var AQE = (function ( $ ) {
 
   // Air Quality Egg and AirNow AWS layers
   var egg_layer = L.layerGroup([]);
-  var egg_heatmap = L.heatLayer([], {radius: 25})
+  var egg_heatmap = L.heatLayer([], {radius: 50})
   var egg_heatmap_layer = L.layerGroup([egg_heatmap])
   var aqs_layer = L.layerGroup([]);
-  var aqs_heatmap = L.heatLayer([], {radius: 25})
+  var aqs_heatmap = L.heatLayer([], {radius: 50})
   var aqs_heatmap_layer = L.layerGroup([aqs_heatmap])
 
   // OpenWeatherMap Layers
@@ -90,10 +90,10 @@ var AQE = (function ( $ ) {
 
     map.on('overlayadd', function (eventLayer) {
       if(eventLayer.name == "Heatmap" && eventLayer.group.name == "Air Quality Eggs"){
-        egg_heatmap.setLatLngs(egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "1"]}))
+        egg_heatmap.setLatLngs(egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]}))
       }
       if(eventLayer.name == "Heatmap" && eventLayer.group.name == "AirNow AQS Sites"){
-        aqs_heatmap.setLatLngs(aqs_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "1"]}))
+        aqs_heatmap.setLatLngs(aqs_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]}))
       }
     })
 
