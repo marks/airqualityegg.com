@@ -163,8 +163,8 @@ var AQE = (function ( $ ) {
     if(aqs.cmsa_name){html += "<tr><td>CMSA </td><td> "+aqs.cmsa_name+"</td></tr>"}
     html += "<tr><td>County </td><td> "+aqs.county_name+"</td></tr>"
     html += "<tr><td>Status </td><td> "+aqs.status+"</td></tr>"
-    html += "</table><hr /><strong>Latest Readings</strong>"
-    html += "<div id='aqs_"+aqs.aqs_id+"'></div></div>"
+    html += "</table><hr />"
+    html += "<div id='aqs_"+aqs.aqs_id+"'><em>Loading most recent readings..</em></div></div>"
     marker.bindPopup(html)
     marker.on('click', onAQSSiteMapMarkerClick); 
     marker.addTo(aqs_layer);
@@ -173,12 +173,28 @@ var AQE = (function ( $ ) {
     function onAQSSiteMapMarkerClick(e){
     var aqs_id = $(".popup_metadata").data("aqs_id")
     $.getJSON("/aqs/"+aqs_id+".json", function(data){
-      var html = ""
-      $.each(data.epa_datas, function(n,i){
-        html += i.parameter+": "+i.value+" "+i.unit+" ("+moment(i.date).format("MM/DD/YYYY")+")<br />"
-      })
-      if(html == ""){html += "<em>No recent data available</em>"}
-      $("#aqs_"+aqs_id).html(html)
+
+      var daily_html = "<strong>Latest Daily Readings</strong><br />"
+      var daily_data = $.map(data.latest_daily, function(i){
+        return i.parameter+": "+i.value+" "+i.unit+" ("+moment(i.date).format("MM/DD/YYYY")+")"
+      })     
+      if(daily_data.length == 0){
+        daily_html += "<em>No daily data available</em>"
+      } else {
+        daily_html += daily_data.join("<br />")
+      }
+
+      var hourly_html = "<br /><br /><strong>Latest Hourly Readings</strong><br />"
+      var hourly_data = $.map(data.latest_hourly, function(i){
+        return i.parameter+": "+i.value+" "+i.unit+" ("+moment(i.date).format("MM/DD/YYYY h:mm a")+" GMT "+data.gmt_offset+")"
+      })     
+      if(hourly_data.length == 0){
+        hourly_html += "<em>No hourly data available</em>"
+      } else {
+        hourly_html += hourly_data.join("<br />")
+      }
+      
+      $("#aqs_"+aqs_id).html(daily_html+hourly_html)
     })
   }
 
