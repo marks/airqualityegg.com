@@ -20,7 +20,7 @@
       <h3 class="current-id-full">Nitrogen Dioxide<br /><a class="current-external-link" href="http://www.epa.gov/air/nitrogenoxides/" target="blank">More info at EPA.gov</a></h3>
       <div class="current-value">
         <p class="current-value-measure">
-          <span class="current-value-measure-wrap"><%= @no2 ? "#{@no2.current_value} #{@no2.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap"><%= @no2 ? "#{@no2.current_value.to_f.round(2)} #{@no2.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
         </p>
         <span class="current-gauge"></span>
         <span class="current-gauge-filling current-gauge-green"></span>
@@ -32,7 +32,7 @@
       <h3 class="current-id-full">Carbon Monoxide<br /><a class="current-external-link" href="http://www.epa.gov/airquality/carbonmonoxide/" target="blank">More info at EPA.gov</a></h3>
       <div class="current-value">
         <p class="current-value-measure">
-          <span class="current-value-measure-wrap"><%= @co ? "#{@co.current_value} #{@co.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap"><%= @co ? "#{@co.current_value.to_f.round(2)} #{@co.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
         </p>
         <span class="current-gauge"></span>
         <span class="current-gauge-filling current-gauge-green"></span>
@@ -44,7 +44,7 @@
       <h3 class="current-id-full"><br /></h3>
       <div class="current-value">
         <p class="current-value-measure">
-          <span class="current-value-measure-wrap"><%= @temperature ? "#{celsius_to_fahrenheit(@temperature.current_value)} °F" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap"><%= @temperature ? "#{celsius_to_fahrenheit(@temperature.current_value).round(2)} °F" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
         </p>
         <span class="current-gauge"></span>
         <span class="current-gauge-filling"></span>
@@ -56,7 +56,7 @@
       <h3 class="current-id-full"><br /></h3>
       <div class="current-value">
         <p class="current-value-measure">
-          <span class="current-value-measure-wrap"><%= @humidity ? "#{@humidity.current_value} #{@humidity.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap"><%= @humidity ? "#{@humidity.current_value.to_f.round(2)} #{@humidity.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
         </p>
         <span class="current-gauge"></span>
         <span class="current-gauge-filling"></span>
