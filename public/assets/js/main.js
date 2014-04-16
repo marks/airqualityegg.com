@@ -332,6 +332,15 @@ var AQE = (function ( $ ) {
           { title: { text: 'ppb (parts per billion)'}, min: 0},
           { title: {text: ''}, min: 0, opposite: true }
         ],
+        tooltip: {
+          formatter: function(){
+            console.log(this)
+            var time = moment(this.x)
+            var series_label = this.series.name.replace(/ \(.+\)/g,"")
+            var series_unit = this.series.name.replace(/.+\ \((.+)\)/,"$1")
+            return ''+time.format("MMM D, YYYY [at] h:mm a ([GMT] Z)")+' ('+time.fromNow()+')<br />'+'<b>'+ series_label +':</b> '+this.y+' '+series_unit;
+          }
+        },
         series: []
     });
 
