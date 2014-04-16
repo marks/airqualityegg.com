@@ -141,6 +141,7 @@ var AQE = (function ( $ ) {
 
   function onEggMapMarkerClick(e){
     var feed_id = $(".popup_metadata").data("feed_id")
+    if(typeof(ga)!="undefined"){ ga('send', 'event', 'egg_'+feed_id, 'click', 'egg_on_map', 1); }
     $.getJSON("/egg/"+feed_id+".json", function(data){
       var html = ""
       if(data.datastreams.no2){ html += "NO2: "+data.datastreams.no2.current_value + " " + data.datastreams.no2.unit.label + " (" + moment(data.datastreams.no2.at).fromNow() +  ")"}
@@ -170,8 +171,9 @@ var AQE = (function ( $ ) {
     marker.addTo(aqs_layer);
   }
 
-    function onAQSSiteMapMarkerClick(e){
+  function onAQSSiteMapMarkerClick(e){
     var aqs_id = $(".popup_metadata").data("aqs_id")
+    if(typeof(ga)!="undefined"){ ga('send', 'event', 'aqs_'+aqs_id, 'click', 'aqs_on_map', 1); }
     $.getJSON("/aqs/"+aqs_id+".json", function(data){
 
       var daily_html = "<strong>Latest Daily Readings</strong><br />"
