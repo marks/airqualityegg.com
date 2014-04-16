@@ -326,7 +326,7 @@ var AQE = (function ( $ ) {
             zoomType: 'xy',
         },
         credits: { enabled: false }, 
-        title: { text: "Egg's Datastreams" },
+        title: { text: "This Egg's Datastreams" },
         xAxis: { type: 'datetime' },
         yAxis: [
           { title: { text: 'ppb (parts per billion)'}, min: 0},
@@ -344,19 +344,52 @@ var AQE = (function ( $ ) {
   function graphEggDatastream(data){
     var new_series = {id: data.id, name: data.id.split("_")[0]}
 
+    new_series.data = $(data.datapoints).map(function(n,i){
+      var date = new Date(i.at)
+      var x_value = date.getTime()
+      var y_value = parseFloat(i.value)
+      if(new_series.name == "Temperature"){ y_value = celsiusToFahrenheit(y_value) }
+
+      return {x: x_value,y: y_value}
+    })
+
     // put CO and NO2 on yAxisY=0, all others on the second (right) y-axis
     if(new_series.name == "CO" || new_series.name == "NO2"){
-      new_series.yAxis = 0;
     } else {
       new_series.yAxis = 1;
     }
 
-    new_series.data = $(data.datapoints).map(function(n,i){
-      var date = new Date(i.at)
-      return {x: date.getTime(),y: parseFloat(i.value)}
-    })
-    
+    // change namem and define order and axis of series
+    switch (new_series.name) {
+      case "NO2":
+        new_series.name = "NO2 (ppb)"
+        new_series.index = 1
+        new_series.yAxis = 0
+        break;
+      case "CO":
+        new_series.name = "CO (ppb)"
+        new_series.index = 2
+        new_series.yAxis = 0
+        break;
+      case "Humidity":
+        new_series.name = "Humidity (%)"
+        new_series.index = 3
+        new_series.yAxis = 1
+        break;
+      case "Temperature":
+        new_series.name = "Temperature (°F)" // we converted it from Celsius above
+        new_series.index = 4
+        new_series.yAxis = 1
+        break;
+    }
+
+
+
     $('#dashboard-xively-chart').highcharts().addSeries(new_series)
+  }
+
+  function celsiusToFahrenheit(value){
+    return parseFloat(value) * 9 / 5 + 32
   }
 
 
