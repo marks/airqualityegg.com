@@ -3,12 +3,14 @@ var AQE = (function ( $ ) {
   "use strict";
 
   // set up icons for map
+  var eggIconURL = '/assets/img/egg-icon.png';
   var eggIcon = L.icon({
-      iconUrl: '/assets/img/egg-icon.png',
+      iconUrl: eggIconURL,
       iconSize: [19, 20], // size of the icon
   });
+  var aqsIconURL = '/assets/img/blue_dot.png'
   var aqsIcon = L.icon({
-      iconUrl: '/assets/img/blue_dot.png',
+      iconUrl: aqsIconURL,
       iconSize: [5, 5], // size of the icon
   });
 
@@ -28,6 +30,21 @@ var AQE = (function ( $ ) {
   var pressure_layer = L.OWM.pressure({opacity: 0.4});
   var temp_layer = L.OWM.temperature({opacity: 0.5});
   var wind_layer = L.OWM.wind({opacity: 0.5});
+
+  var legend = L.control({position: 'bottomright'});
+    legend.onAdd = function (map) {
+    var div = L.DomUtil.create('div', 'info legend')
+    var div_html = "";
+    div_html += "<div class='leaflet-control-layers leaflet-control leaflet-control-legend leaflet-control-layers-expanded'><div class='leaflet-control-layers-base'></div><div class='leaflet-control-layers-separator' style='display: none;'></div><div class='leaflet-control-layers-overlays'><div class='leaflet-control-layers-group' id='leaflet-control-layers-group-2'><span class='leaflet-control-layers-group-name'>Legend</span>";
+    div_html += "<table>"
+    div_html += "<tr><td align='center'><img style='width:19px; height:20px;' src='"+eggIconURL+"' alt='egg'> </td><td> Air Quality Egg</td></tr>";
+    div_html += "<tr><td align='center'><img src='"+aqsIconURL+"' alt='blue dot' ></td><td> EPA Air Quality System Site</td></tr>";
+    div_html += "</table>"
+    div_html += "</div></div></div>"
+    div.innerHTML = div_html
+    return div;
+  };
+
 
   var groupedOverlays = {
     "Air Quality Eggs": {
@@ -65,6 +82,7 @@ var AQE = (function ( $ ) {
       }).addTo(map);
       L.control.groupedLayers([], groupedOverlays).addTo(map);
       L.control.locate({locateOptions: {maxZoom: 9}}).addTo(map);
+      legend.addTo(map)
 
       $.getJSON(local_feed_path, function(mapmarkers){
         // if on an egg's page, zoom in close to the egg
