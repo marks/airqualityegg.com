@@ -14,12 +14,17 @@ var AQE = (function ( $ ) {
       iconSize: [5, 5], // size of the icon
   });
 
+  var today = new Date()
+  var thirty_days_ago = new Date()
+  thirty_days_ago = thirty_days_ago.setDate(today.getDate()-30)
+
   // Air Quality Egg and AirNow AWS layers
   var egg_layer = L.layerGroup([]);
-  var egg_heatmap = L.heatLayer([], {radius: 50})
+  var egg_layer_inactive = L.layerGroup([]);
+  var egg_heatmap = L.heatLayer([], {radius: 35})
   var egg_heatmap_layer = L.layerGroup([egg_heatmap])
   var aqs_layer = L.layerGroup([]);
-  var aqs_heatmap = L.heatLayer([], {radius: 50})
+  var aqs_heatmap = L.heatLayer([], {radius: 35})
   var aqs_heatmap_layer = L.layerGroup([aqs_heatmap])
 
   // OpenWeatherMap Layers
@@ -48,8 +53,9 @@ var AQE = (function ( $ ) {
 
   var groupedOverlays = {
     "Air Quality Eggs": {
-      "Markers": egg_layer,
-      "Heatmap": egg_heatmap_layer
+      "Markers (updated in past 30 days)": egg_layer,
+      "Markers (not recently updated)": egg_layer_inactive,
+      "Heatmap (of all eggs)": egg_heatmap_layer
     },
     "AirNow AQS Sites": {
       "Markers": aqs_layer,
@@ -96,6 +102,8 @@ var AQE = (function ( $ ) {
         }
 
         $("span#num_eggs").html(mapmarkers.length)
+        console.log('active',egg_layer.getLayers().length)
+        console.log('inactive',egg_layer_inactive.getLayers().length)
       })
     }
 
@@ -107,8 +115,10 @@ var AQE = (function ( $ ) {
     })
 
     map.on('overlayadd', function (eventLayer) {
-      if(eventLayer.name == "Heatmap" && eventLayer.group.name == "Air Quality Eggs"){
-        egg_heatmap.setLatLngs(egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]}))
+      if(eventLayer.name == "Heatmap (of all eggs)" && eventLayer.group.name == "Air Quality Eggs"){
+        var active_eggs = egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]})
+        var inactive_eggs = egg_layer_inactive.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]})
+        egg_heatmap.setLatLngs(Array().concat(active_eggs,inactive_eggs))
       }
       if(eventLayer.name == "Heatmap" && eventLayer.group.name == "AirNow AQS Sites"){
         aqs_heatmap.setLatLngs(aqs_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]}))
@@ -154,7 +164,11 @@ var AQE = (function ( $ ) {
     html += "<div id='egg_"+egg.id+"'></div></div>"
     marker.bindPopup(html)
     marker.on('click', onEggMapMarkerClick); 
-    marker.addTo(egg_layer);
+    if(new Date(egg.updated) < thirty_days_ago){
+      marker.addTo(egg_layer_inactive);
+    } else {
+      marker.addTo(egg_layer);
+    }
   }
 
   function onEggMapMarkerClick(e){
@@ -354,7 +368,6 @@ var AQE = (function ( $ ) {
         ],
         tooltip: {
           formatter: function(){
-            console.log(this)
             var time = moment(this.x)
             var series_label = this.series.name.replace(/ \(.+\)/g,"")
             var series_unit = this.series.name.replace(/.+\ \((.+)\)/,"$1")
