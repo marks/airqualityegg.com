@@ -80,7 +80,7 @@ var AQE = (function ( $ ) {
     // load feeds and then initialize map and add the markers
     if(local_feed_path){
       // set up leaflet map
-      map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer]})
+      map = L.map('map_canvas', {scrollWheelZoom: false, layers: [aqs_layer, egg_layer]})
       handleNoGeolocation();
       L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
