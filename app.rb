@@ -107,7 +107,7 @@ class AirQualityEgg < Sinatra::Base
         series_datapoints = recent_history.select{|x| x.parameter == series_name}
         series << {
           :data => series_datapoints.map {|x| [x.date.to_time.utc.change(:hour => x.hour, :zone_offset => '0').to_i*1000,x.value.to_f] },
-          :name => "#{series_name} (#{series_datapoints.first["unit"]})"
+          :name => "#{series_name} (#{series_datapoints.first["unit"].gsub("PERCENT","%")})"
         }
       end
       data[:recent_history] = series
