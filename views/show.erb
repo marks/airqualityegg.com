@@ -23,7 +23,7 @@
           <span class="current-value-measure-wrap"><%= @no2 ? "#{@no2.current_value.to_f.round(2)} #{@no2.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
         </p>
         <span class="current-gauge"></span>
-        <span class="current-gauge-filling current-gauge-green"></span>
+        <span class="current-gauge-filling"></span>
       </div>
     </div>
 
@@ -35,9 +35,22 @@
           <span class="current-value-measure-wrap"><%= @co ? "#{@co.current_value.to_f.round(2)} #{@co.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
         </p>
         <span class="current-gauge"></span>
-        <span class="current-gauge-filling current-gauge-green"></span>
+        <span class="current-gauge-filling"></span>
       </div>
     </div>
+
+    <div class="current current-right current-dust">
+      <h2 class="current-id heading-narrow">Dust</h2>
+      <h3 class="current-id-full"><br /></h3>
+      <div class="current-value">
+        <p class="current-value-measure">
+          <span class="current-value-measure-wrap"><%= @dust ? "#{@dust.current_value.to_f.round(2)} #{@dust.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+        </p>
+        <span class="current-gauge"></span>
+        <span class="current-gauge-filling"></span>
+      </div>
+    </div>
+
 
     <div class="current current-right current-temperature">
       <h2 class="current-id heading-narrow">Temperature</h2>

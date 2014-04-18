@@ -173,10 +173,11 @@ class AirQualityEgg < Sinatra::Base
     @feed = Xively::Feed.new(response.body)
     @no2 = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=NO2/)}
     @co = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=CO/)}
+    @dust = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Dust/)}
     @temperature = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Temperature/)}
     @humidity = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Humidity/)}
     @local_feed_path = "/egg/#{params[:id]}/nearby.json"
-    [@no2, @co, @temperature, @humidity].each{|x| @datastreams << x.id if x}
+    [@no2, @co, @temperature, @humidity, @dust].each{|x| @datastreams << x.id if x}
     erb :show
   end
 

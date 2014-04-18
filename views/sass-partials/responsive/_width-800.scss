@@ -158,23 +158,23 @@ $site-gutter: $site-gutter * 2;
 
 .current {
   float: left;
-  width: 20.9%;
+  width: 15.9%;
   margin-bottom: 0;
 
   &.current-right {
-    width: 19.5%;
+    width: 15.5%;
   }
 
   & + .current {
-    margin-left: 6.32%;
+    margin-left: 4.32%;
   }
 
   &.current-temperature {
-    margin-left: 9.72%;
+    margin-left: 4.32%;
   }
 
   &.current-humidity {
-    margin-left: 2.91%;
+    margin-left: 4.32%;
   }
 }
 
