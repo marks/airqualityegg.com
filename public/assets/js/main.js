@@ -27,6 +27,10 @@ var AQE = (function ( $ ) {
   var aqs_layer = L.layerGroup([]);
   var aqs_heatmap = L.heatLayer([], {radius: 35})
   var aqs_heatmap_layer = L.layerGroup([aqs_heatmap])
+  // Propeller Health image overlay and layer 
+  var propellerhealth_layer_url = '/assets/img/propellerhealth/heatmap_nov13_shared_layer.png';
+  var propellerhealth_layer_bounds = [[37.8419378866983038, -86.0292621133016979], [38.5821425225734487, -85.1883896469475275]]
+  var propellerhealth_layer = L.layerGroup([L.imageOverlay(propellerhealth_layer_url, propellerhealth_layer_bounds)])
 
   // OpenWeatherMap Layers
   var clouds_layer = L.OWM.clouds({opacity: 0.8, legendImagePath: 'files/NT2.png'});
@@ -58,6 +62,9 @@ var AQE = (function ( $ ) {
       "Markers (not recently updated)": egg_layer_inactive,
       "Heatmap (of all eggs)": egg_heatmap_layer
     },
+    "Propeller Health Asthma Hotspots":{
+      "Heatmap": propellerhealth_layer
+    },
     "AirNow AQS Sites": {
       "Markers": aqs_layer,
       "Heatmap": aqs_heatmap_layer
@@ -81,12 +88,13 @@ var AQE = (function ( $ ) {
     // load feeds and then initialize map and add the markers
     if(local_feed_path){
       // set up leaflet map
-      map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer]})
+      map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer, propellerhealth_layer]})
       handleNoGeolocation();
       L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
           maxZoom: 18
       }).addTo(map);
+      propellerhealth_layer.addTo(map);
       L.control.groupedLayers([], groupedOverlays).addTo(map);
       L.control.locate({locateOptions: {maxZoom: 9}}).addTo(map);
       legend.addTo(map)
@@ -103,8 +111,8 @@ var AQE = (function ( $ ) {
         }
 
         $("span#num_eggs").html(mapmarkers.length)
-        console.log('active',egg_layer.getLayers().length)
-        console.log('inactive',egg_layer_inactive.getLayers().length)
+        // console.log('active',egg_layer.getLayers().length)
+        // console.log('inactive',egg_layer_inactive.getLayers().length)
       })
     }
 
