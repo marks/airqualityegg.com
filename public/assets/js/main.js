@@ -298,76 +298,76 @@ var AQE = (function ( $ ) {
   // CLAIMING FIELD
   //
 
-  $(".claiming-form").on( "submit" , function (event) {
-    var $this   = $(this),
-        $input  = $this.find(".claiming-input"),
-        $error  = $(".claiming-error");
+  // $(".claiming-form").on( "submit" , function (event) {
+  //   var $this   = $(this),
+  //       $input  = $this.find(".claiming-input"),
+  //       $error  = $(".claiming-error");
 
-    if ( $input.val() === "" ) {
-      event.preventDefault();
-      $error.html("Please enter a serial number").removeClass("hidden");
-    }
-    else {
-      $(".claiming-button").val("Adding ...").addClass("button-green button-loading");
-    }
-  });
+  //   if ( $input.val() === "" ) {
+  //     event.preventDefault();
+  //     $error.html("Please enter a serial number").removeClass("hidden");
+  //   }
+  //   else {
+  //     $(".claiming-button").val("Adding ...").addClass("button-green button-loading");
+  //   }
+  // });
 
-  $(".claiming-input").blur( function (event) {
-    $(".claiming-error").addClass("hidden");
-  });
+  // $(".claiming-input").blur( function (event) {
+  //   $(".claiming-error").addClass("hidden");
+  // });
 
   //
   // FORM VALIDATION
   //
 
-  $('.form-validation').on( "submit" , function (event) {
-    var $this       = $(this),
-        $required   = $this.find(".field-required [data-validate]"),
-        $submit     = $this.find('.button[type="submit"]'),
-        error       = false;
+  // $('.form-validation').on( "submit" , function (event) {
+  //   var $this       = $(this),
+  //       $required   = $this.find(".field-required [data-validate]"),
+  //       $submit     = $this.find('.button[type="submit"]'),
+  //       error       = false;
 
-    if ( $required.length ) {
-      var errorify = function ( $bro, msg ) {
-            var $other = $bro.siblings(".bubble-error");
+  //   if ( $required.length ) {
+  //     var errorify = function ( $bro, msg ) {
+  //           var $other = $bro.siblings(".bubble-error");
 
-            if ( $bro.val() === "" ) {
-              error = true;
+  //           if ( $bro.val() === "" ) {
+  //             error = true;
 
-              if ( !$other.length ) {
-                $("<span></span>", { "class" : "bubble bubble-error", html : msg }).hide().insertAfter( $bro ).slideDown(150);
-              }
-              else if ( $other.html() === msg ) {
-                $other.slideDown(150);
-              }
-            }
-            else {
-              if ( $other.length || $other.html() === msg ) {
-                $other.slideUp(150);
-              }
-            }
-          };
+  //             if ( !$other.length ) {
+  //               $("<span></span>", { "class" : "bubble bubble-error", html : msg }).hide().insertAfter( $bro ).slideDown(150);
+  //             }
+  //             else if ( $other.html() === msg ) {
+  //               $other.slideDown(150);
+  //             }
+  //           }
+  //           else {
+  //             if ( $other.length || $other.html() === msg ) {
+  //               $other.slideUp(150);
+  //             }
+  //           }
+  //         };
 
-      $required.each( function () {
-        var $el   = $(this);
+  //     $required.each( function () {
+  //       var $el   = $(this);
 
-        if ( $el.get(0).tagName.toLowerCase() === "input" ) {
-          errorify( $el, "This field cannot be blank" );
-        }
-        else if ( $el.get(0).tagName.toLowerCase() === "select" ) {
-          errorify( $el, "Please select one of the options" );
-        }
-      });
-    }
+  //       if ( $el.get(0).tagName.toLowerCase() === "input" ) {
+  //         errorify( $el, "This field cannot be blank" );
+  //       }
+  //       else if ( $el.get(0).tagName.toLowerCase() === "select" ) {
+  //         errorify( $el, "Please select one of the options" );
+  //       }
+  //     });
+  //   }
 
-    if ( error ) {
-      event.preventDefault();
-      $(".bubble-error").first().prev().focus();
-    }
-    else {
-      // success
-      $submit.val("Saving ...").addClass("button-green button-loading");
-    }
-  });
+  //   if ( error ) {
+  //     event.preventDefault();
+  //     $(".bubble-error").first().prev().focus();
+  //   }
+  //   else {
+  //     // success
+  //     $submit.val("Saving ...").addClass("button-green button-loading");
+  //   }
+  // });
 
   function graphEggHistoricalData(){
     // create skeleton chart
