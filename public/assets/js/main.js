@@ -150,9 +150,14 @@ var AQE = (function ( $ ) {
       })
     }
 
-    // if on dashboard
+    // if on egg dashboard
     if($("#dashboard-xively-chart").length){
       graphEggHistoricalData();
+    }
+
+    // if on AQS dashboard
+    if($("#dashboard-aqs-chart").length){
+      graphAQSHistoricalData();
     }
 
 
@@ -444,6 +449,41 @@ var AQE = (function ( $ ) {
 
     $('#dashboard-xively-chart').highcharts().addSeries(new_series)
   }
+
+
+  function graphAQSHistoricalData(){
+    // create skeleton chart
+
+    $.getJSON(location.pathname+".json?include_recent_history=1", function(data){
+
+
+      $('#dashboard-aqs-chart').highcharts({
+          chart: {
+              type: 'spline',
+              zoomType: 'xy',
+          },
+          credits: { enabled: false }, 
+          title: { text: "This Egg's Datastreams" },
+          xAxis: { type: 'datetime' },
+          yAxis: [
+            { title: { text: 'ppb (parts per billion)'}, min: 0},
+            { title: {text: ''}, min: 0, opposite: true }
+          ],
+          tooltip: {
+            formatter: function(){
+              var time = moment(this.x)
+              var series_label = this.series.name.replace(/ \(.+\)/g,"")
+              var series_unit = this.series.name.replace(/.+\ \((.+)\)/,"$1")
+              return ''+time.format("MMM D, YYYY [at] h:mm a ([GMT] Z)")+' ('+time.fromNow()+')<br />'+'<b>'+ series_label +':</b> '+this.y+' '+series_unit;
+            }
+          },
+          series: data.recent_history
+      });
+
+    })
+
+  }
+
 
   function celsiusToFahrenheit(value){
     return parseFloat(value) * 9 / 5 + 32

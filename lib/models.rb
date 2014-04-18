@@ -34,6 +34,12 @@ end
 class EpaData < ActiveRecord::Base
   belongs_to :epa_site, :foreign_key => :aqs_id
 
+  scope :recent, -> { where(:date => (Date.today-30).beginning_of_day..Date.today.end_of_day).order([:date => :asc, :time => :asc])}
+
+  def hour
+    self.time.nil? ? 0 : self.time.hour
+  end
+
   def attributes
     new_attributes = super
     if new_attributes["parameter"] == "TEMP" && new_attributes["unit"] == "C"

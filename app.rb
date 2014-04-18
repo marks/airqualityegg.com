@@ -99,6 +99,19 @@ class AirQualityEgg < Sinatra::Base
     data = site.attributes
     data[:latest_hourly] = site.latest_hourly_data.map(&:attributes)
     data[:latest_daily] = site.latest_daily_data.map(&:attributes)
+    if params[:include_recent_history]
+      series = []
+      recent_history = site.epa_datas.recent
+      series_names = recent_history.map(&:parameter).uniq
+      series_names.each do |series_name|
+        series_datapoints = recent_history.select{|x| x.parameter == series_name}
+        series << {
+          :data => series_datapoints.map {|x| [x.date.to_time.utc.change(:hour => x.hour, :zone_offset => '0').to_i*1000,x.value.to_f] },
+          :name => "#{series_name} (#{series_datapoints.first["unit"]})"
+        }
+      end
+      data[:recent_history] = series
+    end
     return data.to_json
   end
 
