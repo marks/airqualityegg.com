@@ -136,8 +136,6 @@ var AQE = (function ( $ ) {
 
     }
 
-
-
     // if on home page:
     if($(".home-map").length == 1){
       // show search box
@@ -153,7 +151,7 @@ var AQE = (function ( $ ) {
     }
 
     // if on dashboard
-    if($(".dashboard-map").length){
+    if($("#dashboard-xively-chart").length){
       graphEggHistoricalData();
     }
 
@@ -167,7 +165,7 @@ var AQE = (function ( $ ) {
   function addEggMapMarker(egg) {
     var marker = L.marker([egg.location_lat, egg.location_lon],  {icon: eggIcon})
     var html = "<div><strong>Air Quality Egg Details</strong><table class='popup_metadata' data-feed_id='"+egg.id+"'>"
-    html += "<tr><td>Name </td><td> <a href='/egg/"+egg.id+"'>"+egg.title+"</a></td></tr>"
+    html += "<tr><td>Name </td><td> <a href='/egg/"+egg.id+"'><strong>"+egg.title+"<strong></a></td></tr>"
     html += "<tr><td>Description </td><td> "+egg.description+"</td></tr>"
     html += "<tr><td>Position </td><td> "+egg.location_exposure+" @ "+egg.location_ele+" elevation</td></tr>"
     html += "<tr><td>Status </td><td> "+egg.status+"</td></tr>"
@@ -202,7 +200,7 @@ var AQE = (function ( $ ) {
   function addAQSSiteMapMarker(aqs) {
     var marker = L.marker([aqs.lat, aqs.lon],  {icon: aqsIcon})
     var html = "<div><strong>AirNow AQS Site Details</strong><table class='popup_metadata' data-aqs_id='"+aqs.aqs_id+"'>"
-    html += "<tr><td>Name / Code </td><td> <strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></td></tr>"
+    html += "<tr><td>Name / Code </td><td> <a href='/aqs/"+aqs.aqs_id+"'><strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></a></td></tr>"
     html += "<tr><td>Agency </td><td>"+aqs.agency_name+"</td></tr>"
     html += "<tr><td>Collects </td><td> "+aqs.parameter.split(",").join(", ")+"</td></tr>"
     html += "<tr><td>Position </td><td> "+aqs.elevation+" elevation</td></tr>"
@@ -443,8 +441,6 @@ var AQE = (function ( $ ) {
         new_series.yAxis = 1
         break;
     }
-
-
 
     $('#dashboard-xively-chart').highcharts().addSeries(new_series)
   }

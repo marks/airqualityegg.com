@@ -5,17 +5,25 @@
   <img class="dashboard-current-prop" src="/assets/img/prop-bigegg.png">
   <div class="dashboard-current-values clearfix">
     
-    <div class="current current-left current-no2">
-      <h2 class="current-id">NO2</h2>
-      <h3 class="current-id-full"><br /><br /></h3>
-      <div class="current-value">
-        <p class="current-value-measure">
-          <span class="current-value-measure-wrap"><%= @no2 ? "#{@no2.current_value.to_f.round(2)} #{@no2.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
-        </p>
-        <span class="current-gauge"></span>
-        <span class="current-gauge-filling"></span>
+    <% @latest_data.each do |data| %>
+      <div class="current current-right current-dust">
+        <h2 class="current-id heading-narrow"><%= data.parameter.upcase %></h2>
+        <h3 class="current-id-full">
+          <% if data.date.class == Date %>
+            on <%= data.date %>
+          <% else %>
+            <%= data.date %>
+          <% end %>
+        </h3>
+        <div class="current-value">
+          <p class="current-value-measure">
+            <span class="current-value-measure-wrap"><%= "#{data.value.to_f.round(2)} #{data.unit}" %></span>
+          </p>
+          <span class="current-gauge"></span>
+          <span class="current-gauge-filling"></span>
+        </div>
       </div>
-    </div>
+    <% end %>
 
   </div>
   <p class="dashboard-xively-link">
@@ -74,6 +82,6 @@
 </section>
  -->
  
-<section class="">
+<!-- <section class="">
   <div id="dashboard-xively-chart"></div>
-</section>
+</section> -->

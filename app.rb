@@ -102,8 +102,7 @@ class AirQualityEgg < Sinatra::Base
 
   get '/aqs/:aqs_id' do
     @site = EpaSite.find_by(:aqs_id => params[:aqs_id])
-    @latest_hourly = @site.latest_hourly_data
-    @latest_daily = @site.latest_daily_data
+    @latest_data = @site.latest_hourly_data + @site.latest_daily_data
     erb :show_aqs
   end
 
