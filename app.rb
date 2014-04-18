@@ -100,6 +100,14 @@ class AirQualityEgg < Sinatra::Base
     return data.to_json
   end
 
+  get '/aqs/:aqs_id' do
+    @site = EpaSite.find_by(:aqs_id => params[:aqs_id])
+    @latest_hourly = @site.latest_hourly_data
+    @latest_daily = @site.latest_daily_data
+    erb :show_aqs
+  end
+
+
   # Edit egg metadata
   get '/egg/:id/edit' do
     feed_id, api_key = extract_feed_id_and_api_key_from_session

@@ -86,7 +86,7 @@ var AQE = (function ( $ ) {
 
   function initialize() {
     // load feeds and then initialize map and add the markers
-    if(local_feed_path){
+    if(typeof(local_feed_path) != "undefined"){
       // set up leaflet map
       map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer]})
       handleNoGeolocation();
@@ -114,25 +114,29 @@ var AQE = (function ( $ ) {
         // console.log('active',egg_layer.getLayers().length)
         // console.log('inactive',egg_layer_inactive.getLayers().length)
       })
+
+      map.on('overlayadd', function (eventLayer) {
+        if(eventLayer.name == "Heatmap (of all eggs)" && eventLayer.group.name == "Air Quality Eggs"){
+          var active_eggs = egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]})
+          var inactive_eggs = egg_layer_inactive.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]})
+          egg_heatmap.setLatLngs(Array().concat(active_eggs,inactive_eggs))
+        }
+        if(eventLayer.name == "Heatmap" && eventLayer.group.name == "AirNow AQS Sites"){
+          aqs_heatmap.setLatLngs(aqs_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]}))
+        }
+      })
+
+      //  - load active AQS stations to map
+      $.getJSON("/all_aqs_sites.json", function(aqs_mapmarkers){
+        for ( var x = 0, len = aqs_mapmarkers.length; x < len; x++ ) {
+          addAQSSiteMapMarker( aqs_mapmarkers[x] );
+        }
+      })
+
+
     }
 
-    //  - load active AQS stations to map
-    $.getJSON("/all_aqs_sites.json", function(aqs_mapmarkers){
-      for ( var x = 0, len = aqs_mapmarkers.length; x < len; x++ ) {
-        addAQSSiteMapMarker( aqs_mapmarkers[x] );
-      }
-    })
 
-    map.on('overlayadd', function (eventLayer) {
-      if(eventLayer.name == "Heatmap (of all eggs)" && eventLayer.group.name == "Air Quality Eggs"){
-        var active_eggs = egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]})
-        var inactive_eggs = egg_layer_inactive.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]})
-        egg_heatmap.setLatLngs(Array().concat(active_eggs,inactive_eggs))
-      }
-      if(eventLayer.name == "Heatmap" && eventLayer.group.name == "AirNow AQS Sites"){
-        aqs_heatmap.setLatLngs(aqs_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]}))
-      }
-    })
 
     // if on home page:
     if($(".home-map").length == 1){
