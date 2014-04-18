@@ -98,7 +98,7 @@ namespace :airnow do
             data = ftp.getbinaryfile(file, nil, 1024)
             puts "Processing #{file}"
             CSV.parse(data, :col_sep => "|", :encoding => 'ISO8859-1') do |row|
-              if ["NO2T","NO2","NO2Y","CO","CO-8HR","RHUM","TEMP"].include?(row[5])
+              if ["NO2T","NO2","NO2Y","CO","CO-8HR","RHUM","TEMP","PM2.5","WS","WD"].include?(row[5])
                 data_point = EpaData.find_or_create_by(:date => Time.strptime(row[0], "%m/%d/%y"), :time => row[1], :aqs_id => row[2], :parameter => row[5])
                 data_point.update_attributes!({
                   :unit => row[6],
