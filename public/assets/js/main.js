@@ -157,7 +157,7 @@ var AQE = (function ( $ ) {
   }
 
   function handleNoGeolocation() {
-    map.setView([51.944264879028765, -82.705078125], 3);
+    map.setView([38.22847167526397, -85.76099395751953], 11);
   }
 
   function addEggMapMarker(egg) {
