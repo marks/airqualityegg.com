@@ -463,7 +463,7 @@ var AQE = (function ( $ ) {
               zoomType: 'xy',
           },
           credits: { enabled: false }, 
-          title: { text: "This Egg's Datastreams" },
+          title: { text: "This AQS Site's Datastreams" },
           xAxis: { type: 'datetime' },
           yAxis: [
             { title: { text: 'ppb (parts per billion)'}, min: 0},
