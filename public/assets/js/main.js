@@ -62,9 +62,9 @@ var AQE = (function ( $ ) {
       "Markers (not recently updated)": egg_layer_inactive,
       "Heatmap (of all eggs)": egg_heatmap_layer
     },
-    "Propeller Health Asthma Hotspots":{
-      "Heatmap": propellerhealth_layer
-    },
+    // "Propeller Health Asthma Hotspots":{
+    //   "Heatmap": propellerhealth_layer
+    // },
     "AirNow AQS Sites": {
       "Markers": aqs_layer,
       "Heatmap": aqs_heatmap_layer
