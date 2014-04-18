@@ -151,18 +151,18 @@ class AirQualityEgg < Sinatra::Base
     datastreams = feed.datastreams
     data = feed.attributes
     data[:datastreams] = {}
-    data[:datastreams][:no2] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=NO2/)}
-    data[:datastreams][:co] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=CO/)}
-    data[:datastreams][:temperature] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Temperature/)}
-    logger.info(data[:datastreams][:temperature])
-    if data[:datastreams][:temperature] && data[:datastreams][:temperature].unit_symbol == "deg C"
-      data[:datastreams][:temperature].unit_symbol = "°F"
-      data[:datastreams][:temperature].unit_label = "°F"
-      data[:datastreams][:temperature].current_value = celsius_to_fahrenheit(data[:datastreams][:temperature].current_value.to_f)
-      data[:datastreams][:temperature].max_value = celsius_to_fahrenheit(data[:datastreams][:temperature].max_value.to_f)
-      data[:datastreams][:temperature].min_value = celsius_to_fahrenheit(data[:datastreams][:temperature].min_value.to_f)
+    data[:datastreams][:NO2] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=NO2/)}
+    data[:datastreams][:CO] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=CO/)}
+    data[:datastreams][:Dust] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Dust/)}
+    data[:datastreams][:Temperature] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Temperature/)}
+    data[:datastreams][:Humidity] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Humidity/)}
+    if data[:datastreams][:Temperature] && data[:datastreams][:Temperature].unit_symbol == "deg C"
+      data[:datastreams][:Temperature].unit_symbol = "°F"
+      data[:datastreams][:Temperature].unit_label = "°F"
+      data[:datastreams][:Temperature].current_value = celsius_to_fahrenheit(data[:datastreams][:Temperature].current_value.to_f)
+      data[:datastreams][:Temperature].max_value = celsius_to_fahrenheit(data[:datastreams][:Temperature].max_value.to_f)
+      data[:datastreams][:Temperature].min_value = celsius_to_fahrenheit(data[:datastreams][:Temperature].min_value.to_f)
     end
-    data[:datastreams][:humidity] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Humidity/)}
     data.to_json
   end
 

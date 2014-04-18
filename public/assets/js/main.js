@@ -185,10 +185,11 @@ var AQE = (function ( $ ) {
     if(typeof(ga)!="undefined"){ ga('send', 'event', 'egg_'+feed_id, 'click', 'egg_on_map', 1); }
     $.getJSON("/egg/"+feed_id+".json", function(data){
       var html = ""
-      if(data.datastreams.no2){ html += "NO2: "+data.datastreams.no2.current_value + " " + data.datastreams.no2.unit.label + " (" + moment(data.datastreams.no2.at).fromNow() +  ")"}
-      if(data.datastreams.co){ html += "<br />CO: "+data.datastreams.co.current_value + " " + data.datastreams.co.unit.label + " (" + moment(data.datastreams.co.at).fromNow() +  ")"}
-      if(data.datastreams.humidity){ html += "<br />Humidity: "+data.datastreams.humidity.current_value + " " + data.datastreams.humidity.unit.label + " (" + moment(data.datastreams.humidity.at).fromNow() +  ")"}
-      if(data.datastreams.temperature){ html += "<br />Temperature: "+data.datastreams.temperature.current_value + " " + data.datastreams.temperature.unit.label  + " (" + moment(data.datastreams.temperature.at).fromNow() +  ")"}
+      $.each(data.datastreams, function(name,item){
+        if(item){
+          html += "<br />"+name+": "+item.current_value + " " + item.unit.label + " (" + moment(item.at).fromNow() +  ")"  
+        }        
+      })
       if(html == ""){html += "<em>No recent data available</em>"}
       $("#egg_"+feed_id).html(html)
     })
