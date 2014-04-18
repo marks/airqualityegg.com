@@ -423,14 +423,19 @@ var AQE = (function ( $ ) {
         new_series.index = 2
         new_series.yAxis = 0
         break;
+      case "Dust":
+        new_series.name = "Dust (pcs/283ml)"
+        new_series.index = 3
+        new_series.yAxis = 1
+        break;
       case "Humidity":
         new_series.name = "Humidity (%)"
-        new_series.index = 3
+        new_series.index = 4
         new_series.yAxis = 1
         break;
       case "Temperature":
         new_series.name = "Temperature (°F)" // we converted it from Celsius above
-        new_series.index = 4
+        new_series.index = 5
         new_series.yAxis = 1
         break;
     }
