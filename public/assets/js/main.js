@@ -9,10 +9,10 @@ var AQE = (function ( $ ) {
       iconSize: [19, 20], // size of the icon
       className: 'egg-icon'
   });
-  var aqsIconURL = '/assets/img/blue_dot.png'
+  var aqsIconURL = '/assets/img/blue-dot_15.png'
   var aqsIcon = L.icon({
       iconUrl: aqsIconURL,
-      iconSize: [5, 5], // size of the icon
+      iconSize: [15, 15], // size of the icon
   });
 
   var today = new Date()
