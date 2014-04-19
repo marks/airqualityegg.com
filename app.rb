@@ -118,6 +118,7 @@ class AirQualityEgg < Sinatra::Base
   get '/aqs/:aqs_id' do
     @site = EpaSite.find_by(:aqs_id => params[:aqs_id])
     @latest_data = @site.latest_hourly_data + @site.latest_daily_data
+    @local_feed_path = "/eggs/nearby/#{@site.lat}/#{@site.lon}.json"
     erb :show_aqs
   end
 
@@ -132,19 +133,19 @@ class AirQualityEgg < Sinatra::Base
   end
 
   # Register your egg
-  post '/register' do
-    begin
-      logger.info("GET: #{product_url}")
-      response = Xively::Client.get(product_url, :headers => {'Content-Type' => 'application/json', "X-ApiKey" => $api_key})
-      json = MultiJson.load(response.body)
-      session['response_json'] = json
-      feed_id, api_key = extract_feed_id_and_api_key_from_session
-      redirect_with_error("Egg not found") unless feed_id
-      redirect "/egg/#{feed_id}/edit"
-    rescue
-      redirect_with_error "Egg not found"
-    end
-  end
+  # post '/register' do
+  #   begin
+  #     logger.info("GET: #{product_url}")
+  #     response = Xively::Client.get(product_url, :headers => {'Content-Type' => 'application/json', "X-ApiKey" => $api_key})
+  #     json = MultiJson.load(response.body)
+  #     session['response_json'] = json
+  #     feed_id, api_key = extract_feed_id_and_api_key_from_session
+  #     redirect_with_error("Egg not found") unless feed_id
+  #     redirect "/egg/#{feed_id}/edit"
+  #   rescue
+  #     redirect_with_error "Egg not found"
+  #   end
+  # end
 
   # Update egg metadata
   post '/egg/:id/update' do
@@ -193,21 +194,20 @@ class AirQualityEgg < Sinatra::Base
     response = Xively::Client.get(feed_url(params[:id]), :headers => {"X-ApiKey" => $api_key})
     @datastreams = []
     @feed = Xively::Feed.new(response.body)
+    logger.info(@feed)
     @no2 = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=NO2/)}
     @co = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=CO/)}
     @dust = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Dust/)}
     @temperature = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Temperature/)}
     @humidity = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Humidity/)}
-    @local_feed_path = "/egg/#{params[:id]}/nearby.json"
+    @local_feed_path = "/eggs/nearby/#{@feed.location_lat}/#{@feed.location_lon}.json"
     [@no2, @co, @temperature, @humidity, @dust].each{|x| @datastreams << x.id if x}
     erb :show
   end
 
-  get '/egg/:id/nearby.json' do
+  get '/eggs/nearby/:lat/:lon.json' do
     content_type :json
-    response = Xively::Client.get(feed_url(params[:id]), :headers => {"X-ApiKey" => $api_key})
-    @feed = Xively::Feed.new(response.body)
-    @feeds = find_egg_feeds_near(@feed)
+    @feeds = find_egg_feeds_near(@feed, params[:lat], params[:lon])
     @map_markers = collect_map_markers(@feeds)
     return @map_markers
   end
@@ -224,12 +224,12 @@ class AirQualityEgg < Sinatra::Base
     redirect_with_error('Egg not found')
   end
 
-  def find_egg_feeds_near(feed)
-    find_egg_feeds(feed)
+  def find_egg_feeds_near(feed, lat=nil, lon=nil)
+    find_egg_feeds(feed, lat, lon)
   end
 
-  def find_egg_feeds(feed = nil)
-    url = feeds_url(feed)
+  def find_egg_feeds(feed = nil, lat = nil, lon = nil)
+    url = feeds_url(feed, lat, lon)
     logger.info("GET: #{url} - geosearch")
     response = Xively::Client.get(url, :headers => {'Content-Type' => 'application/json', 'X-ApiKey' => $api_key})
     @feeds = Xively::SearchResult.new(response.body).results
@@ -249,8 +249,14 @@ class AirQualityEgg < Sinatra::Base
     )
   end
 
-  def feeds_url(feed)
-    feeds_near = (feed && feed.location_lat && feed.location_lon) ? "&lat=#{feed.location_lat}&lon=#{feed.location_lon}&distance=500&distance_units=kms" : ''
+  def feeds_url(feed, lat, lon)
+    if feed && feed.location_lat && feed.location_lon
+      feeds_near = "&lat=#{feed.location_lat}&lon=#{feed.location_lon}&distance=500&distance_units=kms"
+    elsif lat and lon
+      feeds_near = "&lat=#{lat}&lon=#{lon}&distance=500&distance_units=kms"
+    else
+      feeds_near = ''
+    end
     "#{$api_url}/v2/feeds.json?user=airqualityegg&mapped=true#{feeds_near}"
   end
 
