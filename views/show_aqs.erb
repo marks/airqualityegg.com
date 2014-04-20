@@ -6,16 +6,10 @@
   <img class="dashboard-current-prop" src="/assets/img/prop-bigegg.png">
   <div class="dashboard-current-values clearfix">
     
-    <% @latest_data.each do |data| %>
+    <% @latest_hourly_data.each do |data| %>
       <div class="current current-right current-dust">
         <h2 class="current-id heading-narrow"><%= data.parameter.upcase %></h2>
-        <h3 class="current-id-full">
-          <% if data.date.class == Date %>
-            on <%= data.date %>
-          <% else %>
-            <%= data.date.in_time_zone(settings.time_zone) %>
-          <% end %>
-        </h3>
+        <h3 class="current-id-full"><%= data.date.in_time_zone(settings.time_zone) %></h3>
         <div class="current-value">
           <p class="current-value-measure">
             <span class="current-value-measure-wrap"><%= "#{data.value.to_f.round(2)} #{data.unit}" %></span>
@@ -27,6 +21,26 @@
     <% end %>
 
   </div>
+
+  <div class="dashboard-current-values clearfix">
+    
+    <% @latest_daily_data.each do |data| %>
+      <div class="current current-right current-dust">
+        <h2 class="current-id heading-narrow"><%= data.parameter.upcase %></h2>
+        <h3 class="current-id-full">on <%= data.date %></h3>
+        <div class="current-value">
+          <p class="current-value-measure">
+            <span class="current-value-measure-wrap"><%= "#{data.value.to_f.round(2)} #{data.unit}" %></span>
+          </p>
+          <span class="current-gauge"></span>
+          <span class="current-gauge-filling"></span>
+        </div>
+      </div>
+    <% end %>
+
+  </div>
+
+
   <p class="dashboard-xively-link">
     <a class='button' href='http://www.epa.gov/ttn/airs/airsaqs/' target='blank'>All about the EPA Air Quality System (AQS)</a>
   </p>

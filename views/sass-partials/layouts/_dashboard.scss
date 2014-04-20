@@ -166,9 +166,9 @@
 
 .dashboard-xively-link {
   position: absolute;
+  padding-top: em(1);
   z-index: 5;
   bottom: 0;
-
   .button:hover{
     color:#FFF;
   }

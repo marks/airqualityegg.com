@@ -109,7 +109,7 @@ class AirQualityEgg < Sinatra::Base
         series_datapoints = recent_history.select{|x| x.parameter == series_name}
         series << {
           :data => series_datapoints.map {|x| [x.date.to_time.utc.change(:hour => x.hour, :zone_offset => '0').to_i*1000,x.value.to_f] },
-          :name => "#{series_name} (#{series_datapoints.first["unit"].gsub("PERCENT","%")})"
+          :name => "#{series_name} (#{series_datapoints.first.unit})" # assumption: all are the same for a given parameter
         }
       end
       data[:recent_history] = series
@@ -119,7 +119,8 @@ class AirQualityEgg < Sinatra::Base
 
   get '/aqs/:aqs_id' do
     @site = EpaSite.find_by(:aqs_id => params[:aqs_id])
-    @latest_data = @site.latest_hourly_data + @site.latest_daily_data
+    @latest_hourly_data = @site.latest_hourly_data
+    @latest_daily_data = @site.latest_daily_data
     @local_feed_path = "/eggs/nearby/#{@site.lat}/#{@site.lon}.json"
     erb :show_aqs
   end

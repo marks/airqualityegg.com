@@ -144,7 +144,8 @@ $site-gutter: $site-gutter * 2;
 }
 
 .dashboard-current-values {
-  padding-top: em(145);
+  padding-top: em(30);
+  padding-bottom: em(0);
 }
 
 .dashboard-current-prop {

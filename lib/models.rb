@@ -51,4 +51,31 @@ class EpaData < ActiveRecord::Base
     return new_attributes
   end
 
+  def formatted_unit
+    if parameter == "TEMP" && read_attribute(:unit) == "C"
+      return "F"
+    elsif read_attribute(:unit) == "PERCENT"
+      return "%"
+    else
+      return nil
+    end
+  end
+
+  def unit
+    formatted_unit || read_attribute(:unit)
+  end
+
+  def formatted_value
+    if parameter == "TEMP" && read_attribute(:unit) == "C"
+      return celsius_to_fahrenheit(read_attribute(:value))
+    else
+      return nil
+    end
+  end
+
+  def value
+    formatted_value || read_attribute(:value)
+  end
+
+
 end
