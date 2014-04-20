@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140413012013) do
+ActiveRecord::Schema.define(version: 20140420023203) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,6 +26,12 @@ ActiveRecord::Schema.define(version: 20140413012013) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "epa_data", ["aqs_id", "date", "time"], name: "index_epa_data_on_aqs_id_and_date_and_time", using: :btree
+  add_index "epa_data", ["aqs_id", "date"], name: "index_epa_data_on_aqs_id_and_date", using: :btree
+  add_index "epa_data", ["aqs_id", "parameter", "date", "time"], name: "index_epa_data_on_aqs_id_and_parameter_and_date_and_time", using: :btree
+  add_index "epa_data", ["aqs_id", "parameter", "date"], name: "index_epa_data_on_aqs_id_and_parameter_and_date", using: :btree
+  add_index "epa_data", ["aqs_id", "parameter"], name: "index_epa_data_on_aqs_id_and_parameter", using: :btree
 
   create_table "epa_sites", id: false, force: true do |t|
     t.string   "aqs_id"
@@ -53,5 +59,8 @@ ActiveRecord::Schema.define(version: 20140413012013) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "epa_sites", ["aqs_id", "status"], name: "index_epa_sites_on_aqs_id_and_status", using: :btree
+  add_index "epa_sites", ["status"], name: "index_epa_sites_on_status", using: :btree
 
 end

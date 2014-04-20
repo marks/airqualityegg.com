@@ -11,6 +11,8 @@ ActiveRecord::Base.establish_connection(
   :encoding => 'utf8'
 )
 
+ActiveRecord::Base.logger = Logger.new(STDOUT)
+
 class EpaSite < ActiveRecord::Base
   self.primary_key = 'aqs_id'
   has_many :epa_datas, :foreign_key => :aqs_id
