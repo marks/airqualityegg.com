@@ -31,5 +31,5 @@ group :development, :test do
 end
 
 group :production do
-  require 'oboe-heroku' # for TraceView
+  gem 'oboe-heroku' # for TraceView
 end
