@@ -41,6 +41,7 @@ GEM
       multi_json (~> 1.0)
       multi_xml (>= 0.5.2)
     i18n (0.6.5)
+    json (1.8.1)
     memcachier (0.0.2)
     mime-types (1.23)
     mini_portile (0.5.1)
@@ -50,6 +51,10 @@ GEM
     newrelic_rpm (3.6.5.130)
     nokogiri (1.6.0)
       mini_portile (~> 0.5.0)
+    oboe (2.5.0.7)
+      json
+    oboe-heroku (0.9.8.5)
+      oboe (>= 2.4.0.1)
     ox (2.0.5)
     pg (0.17.1)
     rack (1.5.2)
@@ -116,6 +121,7 @@ DEPENDENCIES
   foreman
   memcachier
   newrelic_rpm
+  oboe-heroku
   pg
   rack-force_domain
   rack-test

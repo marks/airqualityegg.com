@@ -16,6 +16,7 @@ gem "pg"
 gem "activerecord"
 gem "sinatra-activerecord"
 gem 'rake'
+gem 'oboe-heroku' # for TraceView
 
 group :development do
   gem 'foreman'
@@ -30,6 +31,3 @@ group :development, :test do
   gem 'webmock'
 end
 
-group :production do
-  gem 'oboe-heroku' # for TraceView
-end
