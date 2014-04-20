@@ -20,7 +20,7 @@
 
 .dashboard-current-values {
   position: relative;
-  padding-top: em(30);
+  padding-top: em(60);
   z-index: 5;
 }
 
@@ -29,7 +29,7 @@
 .current {
   position: relative;
   margin-bottom: em(35);
-  min-height: em(90);
+  height: em(200);
 }
 
 .current-id {
@@ -70,6 +70,12 @@
   display: block;
   width: 47.5%;
   height: em(90);
+}
+
+.current-value-updated-at{
+  position:absolute;
+  bottom:0;
+  margin:0;
 }
 
 // GAUGES

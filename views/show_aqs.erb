@@ -5,39 +5,34 @@
 <section class="dashboard-current">
   <img class="dashboard-current-prop" src="/assets/img/prop-bigegg.png">
   <div class="dashboard-current-values clearfix">
-    
     <% @latest_hourly_data.each do |data| %>
       <div class="current current-right current-dust">
         <h2 class="current-id heading-narrow"><%= data.parameter.upcase %></h2>
-        <h3 class="current-id-full"><%= data.date.in_time_zone(settings.time_zone) %></h3>
-        <div class="current-value">
-          <p class="current-value-measure">
-            <span class="current-value-measure-wrap"><%= "#{data.value.to_f.round(2)} #{data.unit}" %></span>
+        <div class="current-value" style="margin-top:0px;height:20px;">
+          <p class="current-value-measure" style="border-top:none; text-align:left;">
+            <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data.value.to_f.round(2)} #{data.unit}" %></span>
+            <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data.aqi_range}" %></span>
           </p>
-          <span class="current-gauge"></span>
-          <span class="current-gauge-filling"></span>
         </div>
+        <p class="current-value-updated-at">As of <%= data.date.in_time_zone(settings.time_zone) %></p>
       </div>
     <% end %>
-
   </div>
 
   <div class="dashboard-current-values clearfix">
-    
     <% @latest_daily_data.each do |data| %>
       <div class="current current-right current-dust">
         <h2 class="current-id heading-narrow"><%= data.parameter.upcase %></h2>
-        <h3 class="current-id-full">on <%= data.date %></h3>
-        <div class="current-value">
-          <p class="current-value-measure">
-            <span class="current-value-measure-wrap"><%= "#{data.value.to_f.round(2)} #{data.unit}" %></span>
+        <h3 class="current-id-full"></h3>
+        <div class="current-value" style="margin-top:0px;height:20px;">
+          <p class="current-value-measure" style="border-top:none; text-align:left;">
+            <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data.value.to_f.round(2)} #{data.unit}" %></span>
+            <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data.aqi_range}" %></span>
           </p>
-          <span class="current-gauge"></span>
-          <span class="current-gauge-filling"></span>
         </div>
+        <p class="current-value-updated-at">Updated <%= data.updated_at.in_time_zone(settings.time_zone) %></p>
       </div>
     <% end %>
-
   </div>
 
 

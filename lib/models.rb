@@ -24,7 +24,7 @@ class EpaSite < ActiveRecord::Base
   end
 
   def latest_daily_data
-    self.epa_datas.find_by_sql(["SELECT T.id,T.date,T.parameter,T.unit,T.value,T.data_source FROM epa_data T INNER JOIN (SELECT epa_data.parameter, MAX (DATE) AS MaxDate FROM epa_data GROUP BY parameter) tm ON T.parameter = tm.parameter AND T.date = tm.MaxDate and T.aqs_id = ? and T.time is NULL",self.aqs_id])
+    self.epa_datas.find_by_sql(["SELECT T.id,T.date,T.parameter,T.unit,T.value,T.data_source,T.updated_at FROM epa_data T INNER JOIN (SELECT epa_data.parameter, MAX (DATE) AS MaxDate FROM epa_data GROUP BY parameter) tm ON T.parameter = tm.parameter AND T.date = tm.MaxDate and T.aqs_id = ? and T.time is NULL",self.aqs_id])
   end
 
   def latest_hourly_data
@@ -57,7 +57,7 @@ class EpaData < ActiveRecord::Base
     elsif read_attribute(:unit) == "PERCENT"
       return "%"
     else
-      return nil
+      return read_attribute(:unit).downcase
     end
   end
 
@@ -77,12 +77,16 @@ class EpaData < ActiveRecord::Base
     formatted_value || read_attribute(:value)
   end
 
-  def aqi_category
-    case parameter
-    # when "X"
+  def value_in_ppm
+    if unit == "PPB"
+      return value/1000.00
     else
+      return value
+    end
+  end
 
-    end 
+  def aqi_range
+    determine_aqi_range(parameter,value,unit)
   end
 
 

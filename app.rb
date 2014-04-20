@@ -42,6 +42,7 @@ class AirQualityEgg < Sinatra::Base
     $stdout.sync = true
     set :logging, Logger::DEBUG
     register Sinatra::Reloader
+    also_reload "lib/*.rb"
     set :cache_time, 3600*12 # five minutes
   end
 
