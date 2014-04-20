@@ -77,5 +77,13 @@ class EpaData < ActiveRecord::Base
     formatted_value || read_attribute(:value)
   end
 
+  def aqi_category
+    case parameter
+    # when "X"
+    else
+
+    end 
+  end
+
 
 end
