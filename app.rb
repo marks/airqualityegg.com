@@ -7,7 +7,7 @@ require 'xively-rb'
 require 'dalli'
 require 'memcachier'
 require 'json'
-
+require 'oboe-heroku'
 
 require './lib/helpers'
 include AppHelpers
