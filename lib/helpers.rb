@@ -82,6 +82,7 @@ module AppHelpers
     when "NO2"
       value = value/1000.00 if unit.upcase == "PPB"
       value = value.round(3)
+      puts value
       if value.between?(0.65,1.24)
         return [201,300]
       elsif value.between?(1.25,1.64)
@@ -89,6 +90,31 @@ module AppHelpers
       elsif value >= 1.65
         return [401,500]
       end
+    when "DUST"
+      vaule = value.round(0)
+      if value.between?(0,1500)
+        return [0,50]
+      elsif value.between?(1501,1529)
+        return [50.5,50.5]
+      elsif value.between?(1530,3000)
+        return [51,100]
+      elsif value.between?(3001,3059)
+        return [100.5,100.5]
+      elsif value.between?(3060,5837)
+        return [101,150]
+      elsif value.between?(5838,5892)
+        return [150.5,150.5]
+      elsif value.between?(5893,8670)
+        return [151,200]
+      elsif value.between?(8671,8726)
+        return [200.5,200.5]
+      elsif value.between?(8727,14336)
+        return [201,300]
+      elsif value.between?(14337,14364)
+        return [300.5,300.5]
+      elsif value >= 14365
+        return [301,500]
+      end      
     else
       return nil
     end 
