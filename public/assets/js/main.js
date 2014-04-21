@@ -501,7 +501,8 @@ var AQE = (function ( $ ) {
                     type: 'gauge',
                     plotBorderWidth: 0,
                     plotShadow: false,
-                    backgroundColor:'rgba(255, 255, 255, 0.002)'
+                    backgroundColor:'rgba(255, 255, 255, 0.002)',
+                    marginLeft:-55
                 },
                 credits: { enabled: false },
                 exporting: { enabled: false },
