@@ -178,8 +178,10 @@ var AQE = (function ( $ ) {
     html += "<tr><td>Status </td><td> "+egg.status+"</td></tr>"
     html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
     html += "<tr><td>Created </td><td> "+moment(egg.created).fromNow()+"</td></tr>"
-    html += "</table><hr /><strong>Latest Readings</strong>"
-    html += "<div id='egg_"+egg.id+"'></div></div>"
+    html += "</table><hr />"
+    html += "<div id='egg_"+egg.id+"'><strong>Latest Readings</strong></div>"
+    html += "<p style='text-align: right'><a href='/egg/"+egg.id+"'>More about this egg site including historical graphs →</a></p>"
+    html += "</div>"
     marker.bindPopup(html)
     marker.on('click', onEggMapMarkerClick); 
     if(new Date(egg.updated) < thirty_days_ago){
@@ -200,7 +202,7 @@ var AQE = (function ( $ ) {
         }        
       })
       if(html == ""){html += "<em>No recent data available</em>"}
-      $("#egg_"+feed_id).html(html)
+      $("#egg_"+feed_id).append(html)
     })
   }
 
@@ -216,7 +218,9 @@ var AQE = (function ( $ ) {
     html += "<tr><td>County </td><td> "+aqs.county_name+"</td></tr>"
     html += "<tr><td>Status </td><td> "+aqs.status+"</td></tr>"
     html += "</table><hr />"
-    html += "<div id='aqs_"+aqs.aqs_id+"'><em>Loading most recent readings..</em></div></div>"
+    html += "<div id='aqs_"+aqs.aqs_id+"'><em>Loading most recent readings..</em></div>"
+    html += "<p style='text-align: right'><a href='/aqs/"+aqs.aqs_id+"'>More about this AQS site including historical graphs →</a></p>"
+    html += "</div>"
     marker.bindPopup(html)
     marker.on('click', onAQSSiteMapMarkerClick); 
     marker.addTo(aqs_layer);
