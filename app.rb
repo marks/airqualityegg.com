@@ -200,6 +200,11 @@ class AirQualityEgg < Sinatra::Base
     @feed = Xively::Feed.new(response.body)
     logger.info(@feed)
     @no2 = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=NO2/)}
+    logger.info(@no2.current_value)
+    if @no2 && @no2.current_value == "-2147483648"
+      # weird AQE bug
+      remove_instance_variable(:@no2)
+    end
     @co = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=CO/)}
     @dust = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Dust/)}
     @temperature = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Temperature/)}

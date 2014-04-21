@@ -20,10 +20,11 @@
       <h3 class="current-id-full">Nitrogen Dioxide<br /><a class="current-external-link" href="http://www.epa.gov/air/nitrogenoxides/" target="blank">More info at EPA.gov</a></h3>
       <div class="current-value" style="margin-top:0px;height:20px;">
         <p class="current-value-measure" style="border-top:none; text-align:left;">
-          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @no2 ? "#{@no2.current_value.to_f.round(2)} #{@no2.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @no2 ? "#{@no2.current_value.to_f.round(2)} #{@no2.unit_label}" : "" %></span>
+          <% if @no2 %><div class="current-value-gauge" data-value="<%= "#{determine_aqi_range("NO2",@no2.current_value.to_f,@no2.unit_label)}" %>" id="current-gauge_NO2"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @no2 ? "Updated #{@no2.updated.in_time_zone(settings.time_zone)}": ''%></p>
+      <p class="current-value-updated-at"><%= @no2 ? "Updated #{@no2.updated.in_time_zone(settings.time_zone)}": ''%></p>      
     </div>
 
     <div class="current current-right">
@@ -31,7 +32,8 @@
       <h3 class="current-id-full">Carbon Monoxide<br /><a class="current-external-link" href="http://www.epa.gov/airquality/carbonmonoxide/" target="blank">More info at EPA.gov</a></h3>
       <div class="current-value" style="margin-top:0px;height:20px;">
         <p class="current-value-measure" style="border-top:none; text-align:left;">
-          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @co ? "#{@co.current_value.to_f.round(2)} #{@co.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @co ? "#{@co.current_value.to_f.round(2)} #{@co.unit_label}" : "" %></span>
+          <% if @co %><div class="current-value-gauge" data-value="<%= "#{determine_aqi_range("CO",@co.current_value.to_f,@co.unit_label)}" %>" id="current-gauge_CO"></div><% end %>
         </p>
       </div>
       <p class="current-value-updated-at"><%= @co ? "Updated #{@co.updated.in_time_zone(settings.time_zone)}": ''%></p>
@@ -42,7 +44,7 @@
       <h3 class="current-id-full"><br /><br /></h3>
       <div class="current-value" style="margin-top:0px;height:20px;">
         <p class="current-value-measure" style="border-top:none; text-align:left;">
-          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @dust ? "#{@dust.current_value.to_f.round(2)} #{@dust.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @dust ? "#{@dust.current_value.to_f.round(2)} #{@dust.unit_label}" : "" %></span>
         </p>
       </div>
       <p class="current-value-updated-at"><%= @dust ? "Updated #{@dust.updated.in_time_zone(settings.time_zone)}": ''%></p>
@@ -54,7 +56,7 @@
       <h3 class="current-id-full"><br /><br /></h3>
       <div class="current-value" style="margin-top:0px;height:20px;">
         <p class="current-value-measure" style="border-top:none; text-align:left;">
-          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @temperature ? "#{celsius_to_fahrenheit(@temperature.current_value).round(2)} °F" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @temperature ? "#{celsius_to_fahrenheit(@temperature.current_value).round(2)} °F" : "" %></span>
         </p>
       </div>
       <p class="current-value-updated-at"><%= @temperature ? "Updated #{@temperature.updated.in_time_zone(settings.time_zone)}": ''%></p>
@@ -65,7 +67,7 @@
       <h3 class="current-id-full"><br /><br /></h3>
       <div class="current-value" style="margin-top:0px;height:20px;">
         <p class="current-value-measure" style="border-top:none; text-align:left;">
-          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @humidity ? "#{@humidity.current_value.to_f.round(2)} #{@humidity.unit_label}" : "<small class='current-value-unavailable'>Not available yet.</small>" %></span>
+          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @humidity ? "#{@humidity.current_value.to_f.round(2)} #{@humidity.unit_label}" : "" %></span>
         </p>
       </div>
       <p class="current-value-updated-at"><%= @humidity ? "Updated #{@humidity.updated.in_time_zone(settings.time_zone)}": ''%></p>

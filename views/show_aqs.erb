@@ -11,7 +11,7 @@
         <div class="current-value" style="margin-top:0px;height:20px;">
           <p class="current-value-measure" style="border-top:none; text-align:left;">
             <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data.value.to_f.round(2)} #{data.unit}" %></span>
-            <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data.aqi_range}" %></span>
+            <div class="current-value-gauge" data-value="<%= data.aqi_range %>" id="current-gauge_<%= data.parameter.gsub(/\W/,"") %>" style="width: 110px; height: 130px; margin: 0 0"></div>
           </p>
         </div>
         <p class="current-value-updated-at">As of <%= data.date.in_time_zone(settings.time_zone) %></p>
@@ -27,7 +27,7 @@
         <div class="current-value" style="margin-top:0px;height:20px;">
           <p class="current-value-measure" style="border-top:none; text-align:left;">
             <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data.value.to_f.round(2)} #{data.unit}" %></span>
-            <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data.aqi_range}" %></span>
+            <div class="current-value-gauge" data-value="<%= data.aqi_range %>" id="current-gauge_<%= data.parameter.gsub(/\W/,"") %>"></div>
           </p>
         </div>
         <p class="current-value-updated-at">Updated <%= data.updated_at.in_time_zone(settings.time_zone) %></p>

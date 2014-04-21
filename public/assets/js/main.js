@@ -152,11 +152,13 @@ var AQE = (function ( $ ) {
 
     // if on egg dashboard
     if($("#dashboard-xively-chart").length){
+      addAQIGauges()
       graphEggHistoricalData();
     }
 
     // if on AQS dashboard
     if($("#dashboard-aqs-chart").length){
+      addAQIGauges()
       graphAQSHistoricalData();
     }
 
@@ -482,6 +484,97 @@ var AQE = (function ( $ ) {
 
     })
 
+  }
+
+  function addAQIGauges(){
+    $(".current-value-gauge").each(function(n,span){
+      var values = $(span).data("value")
+      var gauge_id = $(span).attr("id")
+      if(values){
+        var value = parseFloat(values[0]+values[1])/2
+        $('#'+gauge_id).highcharts({
+                chart: {
+                    type: 'gauge',
+                    plotBorderWidth: 0,
+                    plotShadow: false,
+                    backgroundColor:'rgba(255, 255, 255, 0.002)'
+                },
+                credits: { enabled: false },
+                exporting: { enabled: false },
+                title: { text: ''},
+                pane: {
+                    startAngle: -90,
+                    endAngle: 90,
+                    background: null
+                },
+                plotOptions: {
+                    gauge: {
+                        dataLabels: { enabled: false },
+                        dial: { radius: '80%' }
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    max: 500,
+                    minorTickInterval: 'auto',
+                    minorTickWidth: 0,
+                    minorTickLength: 10,
+                    minorTickPosition: 'inside',
+                    minorTickColor: '#666',
+
+                    tickPixelInterval: 30,
+                    tickWidth: 2,
+                    tickPosition: 'inside',
+                    tickLength: 10,
+                    tickColor: '#666',
+                    labels: {
+                        step: 5,
+                        rotation: 'auto'
+                    },
+                    title: { text: '' },
+                    plotBands: [{
+                        from: 0,
+                        to: 50,
+                        color: '#00E400'
+                    }, {
+                        from: 51,
+                        to: 100,
+                        color: '#FFFF00'
+                    }, {
+                        from: 101,
+                        to: 150,
+                        color: '#FF7E00'
+                    }, {
+                        from: 151,
+                        to: 200,
+                        color: '#FF0000'
+                    }, {
+                        from: 201,
+                        to: 300,
+                        color: '#99004C'
+                    }, {
+                        from: 301,
+                        to: 500,
+                        color: '#4C0026'
+                    }, ]
+                },
+                tooltip: {
+                  formatter: function(){
+                    return 'AQI b/w '+this.point.range[0]+'-'+this.point.range[1];
+                  }
+                },
+
+                series: [{
+                    name: 'AQI',
+                    data: [{y: value, range:values}],
+                }]
+
+            },
+            function () {}
+        );
+
+      }
+    })
   }
 
 
