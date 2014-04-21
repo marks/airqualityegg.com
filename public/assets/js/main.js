@@ -198,10 +198,9 @@ var AQE = (function ( $ ) {
       var html = ""
       $.each(data.datastreams, function(name,item){
         if(item){
-          html += "<br />"+name+": "+item.current_value + " " + item.unit_label + " (" + moment(item.at).fromNow() +  ")"  
-          if(item.aqi_range){
-            html += " [AQI range: "+item.aqi_range[0]+"-"+item.aqi_range[1]+"]"
-          }
+          html += "<br />"+name+": "+item.current_value + " " + item.unit_label
+          if(item.aqi_range){ html += " <span style='padding: 0 2px; border:2px solid "+aqiRangeToColor(item.aqi_range)+"'>AQI range: "+item.aqi_range[0]+"-"+item.aqi_range[1]+"</span> " }
+          html += " (" + moment(item.at).fromNow() +  ")"  
         }        
       })
       if(html == ""){html += "<em>No recent data available</em>"}
@@ -237,10 +236,9 @@ var AQE = (function ( $ ) {
       var daily_html = "<strong>Latest Daily Readings</strong><br />"
       var daily_data = $.map(data.latest_daily, function(i){
         var item_html = ""
-        item_html += i.parameter+": "+i.value+" "+i.unit+" ("+moment(i.date).format("MM/DD/YYYY")+")"
-        if(i.aqi_range){
-          item_html += " [AQI range: "+i.aqi_range[0]+"-"+i.aqi_range[1]+"]"
-        }
+        item_html += i.parameter+": "+i.value+" "+i.unit
+        if(i.aqi_range){ item_html += " <span style='padding: 0 2px; border:2px solid "+aqiRangeToColor(i.aqi_range)+"'>AQI range: "+i.aqi_range[0]+"-"+i.aqi_range[1]+"</span> " }
+        item_html += " ("+moment(i.date).format("MM/DD/YYYY")+")"
         return item_html
       })     
       if(daily_data.length == 0){
@@ -569,7 +567,7 @@ var AQE = (function ( $ ) {
                         from: 301,
                         to: 500,
                         color: '#4C0026'
-                    }, ]
+                    }]
                 },
                 tooltip: {
                   formatter: function(){
@@ -593,6 +591,19 @@ var AQE = (function ( $ ) {
 
   function celsiusToFahrenheit(value){
     return parseFloat(value) * 9 / 5 + 32
+  }
+
+  function aqiRangeToColor(range){
+    var aqi = (range[0]+range[1])/2.00
+    var color;
+    if (aqi <= 50) { color = "#00E400" }
+    else if(aqi > 51 && aqi <= 100) { color = "#FFFF00"}
+    else if(aqi > 101 && aqi <= 150) { color = "#FF7E00"}
+    else if(aqi > 151 && aqi <= 200) { color = "#FF0000"}
+    else if(aqi > 201 && aqi <= 300) { color = "#99004C"}
+    else if(aqi > 301 && aqi <= 500) { color = "#4C0026"}
+    else { color = "#000"}
+    return color;
   }
 
 
