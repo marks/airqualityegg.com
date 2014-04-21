@@ -191,8 +191,10 @@ class AirQualityEgg < Sinatra::Base
       data[:datastreams][:Temperature].min_value = celsius_to_fahrenheit(data[:datastreams][:Temperature].min_value.to_f)
     end
     data[:datastreams].each do |metric, hash|
-      data[:datastreams][metric] = hash.attributes
-      data[:datastreams][metric][:aqi_range] = determine_aqi_range(metric.to_s,hash.current_value.to_f,hash.unit_label)
+      if hash
+        data[:datastreams][metric] = hash.attributes
+        data[:datastreams][metric][:aqi_range] = determine_aqi_range(metric.to_s,hash.current_value.to_f,hash.unit_label)
+      end
     end
     data.to_json
   end

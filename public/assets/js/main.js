@@ -198,7 +198,10 @@ var AQE = (function ( $ ) {
       var html = ""
       $.each(data.datastreams, function(name,item){
         if(item){
-          html += "<br />"+name+": "+item.current_value + " " + item.unit.label + " (" + moment(item.at).fromNow() +  ")"  
+          html += "<br />"+name+": "+item.current_value + " " + item.unit_label + " (" + moment(item.at).fromNow() +  ")"  
+          if(item.aqi_range){
+            html += " [AQI range: "+item.aqi_range[0]+"-"+item.aqi_range[1]+"]"
+          }
         }        
       })
       if(html == ""){html += "<em>No recent data available</em>"}
@@ -233,7 +236,12 @@ var AQE = (function ( $ ) {
 
       var daily_html = "<strong>Latest Daily Readings</strong><br />"
       var daily_data = $.map(data.latest_daily, function(i){
-        return i.parameter+": "+i.value+" "+i.unit+" ("+moment(i.date).format("MM/DD/YYYY")+")"
+        var item_html = ""
+        item_html += i.parameter+": "+i.value+" "+i.unit+" ("+moment(i.date).format("MM/DD/YYYY")+")"
+        if(i.aqi_range){
+          item_html += " [AQI range: "+i.aqi_range[0]+"-"+i.aqi_range[1]+"]"
+        }
+        return item_html
       })     
       if(daily_data.length == 0){
         daily_html += "<em>No daily data available</em>"
