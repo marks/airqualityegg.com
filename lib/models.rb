@@ -48,6 +48,7 @@ class EpaData < ActiveRecord::Base
       new_attributes["value"] = celsius_to_fahrenheit(new_attributes["value"])
       new_attributes["unit"] = "°F"
     end
+    new_attributes["aqi_range"] = aqi_range
     return new_attributes
   end
 
