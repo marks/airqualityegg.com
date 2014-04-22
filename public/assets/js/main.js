@@ -513,6 +513,7 @@ var AQE = (function ( $ ) {
                 credits: { enabled: false },
                 exporting: { enabled: false },
                 title: { text: ''},
+                subtitle: { text: 'AQI:', align: 'left', floating: true, x:-10, y:5},
                 pane: {
                     startAngle: -90,
                     endAngle: 90,
