@@ -22,10 +22,10 @@ var AQE = (function ( $ ) {
   // Air Quality Egg and AirNow AWS layers
   var egg_layer = L.layerGroup([]);
   var egg_layer_inactive = L.layerGroup([]);
-  var egg_heatmap = L.heatLayer([], {radius: 35})
+  var egg_heatmap = L.heatLayer([], {radius: 35, gradient: {0.9:'darkgreen'}})
   var egg_heatmap_layer = L.layerGroup([egg_heatmap])
   var aqs_layer = L.layerGroup([]);
-  var aqs_heatmap = L.heatLayer([], {radius: 35})
+  var aqs_heatmap = L.heatLayer([], {radius: 35, gradient: {0.9:'darkblue'}})
   var aqs_heatmap_layer = L.layerGroup([aqs_heatmap])
   // Propeller Health image overlay and layer 
   // var propellerhealth_layer_url = '/assets/img/propellerhealth/heatmap_nov13_shared_layer.png';
