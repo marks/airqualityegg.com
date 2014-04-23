@@ -51,10 +51,10 @@ GEM
     newrelic_rpm (3.6.5.130)
     nokogiri (1.6.0)
       mini_portile (~> 0.5.0)
-    oboe (2.5.0.7)
+    oboe (2.6.3.0)
       json
-    oboe-heroku (0.9.8.5)
-      oboe (>= 2.4.0.1)
+    oboe-heroku (0.9.11.0)
+      oboe (>= 2.6.3.0)
     ox (2.0.5)
     pg (0.17.1)
     rack (1.5.2)
