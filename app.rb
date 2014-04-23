@@ -221,6 +221,7 @@ class AirQualityEgg < Sinatra::Base
     content_type :json
     @feeds = find_egg_feeds_near(@feed, params[:lat], params[:lon])
     @map_markers = collect_map_markers(@feeds)
+    @map_markers = @map_markers.first(params[:limit].to_i) if params[:limit].to_i != 0
     return @map_markers
   end
 
