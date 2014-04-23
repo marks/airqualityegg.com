@@ -152,24 +152,24 @@ class AirQualityEgg < Sinatra::Base
   # end
 
   # Update egg metadata
-  post '/egg/:id/update' do
-    feed_id, api_key = extract_feed_id_and_api_key_from_session
-    redirect_with_error('Not your egg') if feed_id.to_s != params[:id]
-    new_tags = [params[:existing_tags], "device:type=airqualityegg"].compact.delete_if {|tag| tag.empty?}
-    feed = Xively::Feed.new({
-      :title => params[:title],
-      :description => params[:description],
-      :id => feed_id,
-      :private => false,
-      :location_ele => params[:location_ele],
-      :location_lat => params[:location_lat],
-      :location_lon => params[:location_lon],
-      :location_exposure => params[:location_exposure],
-      :tags => new_tags.join(',')
-    })
-    response = Xively::Client.put(feed_url(feed_id), :headers => {'Content-Type' => 'application/json', "X-ApiKey" => api_key}, :body => feed.to_json)
-    redirect "/egg/#{feed_id}"
-  end
+  # post '/egg/:id/update' do
+  #   feed_id, api_key = extract_feed_id_and_api_key_from_session
+  #   redirect_with_error('Not your egg') if feed_id.to_s != params[:id]
+  #   new_tags = [params[:existing_tags], "device:type=airqualityegg"].compact.delete_if {|tag| tag.empty?}
+  #   feed = Xively::Feed.new({
+  #     :title => params[:title],
+  #     :description => params[:description],
+  #     :id => feed_id,
+  #     :private => false,
+  #     :location_ele => params[:location_ele],
+  #     :location_lat => params[:location_lat],
+  #     :location_lon => params[:location_lon],
+  #     :location_exposure => params[:location_exposure],
+  #     :tags => new_tags.join(',')
+  #   })
+  #   response = Xively::Client.put(feed_url(feed_id), :headers => {'Content-Type' => 'application/json', "X-ApiKey" => api_key}, :body => feed.to_json)
+  #   redirect "/egg/#{feed_id}"
+  # end
 
   get '/egg/:id.json' do
     content_type :json
@@ -257,7 +257,7 @@ class AirQualityEgg < Sinatra::Base
   def collect_map_markers(feeds)
     MultiJson.dump(
       feeds = feeds.collect do |feed|
-        feed.attributes["datastreams"].delete_if{|d| !d.tags.match(/computed/)}
+        feed.attributes["datastreams"].delete_if{|d| !d.tags.match(/computed/) && !d.tags.match(/sensor_type=NO2/) && !d.tags.match(/sensor_type=CO/) && !d.tags.match(/sensor_type=Dust/) && !d.tags.match(/sensor_type=Temperature/) && !d.tags.match(/sensor_type=Humidity/) && !d.tags.match(/sensor_type=VOC/) && !d.tags.match(/sensor_type=O3/) }
         feed.attributes.delete_if {|_,v| v.blank?}
         feed.attributes
       end
