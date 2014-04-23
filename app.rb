@@ -259,7 +259,7 @@ class AirQualityEgg < Sinatra::Base
       feeds = feeds.collect do |feed|
         feed.attributes["datastreams"].delete_if{|d| !d.tags.match(/computed/)}
         feed.attributes.delete_if {|_,v| v.blank?}
-        feed
+        feed.attributes
       end
     )
   end
