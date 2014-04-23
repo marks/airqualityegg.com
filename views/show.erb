@@ -44,7 +44,7 @@
       <h3 class="current-id-full"><br /><br /></h3>
       <div class="current-value" style="margin-top:0px;height:20px;">
         <p class="current-value-measure" style="border-top:none; text-align:left;">
-          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @dust ? "#{@dust.current_value.to_i} #{@dust.unit_label}" : "" %></span>
+          <span class="current-value-measure-wrap" style="padding-left:0px;font-size: 80%;"><%= @dust ? "#{@dust.current_value.to_i} #{@dust.unit_label}" : "" %></span>
           <% if @dust %><div class="current-value-gauge" data-value="<%= "#{determine_aqi_range("DUST",@dust.current_value.to_f,@dust.unit_label)}" %>" id="current-gauge_DUST"></div><% end %>
         </p>
       </div>
