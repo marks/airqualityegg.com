@@ -257,7 +257,7 @@ class AirQualityEgg < Sinatra::Base
   def collect_map_markers(feeds)
     MultiJson.dump(
       feeds = feeds.collect do |feed|
-        feed.attributes["datastreams"].delete_if{|d| !d.tags.match(/computed/) && !d.tags.match(/sensor_type=NO2/) && !d.tags.match(/sensor_type=CO/) && !d.tags.match(/sensor_type=Dust/) && !d.tags.match(/sensor_type=Temperature/) && !d.tags.match(/sensor_type=Humidity/) && !d.tags.match(/sensor_type=VOC/) && !d.tags.match(/sensor_type=O3/) }
+        feed.attributes["datastreams"].delete_if{|d| !d.tags.match(/computed/) && !d.tags.match(/sensor_type=NO2\z/) && !d.tags.match(/sensor_type=CO\z/) && !d.tags.match(/sensor_type=Dust\z/) && !d.tags.match(/sensor_type=Temperature\z/) && !d.tags.match(/sensor_type=Humidity\z/) && !d.tags.match(/sensor_type=VOC\z/) && !d.tags.match(/sensor_type=O3\z/) }
         feed.attributes.delete_if {|_,v| v.blank?}
         feed.attributes
       end
