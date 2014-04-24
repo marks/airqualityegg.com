@@ -14,6 +14,13 @@ var AQE = (function ( $ ) {
       iconUrl: aqsIconURL,
       iconSize: [15, 15], // size of the icon
   });
+  var schoolIconURL = '/assets/img/blackboard.png'
+  var schoolIcon = L.icon({
+      iconUrl: schoolIconURL,
+      iconSize: [17, 17], // size of the icon
+  });
+  var heatmapIconURL = '/assets/img/heatmap_legend.png'
+
 
   var today = new Date()
   var thirty_days_ago = new Date()
@@ -24,9 +31,13 @@ var AQE = (function ( $ ) {
   var egg_layer_inactive = L.layerGroup([]);
   var egg_heatmap = L.heatLayer([], {radius: 35})
   var egg_heatmap_layer = L.layerGroup([egg_heatmap])
+
   var aqs_layer = L.layerGroup([]);
-  var aqs_heatmap = L.heatLayer([], {radius: 35, gradient: {}})
+  var aqs_heatmap = L.heatLayer([], {radius: 35})
   var aqs_heatmap_layer = L.layerGroup([aqs_heatmap])
+
+  var school_layer = L.layerGroup([]);
+
   // Propeller Health image overlay and layer 
   var propellerhealth_layer_url = 'http://s3.amazonaws.com/healthyaws/propeller_health/propeller_health_heatmap_nov13_shared.png';
   var propellerhealth_layer_bounds = [[37.8419378866983038, -86.0292621133016979], [38.5821425225734487, -85.1883896469475275]]
@@ -48,7 +59,9 @@ var AQE = (function ( $ ) {
     div_html += "<div class='leaflet-control-layers leaflet-control leaflet-control-legend leaflet-control-layers-expanded'><div class='leaflet-control-layers-base'></div><div class='leaflet-control-layers-separator' style='display: none;'></div><div class='leaflet-control-layers-overlays'><div class='leaflet-control-layers-group' id='leaflet-control-layers-group-2'><span class='leaflet-control-layers-group-name'>Legend</span>";
     div_html += "<table>"
     div_html += "<tr><td align='center'><img style='width:19px; height:20px;' src='"+eggIconURL+"' alt='egg'> </td><td> Air Quality Egg</td></tr>";
-    div_html += "<tr><td align='center'><img src='"+aqsIconURL+"' alt='blue dot' ></td><td> EPA Air Quality System Site</td></tr>";
+    div_html += "<tr><td align='center'><img src='"+aqsIconURL+"' alt='blue dot'> </td><td> EPA Air Quality System Site</td></tr>";
+    div_html += "<tr><td align='center'><img style='width:19px; height:19px;' src='"+schoolIconURL+"' alt='school'> </td><td> Schools from Dept of Education</td></tr>";
+    div_html += "<tr><td align='center'><img style='width:19px; height:19px;' src='"+heatmapIconURL+"' alt='heatmap'> </td><td> Propeller Health Asthma Hotspots</td></tr>";
     div_html += "</table>"
     div_html += "</div></div></div>"
     div.innerHTML = div_html
@@ -62,12 +75,13 @@ var AQE = (function ( $ ) {
       "Markers (not recently updated)": egg_layer_inactive,
       "Heatmap (of all eggs)": egg_heatmap_layer
     },
-    // "Propeller Health Asthma Hotspots":{
-    //   "Heatmap": propellerhealth_layer
-    // },
     "AirNow AQS Sites": {
       "Markers": aqs_layer,
       "Heatmap": aqs_heatmap_layer
+    },
+    "Additional Data":{
+      "Louisville Asthma Hotspots": propellerhealth_layer,
+      "Jefferson County Schools": school_layer
     },
     "OpenWeatherMap": {
       "Clouds": clouds_layer,
@@ -88,7 +102,7 @@ var AQE = (function ( $ ) {
     // load feeds and then initialize map and add the markers
     if(typeof(local_feed_path) != "undefined"){
       // set up leaflet map
-      map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer, propellerhealth_layer]})
+      map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer, school_layer, propellerhealth_layer]})
       handleNoGeolocation();
       L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
@@ -111,8 +125,6 @@ var AQE = (function ( $ ) {
         }
 
         $("span#num_eggs").html(mapmarkers.length)
-        // console.log('active',egg_layer.getLayers().length)
-        // console.log('inactive',egg_layer_inactive.getLayers().length)
       })
 
       map.on('overlayadd', function (eventLayer) {
@@ -133,13 +145,18 @@ var AQE = (function ( $ ) {
         }
       })
 
+      $.getJSON("http://opendata.socrata.com/resource/w376-xd3c.json", function(school_mapmarkers){
+        for ( var x = 0, len = school_mapmarkers.length; x < len; x++ ) {
+          addSchoolSiteMapMarker( school_mapmarkers[x] );
+        }
+      })
+
+
 
     }
 
     // if on home page:
     if($(".home-map").length == 1){
-      // show search box
-      $("#pac-input").show()
       //  - load recently created and updated eggs
       $.each(["recently_created_at","recently_retrieved_at"],function(i,order){
         $.getJSON("/"+order+".json", function(data){
@@ -261,7 +278,25 @@ var AQE = (function ( $ ) {
     })
   }
 
-
+  function addSchoolSiteMapMarker(school) {
+    var marker = L.marker([school.geocoded_location.latitude, school.geocoded_location.longitude],  {icon: schoolIcon})
+    var html = "<div><strong>School Details</strong><table class='popup_metadata' data-school_id='"+school.nces_school_id+"'>"
+    html += "<tr><td>School Name</td><td>"+school.school_name+"</td></tr>"
+    html += "<tr><td>Grades</td><td>"+school.low_grade+" through "+school.high_grade+"</td></tr>"
+    html += "<tr><td>Phone Number</td><td>"+school.phone+"</td></tr>"
+    html += "<tr><td># Students</td><td>"+school.students+"</td></tr>"
+    html += "<tr><td>Student-Teacher Ratio</td><td>"+school.student_teacher_ratio+"</td></tr>"
+    html += "<tr><td>Title I School (Wide)?</td><td>"+school.title_i_school+" ("+school.title_1_school_wide+")</td></tr>"
+    html += "<tr><td>Magnet School?</td><td>"+school.magnet+"</td></tr>"
+    html += "<tr><td>School District</td><td>"+school.district+"</td></tr>"
+    html += "<tr><td>NCES School ID</td><td>"+school.nces_school_id+"</td></tr>"
+    html += "<tr><td>State School ID</td><td>"+school.state_school_id+"</td></tr>"
+    html += "</table>" // <hr />"
+    html += "<p style='font-size:80%'>From CCD public school data 2011-2012, 2011-2012 school years. To download full CCD datasets, please go to <a href='http://nces.ed.gov/ccd' target='blank'>the CCD home page</a>."
+    html += "</div>"
+    marker.bindPopup(html)
+    marker.addTo(school_layer);
+  }
 
 
   //
