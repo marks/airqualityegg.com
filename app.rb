@@ -36,11 +36,6 @@ class AirQualityEgg < Sinatra::Base
   configure :production do
     require 'newrelic_rpm'
     set :cache_time, 3600*12 # 12 hours
-
-    use Rack::Auth::Basic, "Restricted Area" do |username, password|
-      username == ENV["HTTP_BASIC_USER"] and password == ENV["HTTP_BASIC_PASS"]
-    end
-
   end
 
   configure :development do
@@ -51,6 +46,20 @@ class AirQualityEgg < Sinatra::Base
     set :cache_time, 3600*12 # five minutes
   end
 
+  helpers do
+    def protected!
+      return if authorized?
+      headers['WWW-Authenticate'] = 'Basic realm="Temporarily Restricted Area"'
+      halt 401, "Sorry, Not authorized\n"
+    end
+
+    def authorized?
+      @auth ||=  Rack::Auth::Basic::Request.new(request.env)
+      @auth.provided? and @auth.basic? and @auth.credentials and @auth.credentials == [ENV["HTTP_BASIC_USER"], ENV["HTTP_BASIC_USER"]]
+    end
+  end
+
+
   # Render css from scss
   get '/style.css' do
     scss :style
@@ -58,6 +67,7 @@ class AirQualityEgg < Sinatra::Base
 
   # Home page
   get '/' do
+    protected!
     @local_feed_path = '/all_eggs.json'
     @error = session.delete(:error)
     erb :home
@@ -124,6 +134,7 @@ class AirQualityEgg < Sinatra::Base
   end
 
   get '/aqs/:aqs_id' do
+    protected!
     @site = EpaSite.find_by(:aqs_id => params[:aqs_id])
     @latest_hourly_data = @site.latest_hourly_data
     @latest_daily_data = @site.latest_daily_data
@@ -133,13 +144,13 @@ class AirQualityEgg < Sinatra::Base
 
 
   # Edit egg metadata
-  get '/egg/:id/edit' do
-    feed_id, api_key = extract_feed_id_and_api_key_from_session
-    redirect_with_error('Not your egg') if feed_id.to_s != params[:id]
-    response = Xively::Client.get(feed_url(feed_id), :headers => {'Content-Type' => 'application/json', "X-ApiKey" => api_key})
-    @feed = Xively::Feed.new(response.body)
-    erb :edit
-  end
+  # get '/egg/:id/edit' do
+  #   feed_id, api_key = extract_feed_id_and_api_key_from_session
+  #   redirect_with_error('Not your egg') if feed_id.to_s != params[:id]
+  #   response = Xively::Client.get(feed_url(feed_id), :headers => {'Content-Type' => 'application/json', "X-ApiKey" => api_key})
+  #   @feed = Xively::Feed.new(response.body)
+  #   erb :edit
+  # end
 
   # Register your egg
   # post '/register' do
@@ -206,6 +217,7 @@ class AirQualityEgg < Sinatra::Base
 
   # View egg dashboard
   get '/egg/:id' do
+    protected!
     response = Xively::Client.get(feed_url(params[:id]), :headers => {"X-ApiKey" => $api_key})
     @datastreams = []
     @feed = Xively::Feed.new(response.body)
