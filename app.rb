@@ -54,9 +54,9 @@ class AirQualityEgg < Sinatra::Base
     end
 
     def authorized?
-      if ENV["HTTP_BASIC_USER"] && ENV["HTTP_BASIC_USER"]
+      if ENV["HTTP_BASIC_USER"] && ENV["HTTP_BASIC_PASS"]
         @auth ||=  Rack::Auth::Basic::Request.new(request.env)
-        @auth.provided? and @auth.basic? and @auth.credentials and @auth.credentials == [ENV["HTTP_BASIC_USER"], ENV["HTTP_BASIC_USER"]]
+        @auth.provided? and @auth.basic? and @auth.credentials and @auth.credentials == [ENV["HTTP_BASIC_USER"], ENV["HTTP_BASIC_PASS"]]
       else
         true
       end
