@@ -36,6 +36,11 @@ class AirQualityEgg < Sinatra::Base
   configure :production do
     require 'newrelic_rpm'
     set :cache_time, 3600*12 # 12 hours
+
+    use Rack::Auth::Basic, "Restricted Area" do |username, password|
+      username == ENV["HTTP_BASIC_USER"] and password == ENV["HTTP_BASIC_PASS"]
+    end
+
   end
 
   configure :development do
