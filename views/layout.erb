@@ -76,8 +76,11 @@
   <script src="http://code.highcharts.com/3.0.10/modules/exporting.js"></script>
   
   <!-- <script src="/assets/js/plugins.js"></script> -->
-  <script src="/assets/js/main.js"></script>
-
+  <% if @custom_js %>
+    <script src="/assets/js/<%= @custom_js %>.js"></script>
+  <% else %>
+    <script src="/assets/js/main.js"></script>
+  <% end %>
   <!-- google universal analytics -->
   <% if ENV["GOOGLE_ANALYTICS_TRACKING_ID"] and ENV['GOOGLE_ANALYTICS_DOMAIN'] %>
     <script>

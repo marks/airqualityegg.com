@@ -71,9 +71,16 @@ class AirQualityEgg < Sinatra::Base
 
   # Home page
   get '/' do
+    @local_feed_path = '/all_eggs.json'
+    @error = session.delete(:error)
+    erb :home
+  end
+
+  get '/derby' do
     protected!
     @local_feed_path = '/all_eggs.json'
     @error = session.delete(:error)
+    @custom_js = 'derby'
     erb :home
   end
 
