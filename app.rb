@@ -145,7 +145,6 @@ class AirQualityEgg < Sinatra::Base
   end
 
   get '/aqs/:aqs_id' do
-    protected!
     @site = EpaSite.find_by(:aqs_id => params[:aqs_id])
     @latest_hourly_data = @site.latest_hourly_data
     @latest_daily_data = @site.latest_daily_data
@@ -228,7 +227,6 @@ class AirQualityEgg < Sinatra::Base
 
   # View egg dashboard
   get '/egg/:id' do
-    protected!
     response = Xively::Client.get(feed_url(params[:id]), :headers => {"X-ApiKey" => $api_key})
     @datastreams = []
     @feed = Xively::Feed.new(response.body)
