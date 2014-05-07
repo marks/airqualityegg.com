@@ -1,15 +1,40 @@
 require 'net/ftp'
+require 'rest-client'
+require 'json'
 
 TODAY = Date.today.strftime("%Y%m%d")
 YESTERDAY = Date.yesterday.strftime("%Y%m%d")
 HOURS = (0..24).map{|n| format('%02d', n)}
 
 namespace :ckan do 
+
   namespace :airnow do
-    
+
     namespace :sites do
+
+      desc "Create CKAN resource"
+      task :create_resource do |t|
+        search_raw = RestClient.get("http://localhost:5000/api/3/action/resource_search?query=name:#{URI.encode(ENV['CKAN_AQS_SITE_RESOURCE_NAME'])}",{"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+        search_results = JSON.parse(search_raw)
+        resource = search_results["result"]["results"].first
+        if resource.nil?
+          create_raw = RestClient.post("#{CKAN_HOST}/api/3/action/datastore_create",
+            {:resource => {:package_id => ENV['CKAN_AQS_DATASET_ID'], :name => ENV['CKAN_AQS_SITE_RESOURCE_NAME']}, :records => []}.to_json,
+            {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+          create_results = JSON.parse(create_raw)
+          puts create_results
+          resource_id = create_results["result"]["resource"]["resource_id"]
+          puts "Created a new resource named '#{ENV['CKAN_AQS_SITE_RESOURCE_NAME']}'"
+        else
+          resource_id = resource["id"]
+          puts "Resource named '#{ENV['CKAN_AQS_SITE_RESOURCE_NAME']}' already existed"
+        end
+        puts "Resource ID = #{resource_id}"
+      end
+
+
       desc "Open file that has monitoring site listings from FTP and import into CKAN"
-      task :import do |t|
+      task :upsert do |t|
         raise "AirNow credentials not set (see README)" unless ENV['AIRNOW_USER'] && ENV['AIRNOW_PASS']
 
         ftp = Net::FTP.new('ftp.airnowapi.org')

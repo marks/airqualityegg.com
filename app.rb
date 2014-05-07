@@ -18,9 +18,9 @@ class AirQualityEgg < Sinatra::Base
   configure do
     enable :sessions
     enable :logging
-    $product_id = ENV['PRODUCT_ID']
-    $api_key = ENV['API_KEY']
-    $api_url = ENV['API_URL'] || Xively::Client.base_uri
+    $product_id = ENV['XIVELY_PRODUCT_ID']
+    $api_key = ENV['XIVELY_API_KEY']
+    $api_url = ENV['XIVELY_API_URL'] || Xively::Client.base_uri
 
     raise "PRODUCT_ID not set" if $product_id.nil?
     raise "API_KEY not set" if $api_key.nil?

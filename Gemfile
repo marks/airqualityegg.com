@@ -17,7 +17,7 @@ gem "activerecord"
 gem "sinatra-activerecord"
 gem 'rake'
 gem 'oboe-heroku' # for TraceView
-
+gem 'rest-client'
 group :development do
   gem 'foreman'
 end
