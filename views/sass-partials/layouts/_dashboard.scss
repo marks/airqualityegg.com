@@ -20,7 +20,7 @@
 
 .dashboard-current-values {
   position: relative;
-  padding-top: em(30);
+  padding-top: em(60);
   z-index: 5;
 }
 
@@ -29,7 +29,7 @@
 .current {
   position: relative;
   margin-bottom: em(35);
-  min-height: em(90);
+  height: em(220);
 }
 
 .current-id {
@@ -57,6 +57,10 @@
   line-height: 1em;
   text-transform: uppercase;
   color: $color-blue-alt;
+
+  a.current-external-link{
+    text-transform: none;
+  }
 }
 
 .current-value {
@@ -66,6 +70,19 @@
   display: block;
   width: 47.5%;
   height: em(90);
+}
+
+.current-value-updated-at{
+  position:absolute;
+  bottom:0;
+  margin:0;
+}
+
+.current-value-gauge{
+  width: 159px;
+  height: 120px;
+  margin: 0 0;
+  padding-top:10px;
 }
 
 // GAUGES
@@ -158,6 +175,16 @@
   line-height: em(18,13);
   text-transform: uppercase;
   color: $color-blue;
+}
+
+.dashboard-xively-link {
+  position: absolute;
+  padding-top: em(1);
+  z-index: 5;
+  bottom: 0;
+  .button:hover{
+    color:#FFF;
+  }
 }
 
 //

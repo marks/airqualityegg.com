@@ -1,6 +1,6 @@
 *.rbc
 *.sassc
-.sass-cache
+.sass-cache*
 capybara-*.html
 .rspec
 /.bundle
@@ -16,3 +16,4 @@ rerun.txt
 pickle-email-*.html
 .rbenv-version
 .env
+/public/assets/img/propellerhealth/*

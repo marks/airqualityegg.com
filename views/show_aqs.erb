@@ -1,0 +1,97 @@
+<script type="text/javascript">
+  var local_feed_path = '<%= @local_feed_path %>';
+</script>
+
+<section class="dashboard-current">
+  <img class="dashboard-current-prop" src="/assets/img/prop-bigegg.png">
+  <div class="dashboard-current-values clearfix">
+    <% @latest_hourly_data.each do |data| %>
+      <div class="current current-right current-dust">
+        <h2 class="current-id heading-narrow"><%= data.parameter.upcase %></h2>
+        <div class="current-value" style="margin-top:0px;height:20px;">
+          <p class="current-value-measure" style="border-top:none; text-align:left;">
+            <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data.value.to_f.round(2)} #{data.unit}" %></span>
+            <div class="current-value-gauge" data-value="<%= data.aqi_range %>" id="current-gauge_<%= data.parameter.gsub(/\W/,"") %>"></div>
+          </p>
+        </div>
+        <p class="current-value-updated-at">As of <%= data.date.in_time_zone(settings.time_zone) %></p>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="dashboard-current-values clearfix">
+    <% @latest_daily_data.each do |data| %>
+      <div class="current current-right current-dust">
+        <h2 class="current-id heading-narrow"><%= data.parameter.upcase %></h2>
+        <h3 class="current-id-full"></h3>
+        <div class="current-value" style="margin-top:0px;height:20px;">
+          <p class="current-value-measure" style="border-top:none; text-align:left;">
+            <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data.value.to_f.round(2)} #{data.unit}" %></span>
+            <div class="current-value-gauge" data-value="<%= data.aqi_range %>" id="current-gauge_<%= data.parameter.gsub(/\W/,"") %>"></div>
+          </p>
+        </div>
+        <p class="current-value-updated-at">Updated <%= data.updated_at.in_time_zone(settings.time_zone) %></p>
+      </div>
+    <% end %>
+  </div>
+
+
+  <p class="dashboard-xively-link">
+    <a class='button' href='/assets/docs/HourlyDataFactSheet.pdf' target='blank'>Data Fact Sheet</a>
+    <a class='button' href='http://www.epa.gov/ttn/airs/airsaqs/' target='blank'>All about the EPA Air Quality System (AQS)</a>
+  </p>
+  <p class="dashboard-updated"></p>
+
+</section>
+
+<section class="dashboard-metadata">
+  <h1 class="metadata-feed-title"><%= @site.site_name %></h1>
+  <h2 class="metadata-title">Agency Name</h2>
+  <p class="metadata-value metadata-description"><%= @site.agency_name %></p>
+
+  <h2 class="metadata-title">Elevation</h2>
+  <p class="metadata-value"><%= @site.elevation %></p>
+
+  <% if @site.msa_name %>
+    <h2 class="metadata-title">MSA</h2>
+    <p class="metadata-value metadata-description"><%= @site.msa_name %></p>
+  <% end %>
+
+  <% if @site.cmsa_name %>
+    <h2 class="metadata-title">CMSA</h2>
+    <p class="metadata-value metadata-description"><%= @site.cmsa_name %></p>
+  <% end %>
+
+  <% if @site.epa_region %>
+    <h2 class="metadata-title">EPA Region</h2>
+    <p class="metadata-value metadata-description"><%= @site.epa_region %></p>
+  <% end %>
+
+  <% if @site.county_name %>
+    <h2 class="metadata-title">County</h2>
+    <p class="metadata-value metadata-description"><%= @site.county_name %></p>
+  <% end %>
+
+  <% if @site.state_name %>
+    <h2 class="metadata-title">State</h2>
+    <p class="metadata-value metadata-description"><%= @site.state_name %></p>
+  <% end %>
+
+
+  <h2 class="metadata-title">Country / GMT Offset</h2>
+  <p class="metadata-value metadata-description"><%= @site.country_code %> / GMT <%= @site.gmt_offset %></p>
+
+</section>
+
+<section class="dashboard-map-container">
+  <h2 class="metadata-title" style='margin:0;'>Air quality eggs near this AQS site</h2>
+  <div class="map dashboard-map" id="map_canvas" style="width:100%;height:500px;"></div>
+  <div class="map-overlay">
+    <p class="map-overlay-loading">Loading Egg <span>.</span><span>.</span><span>.</span></p>
+  </div>
+  <input id="pac-input" class="controls" type="text" placeholder="Zoom to location by searching" style="display:none;">
+</section>
+ 
+<section class="">
+  <div id="dashboard-aqs-chart"></div>
+</section>

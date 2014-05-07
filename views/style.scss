@@ -12,6 +12,7 @@
 @import "sass-partials/elements/buttons";
 @import "sass-partials/elements/forms";
 @import "sass-partials/elements/bubbles";
+@import "sass-partials/elements/maps_and_charts";
 
 // LAYOUTS
 
@@ -30,7 +31,3 @@
 // PRINT
 
 @import "sass-partials/print";
-
-// GOOGLE MAPS STYLES
-
-@import "sass-partials/google_maps";

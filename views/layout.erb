@@ -8,13 +8,18 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-  <title>Air Quality Egg</title>
+  <title>Air Quality Eggs for Institute for Healthy Air Water and Soil by Social Health Insights</title>
   <meta name="description" content="Air Quality Egg">
-  <meta name="author" content="Xively">
+  <meta name="author" content="Social Health Insights, Institute for Healthy Air Water and Soil">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-
-  <link href="favicon.ico" rel="shortcut icon">
+  <link href="/assets/img/favicon.ico" rel="shortcut icon">
   <link rel="stylesheet" type="text/css" href="/style.css">
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+  <link rel="stylesheet" type="text/css" href="/assets/leaflet-openweathermap-master/leaflet-openweathermap.css" />
+  <link href='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.24.0/L.Control.Locate.css' rel='stylesheet' />
+  <!--[if lt IE 9]>
+    <link href='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.21.0/L.Control.Locate.ie.css' rel='stylesheet' />
+  <![endif]-->
   <script src="/assets/js/vendor/modernizr-2.6.2.min.js"></script>
 </head>
 
@@ -23,9 +28,8 @@
   <header class="app-header">
     <div class="app-header-inner clearfix" style="background-color: #FFFFE0; border: 2px red dashed;">
       <p style="margin:15px;">
-        <strong style="font-size:125%">NOTE: THIS IS NOT AIRQUALITYEGG.COM; This is a "fork" of the open source code.</strong>
-        <br />Accordingly, please do not register or edit your Egg through this website.
-        <br />If you would like to contact the maintainer of this site (<a style="color:#666" href="https://github.com/marks/airqualityegg.com" target="blank">code on github</a>), <a style="color:#666" href="http://twitter.com/skram" target="blank">@Skram</a>, you can email him at <a style="color:#666" href="mailto:mark@socialhealthinsights.com">mark@socialhealthinsights.com</a>. 
+        <strong style="font-size:125%">This is a fork of AirQualityEgg.com for the <a style='text-decoration:underline;color:#3D587E' href='http://www.instituteforhealthyairwaterandsoil.org/' target='blank'>Institute for Healthy Air Water and Soil</a> (<a href='http://twitter.com/HealthyAWS' style='color:#3D587E' target='blank'>@HealthyAWS</a>)</strong>
+        <br />Under active development by <a style='text-decoration:underline;color:#3D587E' href='http://socialhealthinsights.com' target='blank'>Social Health Insights</a> (<a href='http://twitter.com/socialhealthis' style='color:#3D587E' target='blank'>@SocialHealthIs</a>).</a>
       </p> 
     </div>
   </header>
@@ -47,10 +51,10 @@
 
   <footer class="app-footer grid-row" role="contentinfo">
     <div class="elsewhere">
-      <p class="elsewhere-item twitter"><a href="https://twitter.com/#!/search/realtime/%23airqualityegg">Twitter</a></p>
-      <p class="elsewhere-item kickstarter"><a href="http://www.kickstarter.com/projects/edborden/air-quality-egg">Kickstarter</a></p>
-      <p class="elsewhere-item google-group"><a href="https://groups.google.com/forum/?fromgroups#!forum/airqualityegg">Google Group</a></p>
-      <p class="elsewhere-item wiki"><a href="http://airqualityegg.wikispaces.com/">Wiki</a></p>
+      <p class="elsewhere-item"><a href="http://www.instituteforhealthyairwaterandsoil.org/">Institute for Healthy Air Water and Soil</a></p>
+      <p class="elsewhere-item"><a href="http://socialhealthinsights.com">Social Health Insights</a></p>
+      <p class="elsewhere-item google-group"><a href="https://groups.google.com/forum/?fromgroups#!forum/airqualityegg">AirQualityEgg.com Google Group</a></p>
+      <p class="elsewhere-item wiki"><a href="http://airqualityegg.wikispaces.com/">AirQualityEgg.com Wiki</a></p>
       <p class="elsewhere-item buy"><a target="_blank" href="http://wickeddevice.com/index.php?main_page=product_info&cPath=28&products_id=108">Buy an Air Quality Egg from Wicked Device</a></p>
     </div>
   </footer>
@@ -58,17 +62,35 @@
   <!-- scripts -->
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
   <script>window.jQuery || document.write('<script src="/assets/js/vendor/jquery-1.8.1.min.js"><\/script>')</script>
-  <script src="http://maps.googleapis.com/maps/api/js?v=3&sensor=false&libraries=places"></script>
+  <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+  <script src="/assets/js/vendor/leaflet-heat.min.js"></script>
   <script src="/assets/js/vendor/moment-2.5.1.min.js"></script>
-  <script src="/assets/js/plugins.js"></script>
-  <script src="/assets/js/main.js"></script>
-
-  <!-- google analytics -->
-  <script>
-    var _gaq=[['_setAccount','<%= ENV['GOOGLE_ANALYTICS_TRACKING_ID'] %>'],['_trackPageview']];
-    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-    s.parentNode.insertBefore(g,s)}(document,'script'));
-  </script>
+  <script type="text/javascript" src="/assets/leaflet-openweathermap-master/leaflet-openweathermap.js"></script>
+  <script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.24.0/L.Control.Locate.js'></script>
+  <script src="/assets/js/vendor/leaflet.groupedlayercontrol.js"></script>
+  <!-- for highcharts only -->
+  <script src="http://d23cj0cdvyoxg0.cloudfront.net/xivelyjs-1.0.4.min.js"></script>  
+  <script src="http://code.highcharts.com/3.0.10/highcharts.js"></script>
+  <script src="http://code.highcharts.com/3.0.10/modules/data.js"></script>
+  <script src="http://code.highcharts.com/3.0.10/highcharts-more.js"></script>
+  <script src="http://code.highcharts.com/3.0.10/modules/exporting.js"></script>
+  
+  <!-- <script src="/assets/js/plugins.js"></script> -->
+  <% if @custom_js %>
+    <script src="/assets/js/<%= @custom_js %>.js"></script>
+  <% else %>
+    <script src="/assets/js/main.js"></script>
+  <% end %>
+  <!-- google universal analytics -->
+  <% if ENV["GOOGLE_ANALYTICS_TRACKING_ID"] and ENV['GOOGLE_ANALYTICS_DOMAIN'] %>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', '<%= ENV['GOOGLE_ANALYTICS_TRACKING_ID'] %>', '<%= ENV['GOOGLE_ANALYTICS_DOMAIN'] %>');
+      ga('send', 'pageview');
+    </script>
+  <% end %>
 </body>
 </html>
