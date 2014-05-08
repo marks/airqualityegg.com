@@ -382,11 +382,11 @@ namespace :ckan do
           feed_id = egg["id"]
           puts "Upserting data for Xively feed #{feed_id}... "
           egg_history = Xively::Client.get("https://api.xively.com/v2/feeds/#{feed_id}.json?interval=3600&duration=2days&limit=1000", :headers => {"X-ApiKey" => $api_key}).parsed_response
-          egg_history["datastreams"].select{|d| !d["tags"].nil? && d["tags"].to_s.match(/computed/)}.each do |datastream|
+          egg_history["datastreams"].to_a.select{|d| !d["tags"].nil? && d["tags"].to_s.match(/computed/)}.each do |datastream|
             datastream_records = []
             datastream_name = datastream["id"].split("_").first
             datastream["datapoints"].to_a.each do |datapoint|
-              row = {:feed_id => feed_id, :datetime => datapoint["at"], :value => datapoint["value"], :unit => datastream["unit"]["label"], :parameter => datastream_name}
+              row = {:feed_id => feed_id, :datetime => datapoint["at"], :value => datapoint["value"].to_f, :unit => datastream["unit"]["label"], :parameter => datastream_name}
               row[:id] = "#{row[:feed_id]}|#{row[:datetime]}|#{row[:parameter]}"
               datastream_records << row
             end
