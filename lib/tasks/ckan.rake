@@ -86,8 +86,7 @@ namespace :ckan do
         data = ftp.getbinaryfile('Locations/monitoring_site_locations.dat', nil, 1024)
         ftp.close
 
-        # site_records = []
-        puts "Parsing file and upserting rows..."
+        puts "Parsing sites file and upserting rows..."
         CSV.parse(data, :col_sep => "|", :encoding => 'UTF-8') do |row|
           site_data = {
             :aqs_id => row[0],
@@ -181,8 +180,7 @@ namespace :ckan do
         data = ftp.getbinaryfile("DailyData/#{TODAY}-peak.dat", nil, 1024)
         ftp.close
 
-        # site_records = []
-        puts "Parsing file and upserting rows..."
+        puts "Parsing daily file and upserting rows..."
         CSV.parse(data, :col_sep => "|", :encoding => 'UTF-8') do |row|
           monitoring_data = {
             :aqs_id => row[1],
@@ -313,7 +311,6 @@ namespace :ckan do
         raise "CKAN resource ID not set" if args[:resource_id].nil?
         raise "Xively credentials not set (see README)" unless ENV['XIVELY_API_KEY'] && ENV['XIVELY_PRODUCT_ID']
 
-        # site_records = []
         puts "Fetching metadata of all eggs..."
         all_eggs = JSON.parse(fetch_all_feeds)
         puts "Upserting egg site data..."
@@ -324,12 +321,84 @@ namespace :ckan do
           egg[:description] = fix_encoding(egg["description"])
           egg[:geojson] = {:type => 'Point', :coordinates => [egg["location_lon"], egg["location_lat"]] }
           post_data = {:resource_id => args[:resource_id], :records => [egg], :method => 'upsert'}.to_json
-          puts post_data
           upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
           upsert_result = JSON.parse(upsert_raw)
         end
 
         puts "\nAQS Monitoring Sites data upserts complete"
+      end
+    end
+
+    namespace :data do
+
+      desc "Create CKAN resource for data (if it doesn't exist) and then upsert CKAN"
+      task :check_resource_exists_and_upsert do |t|
+        raise "CKAN credentials not set (see README)" unless ENV['CKAN_HOST'] && ENV['CKAN_API_KEY']
+        # search for CKAN data set
+        search_raw = RestClient.get("http://localhost:5000/api/3/action/resource_search?query=name:#{URI.encode(ENV['CKAN_AQE_DATA_RESOURCE_NAME'])}",{"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+        search_results = JSON.parse(search_raw)
+        # resource we want to use is the first match
+        resource = search_results["result"]["results"].first
+        # if there is no resource, create it
+        if resource.nil?
+          create_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_create",
+            {:resource => {
+                :package_id => ENV['CKAN_AQE_DATASET_ID'],
+                :name => ENV['CKAN_AQE_DATA_RESOURCE_NAME']
+              },
+              :primary_key => 'id',
+              :indexes => 'id,feed_id,datetime,parameter,unit',
+              :fields => [
+                {:id => "id", :type => "text"},
+                {:id => "feed_id", :type => "int"},
+                {:id => "datetime", :type => "timestamp"},
+                {:id => "parameter", :type => "text"},
+                {:id => "unit", :type => "text"},
+                {:id => "value", :type => "float"},
+              ],
+              :records => []
+            }.to_json,
+            {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+          create_results = JSON.parse(create_raw)
+          resource_id = create_results["result"]["resource_id"]
+          puts "Created a new resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}'"
+        else
+          resource_id = resource["id"]
+          puts "Resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}' already existed"
+        end
+        puts "Resource ID = #{resource_id}"
+        # invoke upsert rake tasks
+        Rake.application.invoke_task("ckan:airqualityeggs:data:upsert[#{resource_id}]")
+      end
+
+      desc "Get relevant datastreams from each AQE feed and store in CKAN"
+      task :upsert, :resource_id do |t, args|
+        raise "CKAN resource ID not set" if args[:resource_id].nil?
+        raise "Xively credentials not set (see README)" unless ENV['XIVELY_PRODUCT_ID'] && ENV['XIVELY_API_KEY']
+
+        puts "Fetching all eggs..."
+        all_eggs = JSON.parse(fetch_all_feeds) # TODO - get list of eggs from CKAN, not Xively again
+        all_eggs.each do |egg|
+          feed_id = egg["id"]
+          puts "Upserting data for Xively feed #{feed_id}... "
+          egg_history = Xively::Client.get("https://api.xively.com/v2/feeds/#{feed_id}.json?interval=3600&duration=2days&limit=1000", :headers => {"X-ApiKey" => $api_key}).parsed_response
+          egg_history["datastreams"].select{|d| !d["tags"].nil? && d["tags"].to_s.match(/computed/)}.each do |datastream|
+            datastream_records = []
+            datastream_name = datastream["id"].split("_").first
+            datastream["datapoints"].to_a.each do |datapoint|
+              row = {:feed_id => feed_id, :datetime => datapoint["at"], :value => datapoint["value"], :unit => datastream["unit"]["label"], :parameter => datastream_name}
+              row[:id] = "#{row[:feed_id]}|#{row[:datetime]}|#{row[:parameter]}"
+              datastream_records << row
+            end
+
+            # batch upload datastream_records 
+            post_data = {:resource_id => args[:resource_id], :records => datastream_records, :method => 'upsert'}.to_json
+            upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+            upsert_result = JSON.parse(upsert_raw)
+          end
+        end
+
+        puts "\nAQE data upserts complete"
       end
 
     end
