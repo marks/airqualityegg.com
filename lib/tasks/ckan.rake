@@ -6,6 +6,10 @@ TODAY = Date.today.strftime("%Y%m%d")
 YESTERDAY = Date.yesterday.strftime("%Y%m%d")
 HOURS = (0..24).map{|n| format('%02d', n)}
 
+def fix_encoding(string)
+  string.to_s.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '???')
+end
+
 namespace :ckan do 
 
   namespace :airnow do
@@ -89,10 +93,10 @@ namespace :ckan do
           site_data = {
             :aqs_id => row[0],
             :site_code => row[2],
-            :site_name => row[3].encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '???').gsub(";"," "),
+            :site_name => fix_encoding(row[3]).gsub(";"," - "),
             :status => row[4],
             :agency_id => row[5],
-            :agency_name => row[6].encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '???'),
+            :agency_name => fix_encoding(row[6]),
             :epa_region => row[7],
             :lat => row[8],
             :lon => row[9],
@@ -137,9 +141,10 @@ namespace :ckan do
                 :package_id => ENV['CKAN_AQS_DATASET_ID'],
                 :name => ENV['CKAN_AQS_DATA_RESOURCE_NAME']
               },
-              :primary_key => 'aqs_id,date,time,parameter',
-              :indexes => 'aqs_id,date,time,parameter',
+              :primary_key => 'id',
+              :indexes => 'id,aqs_id,date,time,parameter',
               :fields => [
+                {:id => "id", :type => "text"},
                 {:id => "aqs_id", :type => "text"},
                 {:id => "date", :type => "date"},
                 {:id => "time", :type => "time"},
@@ -186,15 +191,63 @@ namespace :ckan do
             :time => nil,
             :parameter => row[3],
             :unit => row[4],
-            :value => row[5],
-            :data_source => row[7].encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '???'),
+            :value => row[5].to_f,
+            :data_source => fix_encoding(row[7]),
           }
+          monitoring_data[:id] = "#{monitoring_data[:aqs_id]}|#{monitoring_data[:date]}|#{monitoring_data[:time]}|#{monitoring_data[:parameter]}"
           post_data = {:resource_id => args[:resource_id], :records => [monitoring_data], :method => 'upsert'}.to_json
           upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
           upsert_result = JSON.parse(upsert_raw)
         end
 
-        puts "\nAQS Monitoring data upserts complete"
+        puts "\nAQS Monitoring daily data upserts complete"
+      end
+
+      desc "Open file that has hourly monitoring data from FTP and import into CKAN"
+      task :upsert_hourly, :resource_id do |t, args|
+        raise "AQS Monitoring Data CKAN resource ID not set" if args[:resource_id].nil?
+        raise "AirNow credentials not set (see README)" unless ENV['AIRNOW_USER'] && ENV['AIRNOW_PASS']
+
+        # connect to FTP and load the data into a variable
+        ftp = Net::FTP.new('ftp.airnowapi.org')
+        ftp.login(ENV['AIRNOW_USER'], ENV['AIRNOW_PASS'])
+        ftp.passive = true # for Heroku
+
+
+
+        [TODAY,YESTERDAY].each  do |day|
+          HOURS.each do |hour|
+            file = "HourlyData/#{day}#{hour}.dat"
+            begin
+              puts "Getting #{file}"
+              data = ftp.getbinaryfile(file, nil, 1024)
+              puts "Processing #{file}"
+              CSV.parse(data, :col_sep => "|", :encoding => 'ISO8859-1') do |row|
+                if ["NO2T","NO2","NO2Y","CO","CO-8HR","RHUM","TEMP","PM2.5","WS","WD"].include?(row[5])
+                  monitoring_data = {
+                    :aqs_id => row[2],
+                    :date => Time.strptime(row[0],'%m/%d/%y').strftime("%Y-%m-%d"),
+                    :time => "#{row[1]}:00",
+                    :parameter => row[5],
+                    :unit => row[6],
+                    :value => row[7].to_f,
+                    :data_source => fix_encoding(row[8]),
+                  }
+                  monitoring_data[:id] = "#{monitoring_data[:aqs_id]}|#{monitoring_data[:date]}|#{monitoring_data[:time]}|#{monitoring_data[:parameter]}"
+                  post_data = {:resource_id => args[:resource_id], :records => [monitoring_data], :method => 'upsert'}.to_json
+                  upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+                  upsert_result = JSON.parse(upsert_raw)
+                end
+              end
+            rescue => e
+              puts "ERROR: #{file} -- #{e} / #{e.message}"
+            end
+          end
+        end
+
+        ftp.close
+
+        puts "\nAQS Monitoring hourly data upserts complete"
       end
 
 
