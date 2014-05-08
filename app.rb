@@ -280,20 +280,6 @@ class AirQualityEgg < Sinatra::Base
     "#{$api_url}/v2/feeds/#{feed_id}.json"
   end
 
-  def collect_map_markers(feeds)
-    MultiJson.dump(
-      feeds = feeds.collect do |feed|
-        attributes = feed.attributes
-        attributes["datastreams"] = attributes["datastreams"].select do |d|
-          tags = d.tags
-          tags.match(/computed/) && (tags.match(/sensor_type=NO2\z/) || tags.match(/sensor_type=CO\z/) || tags.match(/sensor_type=Dust\z/) || tags.match(/sensor_type=Temperature\z/) || tags.match(/sensor_type=Humidity\z/) || tags.match(/sensor_type=VOC\z/) || tags.match(/sensor_type=O3\z/) )
-        end
-        attributes.delete_if {|_,v| v.blank?}
-        attributes
-      end
-    )
-  end
-
   def feeds_url(feed, lat, lon)
     if feed && feed.location_lat && feed.location_lon
       feeds_near = "&lat=#{feed.location_lat}&lon=#{feed.location_lon}&distance=500&distance_units=kms"
@@ -305,24 +291,6 @@ class AirQualityEgg < Sinatra::Base
     "#{$api_url}/v2/feeds.json?user=airqualityegg&mapped=true#{feeds_near}"
   end
 
-  def fetch_all_feeds
-    page = 1
-    all_feeds = []
-    base_url = "#{$api_url}/v2/feeds.json?user=airqualityegg&mapped=true&content=summary&per_page=100"
-    page_response = fetch_xively_url("#{base_url}&page=#{page}")
-    while page_response.code == 200 && page_response["results"].size > 0
-      logger.info("fetched page #{page} of 100 feeds") if Sinatra::Base.development?
-      page_results = Xively::SearchResult.new(page_response.body).results
-      all_feeds = all_feeds + page_results
-      page += 1
-      page_response = fetch_xively_url("#{base_url}&page=#{page}")
-    end
-    all_feeds = collect_map_markers(all_feeds)
-  end
-
-  def fetch_xively_url(url)
-    Xively::Client.get(url, :headers => {'Content-Type' => 'application/json', 'X-ApiKey' => $api_key})
-  end
 
   def product_url
     redirect_with_error('Please enter a serial number') if params[:serial].blank?
