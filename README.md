@@ -17,12 +17,23 @@ The Air Quality Egg dashboard is a [Ruby](http://www.ruby-lang.org/),
 
 ```bash
 # Sample .env file
-XIVELY_PRODUCT_ID=xxxxxx # get this by logging into Xively.com and creating a product batch (Manage > Add Product Batch)
-XIVELY_API_KEY=xxxxxxx # get this by logging into Xively.com and creating a master key (Settings > Master Keys > Add Master Key
-AIRNOW_USER=xxxxxx # get this from airnowapi.org - required for fetching EPA air quality data
-AIRNOW_PASS=xxxxxx # same as AIRNOW_USER
-GOOGLE_ANALYTICS_TRACKING_ID=xxxxxx # get from analytics.google.com or don't include and google analytics wont be used
-GOOGLE_ANALYTICS_DOMAIN=xxxxxx # same as GOOGLE_ANALYTICS_TRACKING_ID
+XIVELY_PRODUCT_ID:            # get this by logging into Xively.com and creating a product batch (Manage > Add Product Batch)
+XIVELY_API_KEY:               # get this by logging into Xively.com and creating a master key (Settings > Master Keys > Add Master Key
+AIRNOW_USER:                  # get this from airnowapi.org - required for fetching EPA air quality data
+AIRNOW_PASS:                  # same as AIRNOW_USER
+GOOGLE_ANALYTICS_TRACKING_ID: # get from analytics.google.com or don't include and google analytics wont be used
+GOOGLE_ANALYTICS_DOMAIN:      # same as GOOGLE_ANALYTICS_TRACKING_ID
+HTTP_BASIC_USER:              # username to protect some pages with
+HTTP_BASIC_PASS:              # password to protect some pages with
+CKAN_HOST:                    # http://url-to-ckan.tld:port
+CKAN_API_KEY:                 # CKAN API key for a user with the appropriate rights to data sets named below
+CKAN_AQS_DATASET_ID:          # URL slug of your CKAN data set (created through CKAN web GUI) for AQS data
+CKAN_AQS_SITE_RESOURCE_NAME:  AirNow AQS Monitoring Sites
+CKAN_AQS_DATA_RESOURCE_NAME:  AirNow AQS Monitoring Data
+CKAN_AQE_DATASET_ID:          # URL slug of your CKAN data set (created through CKAN web GUI) for AQE data
+CKAN_AQE_SITE_RESOURCE_NAME:  Air Quality Egg Sites
+CKAN_AQE_DATA_RESOURCE_NAME:  Air Quality Egg Data
+
 ```
 
 The values in this file are required to interact with Xively, but some value
@@ -50,10 +61,14 @@ website running locally on your machine.
 
 `bundle exec rake`
 
-### Importing AirNow monitoring sites and daily data
+### Importing AirNow monitoring sites and daily data into app database
 `foreman run bundle exec rake db:migrate` 
 `foreman run bundle exec rake airnow:sites:import` - Using Heroku Scheduler, we run this once a day
 `foreman run bundle exec rake airnow:daily_data:import` - Using Heroku Scheduler, we run this once an hour
+
+### Importing AirNow and AirQualityEgg sites and sensor data to CKAN
+`foreman run bundle exec rake ckan:airnow:update` 
+`foreman run bundle exec rake ckan:airqualityeggs:update`
 
 ### To upload local database to Heroku
 

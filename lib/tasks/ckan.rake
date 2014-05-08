@@ -14,6 +14,11 @@ namespace :ckan do
 
   namespace :airnow do
 
+    task :update do 
+      Rake.application.invoke_task("ckan:airnow:sites:check_resource_exists_and_upsert")
+      Rake.application.invoke_task("ckan:airnow:data:check_resource_exists_and_upsert")
+    end
+
     namespace :sites do
 
       desc "Create CKAN resource for AQS monitoring sites (if it doesn't exist) and then upsert CKAN"
@@ -250,6 +255,11 @@ namespace :ckan do
   end
 
   namespace :airqualityeggs do
+
+    task :update do 
+      Rake.application.invoke_task("ckan:airqualityeggs:sites:check_resource_exists_and_upsert")
+      Rake.application.invoke_task("ckan:airqualityeggs:data:check_resource_exists_and_upsert")
+    end
 
     namespace :sites do
 
