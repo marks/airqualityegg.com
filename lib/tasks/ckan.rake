@@ -7,7 +7,7 @@ YESTERDAY = Date.yesterday.strftime("%Y%m%d")
 HOURS = (0..24).map{|n| format('%02d', n)}
 
 def fix_encoding(string)
-  string.to_s.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '???')
+  string.to_s.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '???').gsub(";","-").gsub("&","and")
 end
 
 namespace :ckan do 
@@ -75,7 +75,7 @@ namespace :ckan do
 
       desc "Open file that has monitoring site listings from FTP and import into CKAN"
       task :upsert, :resource_id do |t, args|
-        raise "AQS Monitoring Site CKAN resource ID not set" if args[:resource_id].nil?
+        raise "CKAN resource ID not set" if args[:resource_id].nil?
         raise "AirNow credentials not set (see README)" unless ENV['AIRNOW_USER'] && ENV['AIRNOW_PASS']
 
         # connect to FTP and load the data into a variable
@@ -89,11 +89,10 @@ namespace :ckan do
         # site_records = []
         puts "Parsing file and upserting rows..."
         CSV.parse(data, :col_sep => "|", :encoding => 'UTF-8') do |row|
-          puts row[0]
           site_data = {
             :aqs_id => row[0],
             :site_code => row[2],
-            :site_name => fix_encoding(row[3]).gsub(";"," - "),
+            :site_name => fix_encoding(row[3]),
             :status => row[4],
             :agency_id => row[5],
             :agency_name => fix_encoding(row[6]),
@@ -171,7 +170,7 @@ namespace :ckan do
 
       desc "Open file that has daily monitoring data from FTP and import into CKAN"
       task :upsert_daily, :resource_id do |t, args|
-        raise "AQS Monitoring Data CKAN resource ID not set" if args[:resource_id].nil?
+        raise "CKAN resource ID not set" if args[:resource_id].nil?
         raise "AirNow credentials not set (see README)" unless ENV['AIRNOW_USER'] && ENV['AIRNOW_PASS']
 
         # connect to FTP and load the data into a variable
@@ -205,15 +204,13 @@ namespace :ckan do
 
       desc "Open file that has hourly monitoring data from FTP and import into CKAN"
       task :upsert_hourly, :resource_id do |t, args|
-        raise "AQS Monitoring Data CKAN resource ID not set" if args[:resource_id].nil?
+        raise "CKAN resource ID not set" if args[:resource_id].nil?
         raise "AirNow credentials not set (see README)" unless ENV['AIRNOW_USER'] && ENV['AIRNOW_PASS']
 
         # connect to FTP and load the data into a variable
         ftp = Net::FTP.new('ftp.airnowapi.org')
         ftp.login(ENV['AIRNOW_USER'], ENV['AIRNOW_PASS'])
         ftp.passive = true # for Heroku
-
-
 
         [TODAY,YESTERDAY].each  do |day|
           HOURS.each do |hour|
@@ -252,8 +249,92 @@ namespace :ckan do
 
 
     end
+  end
 
+  namespace :airqualityeggs do
+
+    namespace :sites do
+
+      AQE_SITE_FIELDS = [
+        {:id => "id", :type => "int"},
+        {:id => "creator", :type => "text"},
+        {:id => "description", :type => "text"},
+        {:id => "feed", :type => "text"},
+        {:id => "location_domain", :type => "text"},
+        {:id => "location_ele", :type => "text"},
+        {:id => "location_exposure", :type => "text"},
+        {:id => "location_lat", :type => "float"},
+        {:id => "location_lon", :type => "float"},
+        {:id => "private", :type => "text"},
+        {:id => "status", :type => "text"},
+        {:id => "tags", :type => "text"},
+        {:id => "title", :type => "text"},
+        {:id => "updated", :type => "timestamp"},
+        {:id => "created", :type => "timestamp"},
+        {:id => "geojson", :type => "json"},
+      ]
+
+      desc "Create CKAN resource for Air Quality Eggs (if it doesn't exist) and then upsert CKAN"
+      task :check_resource_exists_and_upsert do |t|
+        raise "CKAN credentials not set (see README)" unless ENV['CKAN_HOST'] && ENV['CKAN_API_KEY']
+        # search for CKAN data set
+        search_raw = RestClient.get("http://localhost:5000/api/3/action/resource_search?query=name:#{URI.encode(ENV['CKAN_AQE_SITE_RESOURCE_NAME'])}",{"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+        search_results = JSON.parse(search_raw)
+        # resource we want to use is the first match
+        resource = search_results["result"]["results"].first
+        # if there is no resource, create it
+        if resource.nil?
+          create_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_create",
+            {:resource => {
+                :package_id => ENV['CKAN_AQE_DATASET_ID'],
+                :name => ENV['CKAN_AQE_SITE_RESOURCE_NAME']
+              },
+              :primary_key => 'id',
+              :indexes => 'id,title,description,status,updated,created',
+              :fields => AQE_SITE_FIELDS,
+              :records => []
+            }.to_json,
+            {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+          create_results = JSON.parse(create_raw)
+          resource_id = create_results["result"]["resource_id"]
+          puts "Created a new resource named '#{ENV['CKAN_AQE_SITE_RESOURCE_NAME']}'"
+        else
+          resource_id = resource["id"]
+          puts "Resource named '#{ENV['CKAN_AQE_SITE_RESOURCE_NAME']}' already existed"
+        end
+        puts "Resource ID = #{resource_id}"
+        # invoke upsert rake task
+        Rake.application.invoke_task("ckan:airqualityeggs:sites:upsert[#{resource_id}]")
+      end
+
+
+      desc "Fetch and upsert data on Air Quality Egg sites"
+      task :upsert, :resource_id do |t, args|
+        raise "CKAN resource ID not set" if args[:resource_id].nil?
+        raise "Xively credentials not set (see README)" unless ENV['XIVELY_API_KEY'] && ENV['XIVELY_PRODUCT_ID']
+
+        # site_records = []
+        puts "Fetching metadata of all eggs..."
+        all_eggs = JSON.parse(fetch_all_feeds)
+        puts "Upserting egg site data..."
+        allowed_fields = AQE_SITE_FIELDS.map{|f| f[:id]}
+        all_eggs.each do |egg|
+          egg.delete_if{|k,v| !allowed_fields.include?(k)} # delete rare metadata fields we don't want to store
+          egg[:title] = fix_encoding(egg["title"])
+          egg[:description] = fix_encoding(egg["description"])
+          egg[:geojson] = {:type => 'Point', :coordinates => [egg["location_lon"], egg["location_lat"]] }
+          post_data = {:resource_id => args[:resource_id], :records => [egg], :method => 'upsert'}.to_json
+          puts post_data
+          upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+          upsert_result = JSON.parse(upsert_raw)
+        end
+
+        puts "\nAQS Monitoring Sites data upserts complete"
+      end
+
+    end
 
   end
+
 
 end

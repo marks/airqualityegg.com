@@ -43,7 +43,7 @@ AQE site running locally.
 
 `bundle exec foreman start`
 
-Visit http://localhost:5000, and you should see a version of the AQE 
+Visit http://localhost:4567, and you should see a version of the AQE 
 website running locally on your machine.
 
 ### Running the tests
