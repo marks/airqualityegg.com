@@ -37,10 +37,10 @@ namespace :ckan do
                 {:id => "agency_id", :type => "text"},
                 {:id => "agency_name", :type => "text"},
                 {:id => "epa_region", :type => "text"},
-                {:id => "lat", :type => "text"},
-                {:id => "lon", :type => "text"},
+                {:id => "lat", :type => "float"},
+                {:id => "lon", :type => "float"},
                 {:id => "elevation", :type => "text"},
-                {:id => "gmt_offset", :type => "float"},
+                {:id => "gmt_offset", :type => "text"},
                 {:id => "country_code", :type => "text"},
                 {:id => "cmsa_code", :type => "text"},
                 {:id => "cmsa_name", :type => "text"},
@@ -83,15 +83,16 @@ namespace :ckan do
         ftp.close
 
         # site_records = []
-        puts "Parsing file..."
-        CSV.parse(data, :col_sep => "|", :encoding => 'ISO8859-1') do |row|
+        puts "Parsing file and upserting rows..."
+        CSV.parse(data, :col_sep => "|", :encoding => 'UTF-8') do |row|
+          puts row[0]
           site_data = {
             :aqs_id => row[0],
             :site_code => row[2],
-            :site_name => row[3].encode("UTF-16BE", :invalid=>:replace, :replace=>"").encode("UTF-8"),
+            :site_name => row[3].encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '???').gsub(";"," "),
             :status => row[4],
             :agency_id => row[5],
-            :agency_name => row[6],
+            :agency_name => row[6].encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '???'),
             :epa_region => row[7],
             :lat => row[8],
             :lon => row[9],
@@ -109,17 +110,12 @@ namespace :ckan do
             :city_code => row[21],
             :geojson => {:type => 'Point', :coordinates => [row[9], row[8]] }
           }
-          # puts site_data
-          # puts site_data[:site_name].inspect
-          # puts site_data[:site_name].encoding
-          upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert",
-            {:resource_id => args[:resource_id], :records => [site_data], :method => 'upsert'}.to_json,
-            {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+          post_data = {:resource_id => args[:resource_id], :records => [site_data], :method => 'upsert'}.to_json
+          upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
           upsert_result = JSON.parse(upsert_raw)
-
         end
 
-        puts "AQS Monitoring Sites data upserts complete"
+        puts "\nAQS Monitoring Sites data upserts complete"
 
       end
     end
