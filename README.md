@@ -67,8 +67,8 @@ website running locally on your machine.
 `foreman run bundle exec rake airnow:daily_data:import` - Using Heroku Scheduler, we run this once an hour
 
 ### Importing AirNow and AirQualityEgg sites and sensor data to CKAN
-`foreman run bundle exec rake ckan:airnow:update` 
-`foreman run bundle exec rake ckan:airqualityeggs:update`
+`foreman run bundle exec rake ckan:airnow:update` # takes about 45 minutes
+`foreman run bundle exec rake ckan:airqualityeggs:update` # takes about 10 minutes for 1,000 eggs
 
 ### To upload local database to Heroku
 

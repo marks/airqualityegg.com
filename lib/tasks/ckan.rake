@@ -335,7 +335,7 @@ namespace :ckan do
           upsert_result = JSON.parse(upsert_raw)
         end
 
-        puts "\nAQS Monitoring Sites data upserts complete"
+        puts "\nAQE sites meta upserts complete"
       end
     end
 
@@ -371,7 +371,7 @@ namespace :ckan do
             {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
           create_results = JSON.parse(create_raw)
           resource_id = create_results["result"]["resource_id"]
-          puts "Created a new resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}'"
+          puts "Created a new resource named '#{ENV['CKAN_AQE_DATA_RESOURCE_NAME']}'"
         else
           resource_id = resource["id"]
           puts "Resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}' already existed"
@@ -405,6 +405,7 @@ namespace :ckan do
             post_data = {:resource_id => args[:resource_id], :records => datastream_records, :method => 'upsert'}.to_json
             upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
             upsert_result = JSON.parse(upsert_raw)
+            sleep 3
           end
         end
 
