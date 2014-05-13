@@ -72,12 +72,17 @@ website running locally on your machine.
 
 ### To upload local database to Heroku
 
-~~This must be done because Heroku does not have a writeable filesystem which is required for downloading the FTP files from AirNow~~ This is optional.
-
 `heroku pg:reset DATABASE_URL`
 `heroku pg:push postgres://localhost/airquality DATABASE_URL`
 
 Be sure to restart heroku after this as the database socket connection will need to be re-initialized
+
+#### Sample crontab entries
+```bash
+# run airnow on even hours and airqualityeggs updates on odd hours
+30   */2     *   *  * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake ckan:airnow:update
+30    1-23/2    * * * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake ckan:airqualityeggs:update
+```
 
 ## Contributing
 
