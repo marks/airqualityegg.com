@@ -62,19 +62,23 @@ website running locally on your machine.
 `bundle exec rake`
 
 ### Importing AirNow monitoring sites and daily data into app database
-`foreman run bundle exec rake db:migrate` 
-`foreman run bundle exec rake airnow:sites:import` - Using Heroku Scheduler, we run this once a day
-`foreman run bundle exec rake airnow:daily_data:import` - Using Heroku Scheduler, we run this once an hour
+```bash
+foreman run bundle exec rake db:migrate
+foreman run bundle exec rake airnow:sites:import #Using Heroku Scheduler, we run this once a day
+foreman run bundle exec rake airnow:daily_data:import # Using Heroku Scheduler, we run this once an hour
+```
 
 ### Importing AirNow and AirQualityEgg sites and sensor data to CKAN
-`foreman run bundle exec rake ckan:airnow:update` # takes about 45 minutes
-`foreman run bundle exec rake ckan:airqualityeggs:update` # takes about 10 minutes for 1,000 eggs
+```bash
+foreman run bundle exec rake ckan:airnow:update # takes about 45 minutes
+foreman run bundle exec rake ckan:airqualityeggs:update # takes about 10 minutes for 1,000 eggs
+```
 
 ### To upload local database to Heroku
-
-`heroku pg:reset DATABASE_URL`
-`heroku pg:push postgres://localhost/airquality DATABASE_URL`
-
+```bash
+heroku pg:reset DATABASE_URL
+heroku pg:push postgres://localhost/airquality DATABASE_URL
+```
 Be sure to restart heroku after this as the database socket connection will need to be re-initialized
 
 #### Sample crontab entries
