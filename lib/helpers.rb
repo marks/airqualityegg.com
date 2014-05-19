@@ -168,8 +168,6 @@ module AppHelpers
     else
       return nil
     end 
-
-
   end
 
 end

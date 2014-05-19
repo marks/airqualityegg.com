@@ -145,13 +145,13 @@ class AirQualityEgg < Sinatra::Base
 
     if params[:include_recent_history]
       series = []
-      recent_history_sql = "SELECT * from \"#{ENV["aqs_data_resource"]}\" WHERE aqs_id = '#{params[:aqs_id]}' and date > current_date - 45;"
+      recent_history_sql = "SELECT * from \"#{ENV["aqs_data_resource"]}\" WHERE aqs_id = '#{params[:aqs_id]}' and date > current_date - 45 order by date, time "
       recent_history = sql_search_ckan(recent_history_sql)
       series_names = recent_history.map{|x| x["parameter"]}.uniq
       series_names.each do |series_name|
         series_datapoints = recent_history.select{|x| x["parameter"] == series_name}
         series << {
-          :data => series_datapoints.map {|x| [x["date"].to_time.utc.change(:hour => x["hour"], :zone_offset => '0').to_i*1000,x["value"].to_f] },
+          :data => series_datapoints.map {|x| [x["date"].to_time.utc.change(:hour => x["time"], :zone_offset => '0').to_i*1000,x["value"].to_f] },
           :name => "#{series_name} (#{series_datapoints.first["unit"]})" # assumption: all are the same for a given parameter
         }
       end
