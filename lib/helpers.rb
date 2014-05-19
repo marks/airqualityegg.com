@@ -21,12 +21,13 @@ module AppHelpers
   end
 
   def transform_row(row)
-    row["aqi_range"] = determine_aqi_range(row["parameter"],row["value"],row["unit"])
+    row["aqi_range"] = determine_aqi_range(row["parameter"],row["value"],row["unit"]) if (row["parameter"] && row["value"] && row["unit"])
     row["unit"] = "%" if row["unit"] == "PERCENT"
-    if row["parameter"] == "TEMP" && row["unit"] == "C"
+    if (row["parameter"] == "TEMP" && row["unit"] == "C") or (row["parameter"] == "Temperature" && row["unit"] == "deg C")
       row["unit"] = "°F"
       row["value"] = celsius_to_fahrenheit(row["value"])
     end
+    row = nil if row["value"].to_i == -2147483648
     return row
   end
 

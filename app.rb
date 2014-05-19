@@ -161,7 +161,6 @@ class AirQualityEgg < Sinatra::Base
   end
 
   get '/aqs/:aqs_id' do
-
     site_sql = "SELECT * from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{params[:aqs_id]}'"
     @site = sql_search_ckan(site_sql).first
 
@@ -222,47 +221,39 @@ class AirQualityEgg < Sinatra::Base
 
   get '/egg/:id.json' do
     content_type :json
-    response = Xively::Client.get(feed_url(params[:id]), :headers => {"X-ApiKey" => $api_key})
-    feed = Xively::Feed.new(response.body)
-    datastreams = feed.datastreams
-    data = feed.attributes
+
+    egg_sql = "SELECT feed,status,updated,location_domain,description,location_lon,location_lat,created,location_exposure,location_ele,title from \"#{ENV["aqe_site_resource"]}\" WHERE id = '#{params[:id]}'"
+    data = sql_search_ckan(egg_sql).first
+
     data[:datastreams] = {}
-    data[:datastreams][:NO2] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=NO2/)}
-    data[:datastreams][:CO] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=CO/)}
-    data[:datastreams][:Dust] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Dust/)}
-    data[:datastreams][:Temperature] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Temperature/)}
-    data[:datastreams][:Humidity] = datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Humidity/)}
-    if data[:datastreams][:Temperature] && data[:datastreams][:Temperature].unit_symbol == "deg C"
-      data[:datastreams][:Temperature].unit_symbol = "°F"
-      data[:datastreams][:Temperature].unit_label = "°F"
-      data[:datastreams][:Temperature].current_value = celsius_to_fahrenheit(data[:datastreams][:Temperature].current_value.to_f)
-      data[:datastreams][:Temperature].max_value = celsius_to_fahrenheit(data[:datastreams][:Temperature].max_value.to_f)
-      data[:datastreams][:Temperature].min_value = celsius_to_fahrenheit(data[:datastreams][:Temperature].min_value.to_f)
+    [:NO2,:CO,:Dust,:Temperature,:Humidity,:Dust,:VOC,:O3].each do |param|
+      data[:datastreams][param] = sql_search_ckan("select feed_id,datetime,parameter,unit,value from \"#{ENV["aqe_data_resource"]}\" where datetime = (select max(datetime) from \"#{ENV["aqe_data_resource"]}\" where feed_id = #{params[:id]} and parameter = '#{param}')").first
     end
-    data[:datastreams].each do |metric, hash|
-      if hash
-        data[:datastreams][metric] = hash.attributes
-        data[:datastreams][metric][:aqi_range] = determine_aqi_range(metric.to_s,hash.current_value.to_f,hash.unit_label)
-      end
-    end
+    
     data.to_json
   end
 
   # View egg dashboard
   get '/egg/:id' do
-    response = Xively::Client.get(feed_url(params[:id]), :headers => {"X-ApiKey" => $api_key})
-    @datastreams = []
-    @feed = Xively::Feed.new(response.body)
-    @no2 = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=NO2/)}
-    if @no2 && @no2.current_value == "-2147483648"
-      remove_instance_variable(:@no2)      # weird AQE bug
+    egg_sql = "SELECT feed,status,updated,location_domain,description,location_lon,location_lat,created,location_exposure,location_ele,title from \"#{ENV["aqe_site_resource"]}\" WHERE id = '#{params[:id]}'"
+    @feed = sql_search_ckan(egg_sql).first
+
+    @datastreams = {}
+    [:NO2,:CO,:Dust,:Temperature,:Humidity,:Dust,:VOC,:O3].each do |param|
+      @datastreams[param] = sql_search_ckan("select feed_id,datetime,parameter,unit,value from \"#{ENV["aqe_data_resource"]}\" where datetime = (select max(datetime) from \"#{ENV["aqe_data_resource"]}\" where feed_id = #{params[:id]} and parameter = '#{param}')").first
     end
-    @co = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=CO/)}
-    @dust = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Dust/)}
-    @temperature = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Temperature/)}
-    @humidity = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Humidity/)}
-    @local_feed_path = "/eggs/nearby/#{@feed.location_lat}/#{@feed.location_lon}.json"
-    [@no2, @co, @temperature, @humidity, @dust].each{|x| @datastreams << x.id if x}
+
+    # @no2 = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=NO2/)}
+    # if @no2 && @no2.current_value == "-2147483648"
+    #   remove_instance_variable(:@no2)      # weird AQE bug
+    # end
+    # @co = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=CO/)}
+    # @dust = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Dust/)}
+    # @temperature = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Temperature/)}
+    # @humidity = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Humidity/)}
+
+    @local_feed_path = "/eggs/nearby/#{@feed["location_lat"]}/#{@feed["location_lon"]}.json"
+    # [@no2, @co, @temperature, @humidity, @dust].each{|x| @datastreams << x.id if x}
     erb :show
   end
 

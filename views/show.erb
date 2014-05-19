@@ -1,7 +1,7 @@
 <script type="text/javascript">
   var datastreams = <%= @datastreams.to_json %>;
   var local_feed_path = '<%= @local_feed_path %>';
-  var feed_id = '<%= @feed.id%>';
+  var feed_id = '<%= @feed["id"]%>';
 </script>
 <!-- <section class="claiming clearfix">
   <form class="claiming-form" method="post" action="/register">
@@ -20,11 +20,11 @@
       <h3 class="current-id-full">Nitrogen Dioxide<br /><a class="current-external-link" href="http://www.epa.gov/air/nitrogenoxides/" target="blank">More info at EPA.gov</a></h3>
       <div class="current-value" style="margin-top:0px;height:20px;">
         <p class="current-value-measure" style="border-top:none; text-align:left;">
-          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @no2 ? "#{@no2.current_value.to_i} #{@no2.unit_label}" : "" %></span>
-          <% if @no2 %><div class="current-value-gauge" data-value="<%= "#{determine_aqi_range("NO2",@no2.current_value.to_f,@no2.unit_label)}" %>" id="current-gauge_NO2"></div><% end %>
+          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @datastreams[:NO2] ? "#{@datastreams[:NO2]["value"]} #{@datastreams[:NO2]["unit"]}" : "" %></span>
+          <% if @datastreams[:NO2] %><div class="current-value-gauge" data-value="<%= @datastreams[:NO2]["aqi_range"] %>" id="current-gauge_NO2"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @no2 ? "Updated #{@no2.updated.in_time_zone(settings.time_zone)}": ''%></p>      
+      <p class="current-value-updated-at"><%= @datastreams[:NO2] ? "Updated #{@datastreams[:NO2]["updated"].in_time_zone(settings.time_zone)}": ''%></p>      
     </div>
 
     <div class="current current-right">
@@ -32,11 +32,11 @@
       <h3 class="current-id-full">Carbon Monoxide<br /><a class="current-external-link" href="http://www.epa.gov/airquality/carbonmonoxide/" target="blank">More info at EPA.gov</a></h3>
       <div class="current-value" style="margin-top:0px;height:20px;">
         <p class="current-value-measure" style="border-top:none; text-align:left;">
-          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @co ? "#{@co.current_value.to_i} #{@co.unit_label}" : "" %></span>
-          <% if @co %><div class="current-value-gauge" data-value="<%= "#{determine_aqi_range("CO",@co.current_value.to_f,@co.unit_label)}" %>" id="current-gauge_CO"></div><% end %>
+          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @datastreams[:CO] ? "#{@datastreams[:CO]["value"]} #{@datastreams[:CO]["unit"]}" : "" %></span>
+          <% if @datastreams[:CO] %><div class="current-value-gauge" data-value="<%= @datastreams[:CO]["aqi_range"] %>" id="current-gauge_CO"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @co ? "Updated #{@co.updated.in_time_zone(settings.time_zone)}": ''%></p>
+      <p class="current-value-updated-at"><%= @datastreams[:CO] ? "Updated #{@datastreams[:CO]["datetime"].to_time.in_time_zone(settings.time_zone)}": ''%></p>      
     </div>
 
     <div class="current current-right">
@@ -44,11 +44,11 @@
       <h3 class="current-id-full"><br /><br /></h3>
       <div class="current-value" style="margin-top:0px;height:20px;">
         <p class="current-value-measure" style="border-top:none; text-align:left;">
-          <span class="current-value-measure-wrap" style="padding-left:0px;font-size: 80%;"><%= @dust ? "#{@dust.current_value.to_i} #{@dust.unit_label}" : "" %></span>
-          <% if @dust %><div class="current-value-gauge" data-value="<%= "#{determine_aqi_range("DUST",@dust.current_value.to_f,@dust.unit_label)}" %>" id="current-gauge_DUST"></div><% end %>
+          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @datastreams[:Dust] ? "#{@datastreams[:Dust]["value"]} #{@datastreams[:Dust]["unit"]}" : "" %></span>
+          <% if @datastreams[:Dust] %><div class="current-value-gauge" data-value="<%= @datastreams[:Dust]["aqi_range"] %>" id="current-gauge_NO2"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @dust ? "Updated #{@dust.updated.in_time_zone(settings.time_zone)}": ''%></p>
+      <p class="current-value-updated-at"><%= @datastreams[:Dust] ? "Updated #{@datastreams[:Dust]["datetime"].to_time.in_time_zone(settings.time_zone)}": ''%></p>      
     </div>
 
 
@@ -57,10 +57,11 @@
       <h3 class="current-id-full"><br /><br /></h3>
       <div class="current-value" style="margin-top:0px;height:20px;">
         <p class="current-value-measure" style="border-top:none; text-align:left;">
-          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @temperature ? "#{celsius_to_fahrenheit(@temperature.current_value).to_i} °F" : "" %></span>
+          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @datastreams[:Temperature] ? "#{@datastreams[:Temperature]["value"]} #{@datastreams[:Temperature]["unit"]}" : "" %></span>
+          <% if @datastreams[:Temperature] %><div class="current-value-gauge" data-value="<%= @datastreams[:Temperature]["aqi_range"] %>" id="current-gauge_Temperature"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @temperature ? "Updated #{@temperature.updated.in_time_zone(settings.time_zone)}": ''%></p>
+      <p class="current-value-updated-at"><%= @datastreams[:Temperature] ? "Updated #{@datastreams[:Temperature]["datetime"].to_time.in_time_zone(settings.time_zone)}": ''%></p>      
     </div>
     
     <div class="current current-right">
@@ -68,34 +69,35 @@
       <h3 class="current-id-full"><br /><br /></h3>
       <div class="current-value" style="margin-top:0px;height:20px;">
         <p class="current-value-measure" style="border-top:none; text-align:left;">
-          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @humidity ? "#{@humidity.current_value.to_i} #{@humidity.unit_label}" : "" %></span>
+          <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @datastreams[:Humidity] ? "#{@datastreams[:Humidity]["value"]} #{@datastreams[:Humidity]["unit"]}" : "" %></span>
+          <% if @datastreams[:Humidity] %><div class="current-value-gauge" data-value="<%= @datastreams[:Humidity]["aqi_range"] %>" id="current-gauge_Humidity"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @humidity ? "Updated #{@humidity.updated.in_time_zone(settings.time_zone)}": ''%></p>
+      <p class="current-value-updated-at"><%= @datastreams[:Humidity] ? "Updated #{@datastreams[:Humidity]["datetime"].to_time.in_time_zone(settings.time_zone)}": ''%></p>      
     </div>
 
   </div>
 
   <p class="dashboard-xively-link">
-    <a class='button' href='https://xively.com/feeds/<%= @feed.id%>' target='blank'>Full details on Xively.com</a>
+    <a class='button' href='https://xively.com/feeds/<%= @feed["id"]%>' target='blank'>Full details on Xively.com</a>
   </p>
-  <p class="dashboard-updated">Egg last updated <%= string_to_time(@feed.updated) %></p>
+  <p class="dashboard-updated">Egg last updated <%= string_to_time(@feed["updated"]) %></p>
 
 </section>
 
 <section class="dashboard-metadata">
-  <h1 class="metadata-feed-title"><%= @feed.title %></h1>
-  <% if @feed.location_exposure %>
+  <h1 class="metadata-feed-title"><%= @feed["title"] %></h1>
+  <% if @feed["location_exposure"] %>
   <h2 class="metadata-title">Exposure</h2>
-  <p class="metadata-value"><%= @feed.location_exposure %></p>
+  <p class="metadata-value"><%= @feed["location_exposure"] %></p>
   <% end %>
-  <% if @feed.location_ele %>
+  <% if @feed["location_ele"] %>
   <h2 class="metadata-title">Elevation</h2>
-  <p class="metadata-value"><%= @feed.location_ele %></p>
+  <p class="metadata-value"><%= @feed["location_ele"] %></p>
   <% end %>
-  <% if @feed.description %>
+  <% if @feed["description"] %>
   <h2 class="metadata-title">Description</h2>
-  <p class="metadata-value metadata-description"><%= @feed.description %></p>
+  <p class="metadata-value metadata-description"><%= @feed["description"] %></p>
   <% end %>
 </section>
 

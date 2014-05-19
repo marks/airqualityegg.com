@@ -214,7 +214,7 @@ var AQE = (function ( $ ) {
       var html = ""
       $.each(data.datastreams, function(name,item){
         if(item){
-          html += "<br />"+name+": "+item.current_value + " " + item.unit_label
+          html += "<br />"+name+": "+item.value + " " + item.unit
           if(item.aqi_range){ html += " <span style='padding: 0 2px; border:2px solid "+aqiRangeToColor(item.aqi_range)+"'>AQI range: "+item.aqi_range[0]+"-"+item.aqi_range[1]+"</span> " }
           html += " (" + moment(item.at).fromNow() +  ")"  
         }        
