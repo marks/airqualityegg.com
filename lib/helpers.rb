@@ -1,5 +1,22 @@
 module AppHelpers
 
+  def get_ckan_resource_by_name(name)
+    search_raw = RestClient.get("#{ENV['CKAN_HOST']}/api/3/action/resource_search?query=name:#{URI.encode(name)}",{"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+    search_results = JSON.parse(search_raw)
+    search_results["result"]["results"].first
+  end
+
+  def sql_search_ckan(sql_query)
+    uri = "#{ENV['CKAN_HOST']}/api/3/action/datastore_search_sql?sql=#{URI.escape(sql_query)}"
+    raw = RestClient.get(uri,{"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+    response = JSON.parse(raw)
+    if response["success"]
+      return response["result"]["records"]
+    else
+      return []
+    end
+  end
+
   def fetch_all_feeds
     page = 1
     all_feeds = []

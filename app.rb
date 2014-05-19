@@ -8,10 +8,16 @@ require 'dalli'
 require 'memcachier'
 require 'json'
 require 'oboe-heroku'
+require 'rest-client'
+require 'json'
 
 require './lib/helpers'
 include AppHelpers
 require './lib/models'
+
+
+ENV["aqs_site_resource"] = get_ckan_resource_by_name(ENV['CKAN_AQS_SITE_RESOURCE_NAME'])["id"]
+ENV["aqe_site_resource"] = get_ckan_resource_by_name(ENV['CKAN_AQE_SITE_RESOURCE_NAME'])["id"]
 
 class AirQualityEgg < Sinatra::Base
 
@@ -29,7 +35,6 @@ class AirQualityEgg < Sinatra::Base
 
     set :session_secret, ENV['SESSION_SECRET'] || 'airqualityegg_session_secret'
     set :cache, Dalli::Client.new
-
     set :time_zone, ActiveSupport::TimeZone.new("Eastern Time (US & Canada)")
   end
 
@@ -88,19 +93,23 @@ class AirQualityEgg < Sinatra::Base
     content_type :json
     cache_key = "all_eggs"
     cached_data = settings.cache.fetch(cache_key) do
-      all_feeds = fetch_all_feeds
+
+      all_aqe_sql = "SELECT id,created,description,feed,location_domain,location_ele,location_exposure,location_lat,location_lon,status,title from \"#{ENV["aqe_site_resource"]}\""
+      all_aqe_sites = sql_search_ckan(all_aqe_sql)
+
       # store in cache and return
-      settings.cache.set(cache_key, all_feeds, settings.cache_time)
-      all_feeds
+      settings.cache.set(cache_key, all_aqe_sites, settings.cache_time)
+      all_aqe_sites
     end
-    return cached_data
+    return cached_data.to_json
   end
 
   get '/all_aqs_sites.json' do
     content_type :json
     cache_key = "all_aqs_sites"
     cached_data = settings.cache.fetch(cache_key) do
-      all_aqs_sites = EpaSite.active.map(&:attributes)
+      all_aqs_sql = "SELECT aqs_id,site_name,agency_name,elevation,msa_name,cmsa_name,county_name,status,lat,lon from \"#{ENV["aqs_site_resource"]}\" WHERE status = 'Active'"
+      all_aqs_sites = sql_search_ckan(all_aqs_sql)
       settings.cache.set(cache_key, all_aqs_sites, settings.cache_time)
       all_aqs_sites
     end

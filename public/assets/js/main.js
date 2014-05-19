@@ -229,7 +229,6 @@ var AQE = (function ( $ ) {
     var html = "<div><strong>AirNow AQS Site Details</strong><table class='popup_metadata' data-aqs_id='"+aqs.aqs_id+"'>"
     html += "<tr><td>Name / Code </td><td> <a href='/aqs/"+aqs.aqs_id+"'><strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></a></td></tr>"
     html += "<tr><td>Agency </td><td>"+aqs.agency_name+"</td></tr>"
-    html += "<tr><td>Collects </td><td> "+aqs.parameter.split(",").join(", ")+"</td></tr>"
     html += "<tr><td>Position </td><td> "+aqs.elevation+" elevation</td></tr>"
     if(aqs.msa_name){html += "<tr><td>MSA </td><td> "+aqs.msa_name+"</td></tr>"}
     if(aqs.cmsa_name){html += "<tr><td>CMSA </td><td> "+aqs.cmsa_name+"</td></tr>"}
