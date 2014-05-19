@@ -7,15 +7,24 @@ module AppHelpers
   end
 
   def sql_search_ckan(sql_query)
+    results = []
     uri = "#{ENV['CKAN_HOST']}/api/3/action/datastore_search_sql?sql=#{URI.escape(sql_query)}"
     puts uri
     raw = RestClient.get(uri,{"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
     response = JSON.parse(raw)
     if response["success"]
-      return response["result"]["records"]
-    else
-      return []
+      response["result"]["records"].each do |row|
+        # transform data
+        row["aqi_range"] = determine_aqi_range(row["parameter"],row["value"],row["unit"])
+        row["unit"] = "%" if row["unit"] == "PERCENT"
+        if row["parameter"] == "TEMP" && row["unit"] == "C"
+          row["unit"] = "°F"
+          row["value"] = celsius_to_fahrenheit(row["value"])
+        end
+        results << row
+      end
     end
+    return results
   end
 
   def fetch_all_feeds
@@ -132,7 +141,6 @@ module AppHelpers
     when "NO2"
       value = value/1000.00 if unit.upcase == "PPB"
       value = value.round(3)
-      puts value
       if value.between?(0.65,1.24)
         return [201,300]
       elsif value.between?(1.25,1.64)
