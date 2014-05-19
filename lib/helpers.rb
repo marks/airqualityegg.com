@@ -14,17 +14,20 @@ module AppHelpers
     response = JSON.parse(raw)
     if response["success"]
       response["result"]["records"].each do |row|
-        # transform data
-        row["aqi_range"] = determine_aqi_range(row["parameter"],row["value"],row["unit"])
-        row["unit"] = "%" if row["unit"] == "PERCENT"
-        if row["parameter"] == "TEMP" && row["unit"] == "C"
-          row["unit"] = "°F"
-          row["value"] = celsius_to_fahrenheit(row["value"])
-        end
-        results << row
+        results << transform_row(row)
       end
     end
     return results
+  end
+
+  def transform_row(row)
+    row["aqi_range"] = determine_aqi_range(row["parameter"],row["value"],row["unit"])
+    row["unit"] = "%" if row["unit"] == "PERCENT"
+    if row["parameter"] == "TEMP" && row["unit"] == "C"
+      row["unit"] = "°F"
+      row["value"] = celsius_to_fahrenheit(row["value"])
+    end
+    return row
   end
 
   def fetch_all_feeds
