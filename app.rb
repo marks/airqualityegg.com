@@ -15,9 +15,11 @@ require './lib/helpers'
 include AppHelpers
 require './lib/models'
 
-
+# TODO - clean up
 ENV["aqs_site_resource"] = get_ckan_resource_by_name(ENV['CKAN_AQS_SITE_RESOURCE_NAME'])["id"]
+ENV["aqs_data_resource"] = get_ckan_resource_by_name(ENV['CKAN_AQS_DATA_RESOURCE_NAME'])["id"]
 ENV["aqe_site_resource"] = get_ckan_resource_by_name(ENV['CKAN_AQE_SITE_RESOURCE_NAME'])["id"]
+ENV["aqe_data_resource"] = get_ckan_resource_by_name(ENV['CKAN_AQE_DATA_RESOURCE_NAME'])["id"]
 
 class AirQualityEgg < Sinatra::Base
 
@@ -93,10 +95,8 @@ class AirQualityEgg < Sinatra::Base
     content_type :json
     cache_key = "all_eggs"
     cached_data = settings.cache.fetch(cache_key) do
-
       all_aqe_sql = "SELECT id,created,description,feed,location_domain,location_ele,location_exposure,location_lat,location_lon,status,title from \"#{ENV["aqe_site_resource"]}\""
       all_aqe_sites = sql_search_ckan(all_aqe_sql)
-
       # store in cache and return
       settings.cache.set(cache_key, all_aqe_sites, settings.cache_time)
       all_aqe_sites
@@ -130,22 +130,28 @@ class AirQualityEgg < Sinatra::Base
     return cached_data.to_json
   end
 
-
   get '/aqs/:aqs_id.json' do
     content_type :json
-    site = EpaSite.find_by(:aqs_id => params[:aqs_id])
-    data = site.attributes
-    data[:latest_hourly] = site.latest_hourly_data.map(&:attributes)
-    data[:latest_daily] = site.latest_daily_data.map(&:attributes)
+
+    site_sql = "SELECT aqs_id,site_name,agency_name,elevation,msa_name,cmsa_name,county_name,status,lat,lon from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{params[:aqs_id]}'"
+    data = sql_search_ckan(site_sql).first
+
+    daily_sql = "SELECT T.id,T.date,T.parameter,T.unit,T.value,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\".parameter, MAX (DATE) AS MaxDate FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY parameter) tm ON T.parameter = tm.parameter AND T.date = tm.MaxDate and T.aqs_id = '#{params['aqs_id']}' and T.time is NULL"
+    data[:latest_daily] = sql_search_ckan(daily_sql)
+
+    hourly_sql = "SELECT T.id,tm.MaxTimestamp AS date,T.parameter,T.unit,T.value,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\". PARAMETER,  MAX((\"#{ENV["aqs_data_resource"]}\".date||' '||\"#{ENV["aqs_data_resource"]}\".time)::timestamp) as MaxTimestamp FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY PARAMETER) tm ON T . PARAMETER = tm. PARAMETER AND (T.date||' '||T.time)::timestamp = tm.MaxTimestamp AND T .aqs_id = '#{params['aqs_id']}'"
+    data[:latest_hourly] = sql_search_ckan(hourly_sql)
+
     if params[:include_recent_history]
       series = []
-      recent_history = site.epa_datas.recent
-      series_names = recent_history.map(&:parameter).uniq
+      recent_history_sql = "SELECT * from \"#{ENV["aqs_data_resource"]}\" WHERE aqs_id = '#{params[:aqs_id]}' and date > current_date - 45;"
+      recent_history = sql_search_ckan(recent_history_sql)
+      series_names = recent_history.map{|x| x["parameter"]}.uniq
       series_names.each do |series_name|
-        series_datapoints = recent_history.select{|x| x.parameter == series_name}
+        series_datapoints = recent_history.select{|x| x["parameter"] == series_name}
         series << {
-          :data => series_datapoints.map {|x| [x.date.to_time.utc.change(:hour => x.hour, :zone_offset => '0').to_i*1000,x.value.to_f] },
-          :name => "#{series_name} (#{series_datapoints.first.unit})" # assumption: all are the same for a given parameter
+          :data => series_datapoints.map {|x| [x["date"].to_time.utc.change(:hour => x["hour"], :zone_offset => '0').to_i*1000,x["value"].to_f] },
+          :name => "#{series_name} (#{series_datapoints.first["unit"]})" # assumption: all are the same for a given parameter
         }
       end
       data[:recent_history] = series
@@ -154,10 +160,17 @@ class AirQualityEgg < Sinatra::Base
   end
 
   get '/aqs/:aqs_id' do
-    @site = EpaSite.find_by(:aqs_id => params[:aqs_id])
-    @latest_hourly_data = @site.latest_hourly_data
-    @latest_daily_data = @site.latest_daily_data
-    @local_feed_path = "/eggs/nearby/#{@site.lat}/#{@site.lon}.json"
+
+    site_sql = "SELECT * from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{params[:aqs_id]}'"
+    @site = sql_search_ckan(site_sql).first
+
+    daily_sql = "SELECT T.id,T.date,T.parameter,T.unit,T.value,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\".parameter, MAX (DATE) AS MaxDate FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY parameter) tm ON T.parameter = tm.parameter AND T.date = tm.MaxDate and T.aqs_id = '#{params['aqs_id']}' and T.time is NULL"
+    @latest_daily_data = sql_search_ckan(daily_sql)
+
+    hourly_sql = "SELECT T.id,tm.MaxTimestamp AS date,T.parameter,T.unit,T.value,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\". PARAMETER,  MAX((\"#{ENV["aqs_data_resource"]}\".date||' '||\"#{ENV["aqs_data_resource"]}\".time)::timestamp) as MaxTimestamp FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY PARAMETER) tm ON T . PARAMETER = tm. PARAMETER AND (T.date||' '||T.time)::timestamp = tm.MaxTimestamp AND T .aqs_id = '#{params['aqs_id']}'"
+    @latest_hourly_data = sql_search_ckan(hourly_sql)
+
+    @local_feed_path = "/eggs/nearby/#{@site["lat"]}/#{@site["lon"]}.json"
     erb :show_aqs
   end
 
