@@ -24,7 +24,7 @@
           <% if @datastreams[:NO2] %><div class="current-value-gauge" data-value="<%= @datastreams[:NO2]["aqi_range"] %>" id="current-gauge_NO2"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @datastreams[:NO2] ? "Updated #{@datastreams[:NO2]["updated"].in_time_zone(settings.time_zone)}": ''%></p>      
+      <p class="current-value-updated-at"><%= @datastreams[:NO2] ? "Updated #{@datastreams[:NO2]["datetime"].in_time_zone(settings.time_zone)}": ''%></p>      
     </div>
 
     <div class="current current-right">

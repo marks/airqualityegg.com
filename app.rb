@@ -13,7 +13,8 @@ require 'json'
 
 require './lib/helpers'
 include AppHelpers
-require './lib/models'
+require "sinatra/activerecord"
+ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 # TODO - clean up
 ENV["aqs_site_resource"] = get_ckan_resource_by_name(ENV['CKAN_AQS_SITE_RESOURCE_NAME'])["id"]
