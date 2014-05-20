@@ -94,8 +94,6 @@ var AQE = (function ( $ ) {
     }
   };
 
-  xively.setKey( "1bgDuzNfCI94eDrcSN0DJ2Kho7zGmXRsCwGTYTA1ugVuLqDa" ); // (READ ONLY) TODO refactor
-
   initialize()
 
   function initialize() {
@@ -113,11 +111,6 @@ var AQE = (function ( $ ) {
       legend.addTo(map)
 
       $.getJSON(local_feed_path, function(mapmarkers){
-        // if on an egg's page, zoom in close to the egg
-        if ( $(".dashboard-map").length && mapmarkers && mapmarkers.length ) {
-          map.setView([mapmarkers[0].location_lat,mapmarkers[0].location_lon],9)
-        }
-
         // add eggs to map
         for ( var x = 0, len = mapmarkers.length; x < len; x++ ) {
           addEggMapMarker(mapmarkers[x]);

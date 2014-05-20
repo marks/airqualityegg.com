@@ -30,10 +30,10 @@ class AirQualityEgg < Sinatra::Base
     $product_id = ENV['XIVELY_PRODUCT_ID']
     $api_key = ENV['XIVELY_API_KEY']
     $api_url = ENV['XIVELY_API_URL'] || Xively::Client.base_uri
-
     raise "PRODUCT_ID not set" if $product_id.nil?
     raise "API_KEY not set" if $api_key.nil?
     raise "API_URL not set" if $api_url.nil?
+
     puts "WARN: You should set a SESSION_SECRET" unless ENV['SESSION_SECRET']
 
     set :session_secret, ENV['SESSION_SECRET'] || 'airqualityegg_session_secret'
@@ -264,10 +264,11 @@ class AirQualityEgg < Sinatra::Base
 
   get '/eggs/nearby/:lat/:lon.json' do
     content_type :json
-    @feeds = find_egg_feeds_near(@feed, params[:lat], params[:lon])
-    @feeds = @feeds.first(params[:limit].to_i) if params[:limit].to_i != 0
-    @map_markers = collect_map_markers(@feeds)
-    return @map_markers
+    redirect '/all_eggs.json'
+    # @feeds = find_egg_feeds_near(@feed, params[:lat], params[:lon])
+    # @feeds = @feeds.first(params[:limit].to_i) if params[:limit].to_i != 0
+    # @map_markers = collect_map_markers(@feeds)
+    # return @map_markers
   end
 
   get '/cache/flush' do
