@@ -142,9 +142,6 @@ var AQE = (function ( $ ) {
           addSchoolSiteMapMarker( school_mapmarkers[x] );
         }
       })
-
-
-
     }
 
     // if on egg dashboard
