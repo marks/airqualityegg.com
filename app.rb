@@ -29,6 +29,10 @@ class AirQualityEgg < Sinatra::Base
     enable :sessions
     enable :logging
 
+    $product_id = ENV['XIVELY_PRODUCT_ID']
+    $api_key = ENV['XIVELY_API_KEY']
+    $api_url = ENV['XIVELY_API_URL'] || Xively::Client.base_uri
+
     puts "WARN: You should set a SESSION_SECRET" unless ENV['SESSION_SECRET']
 
     set :session_secret, ENV['SESSION_SECRET'] || 'airqualityegg_session_secret'
