@@ -219,9 +219,25 @@ class AirQualityEgg < Sinatra::Base
     data = sql_search_ckan(egg_sql).first
 
     data[:datastreams] = {}
-    [:NO2,:CO,:Dust,:Temperature,:Humidity,:Dust,:VOC,:O3].each do |param|
-      data[:datastreams][param] = sql_search_ckan("select feed_id,datetime,parameter,unit,value from \"#{ENV["aqe_data_resource"]}\" where datetime = (select max(datetime) from \"#{ENV["aqe_data_resource"]}\" where feed_id = #{params[:id]} and parameter = '#{param}')").first
-    end
+    datastreams_sql = <<-EOS
+      SELECT
+        data_table.feed_id,data_table.datetime,data_table.parameter,data_table.value,data_table.unit,
+        sites_table.location_lat, sites_table.location_lon
+      FROM
+        "#{ENV["aqe_site_resource"]}" sites_table
+      INNER JOIN "#{ENV["aqe_data_resource"]}" data_table ON sites_table.id = data_table.feed_id
+      WHERE sites_table.id = #{params[:id]}
+      order by datetime desc
+      LIMIT (
+        SELECT COUNT(DISTINCT(data_table.parameter))
+        FROM "#{ENV["aqe_data_resource"]}" data_table
+        WHERE data_table.feed_id = #{params[:id]}
+      )
+    EOS
+    datastreams_data = sql_search_ckan(datastreams_sql)
+    datastreams_data.each do |datastream|
+      data[:datastreams][datastream["parameter"].to_sym] = datastream if datastream
+    end    
 
     if params[:include_recent_history]
       series = []
@@ -246,8 +262,24 @@ class AirQualityEgg < Sinatra::Base
     @feed = sql_search_ckan(egg_sql).first
 
     @datastreams = {}
-    [:NO2,:CO,:Dust,:Temperature,:Humidity,:Dust,:VOC,:O3].each do |param|
-      @datastreams[param] = sql_search_ckan("select feed_id,datetime,parameter,unit,value from \"#{ENV["aqe_data_resource"]}\" where datetime = (select max(datetime) from \"#{ENV["aqe_data_resource"]}\" where feed_id = #{params[:id]} and parameter = '#{param}')").first
+    datastreams_sql = <<-EOS
+      SELECT
+        data_table.feed_id,data_table.datetime,data_table.parameter,data_table.value,data_table.unit,
+        sites_table.location_lat, sites_table.location_lon
+      FROM
+        "#{ENV["aqe_site_resource"]}" sites_table
+      INNER JOIN "#{ENV["aqe_data_resource"]}" data_table ON sites_table.id = data_table.feed_id
+      WHERE sites_table.id = #{params[:id]}
+      order by datetime desc
+      LIMIT (
+        SELECT COUNT(DISTINCT(data_table.parameter))
+        FROM "#{ENV["aqe_data_resource"]}" data_table
+        WHERE data_table.feed_id = #{params[:id]}
+      )
+    EOS
+    datastreams_data = sql_search_ckan(datastreams_sql)
+    datastreams_data.each do |datastream|
+      @datastreams[datastream["parameter"].to_sym] = datastream if datastream
     end
 
     @local_feed_path = "/eggs/nearby/#{@feed["location_lat"]}/#{@feed["location_lon"]}.json"
