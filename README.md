@@ -81,6 +81,18 @@ Be sure to restart heroku after this as the database socket connection will need
 30    1-23/2    * * * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake ckan:airqualityeggs:update
 ```
 
+## Sample CKAN (Datastore) SQL
+
+### Join AQE sensor readings (from data_table) with their lat/lon values (from sites_table)
+```sql
+SELECT
+  data_table.feed_id,data_table.datetime,data_table.parameter,data_table.value,data_table.unit,
+  sites_table.location_lat, sites_table.location_lon
+FROM
+  "c0d9ab3c-91a3-4fe8-8f54-5d3009e4f01d" sites_table
+INNER JOIN "d8482637-477b-4e45-a7f5-6b2ceb98c7e5" data_table ON sites_table.id = data_table.feed_id
+LIMIT 10000
+```
 ## Contributing
 
 Please see our [Contributing guidelines](https://github.com/xively/airqualityegg.com/blob/master/CONTRIBUTING.md).
