@@ -147,18 +147,6 @@ var AQE = (function ( $ ) {
 
     }
 
-    // if on home page:
-    if($(".home-map").length == 1){
-      //  - load recently created and updated eggs
-      $.each(["recently_created_at","recently_retrieved_at"],function(i,order){
-        $.getJSON("/"+order+".json", function(data){
-          $.each(data, function(i,egg){
-            $("#"+order).append("<li><a href='/egg/"+egg.id+"'>"+egg.title+"</a> is a "+egg.status+" "+egg.location_exposure+" egg that was created "+moment(egg.created).fromNow()+" and last updated "+moment(egg.updated).fromNow()+" </li>")
-          })
-        })
-      })
-    }
-
     // if on egg dashboard
     if($("#dashboard-egg-chart").length){
       addAQIGauges()

@@ -61,13 +61,6 @@ website running locally on your machine.
 
 `bundle exec rake`
 
-### Importing AirNow monitoring sites and daily data into app database
-```bash
-foreman run bundle exec rake db:migrate
-foreman run bundle exec rake airnow:sites:import #Using Heroku Scheduler, we run this once a day
-foreman run bundle exec rake airnow:daily_data:import # Using Heroku Scheduler, we run this once an hour
-```
-
 ### Importing AirNow and AirQualityEgg sites and sensor data to CKAN
 ```bash
 foreman run bundle exec rake ckan:airnow:update # takes about 45 minutes

@@ -10,6 +10,7 @@ require 'json'
 require 'oboe-heroku'
 require 'rest-client'
 require 'json'
+require 'net/ftp'
 
 require './lib/helpers'
 include AppHelpers
@@ -27,12 +28,6 @@ class AirQualityEgg < Sinatra::Base
   configure do
     enable :sessions
     enable :logging
-    $product_id = ENV['XIVELY_PRODUCT_ID']
-    $api_key = ENV['XIVELY_API_KEY']
-    $api_url = ENV['XIVELY_API_URL'] || Xively::Client.base_uri
-    raise "PRODUCT_ID not set" if $product_id.nil?
-    raise "API_KEY not set" if $api_key.nil?
-    raise "API_URL not set" if $api_url.nil?
 
     puts "WARN: You should set a SESSION_SECRET" unless ENV['SESSION_SECRET']
 
@@ -114,20 +109,6 @@ class AirQualityEgg < Sinatra::Base
       all_aqs_sites = sql_search_ckan(all_aqs_sql)
       settings.cache.set(cache_key, all_aqs_sites, settings.cache_time)
       all_aqs_sites
-    end
-    return cached_data.to_json
-  end
-
-  get '/recently_:order.json' do
-    content_type :json
-    cache_key = "recently_#{params[:order]}"
-    cached_data = settings.cache.fetch(cache_key) do
-      # fetch feeds based on input
-      recently_response = fetch_xively_url("#{$api_url}/v2/feeds.json?user=airqualityegg&mapped=true&content=summary&per_page=10&order=#{params[:order]}")
-      recently_results = Xively::SearchResult.new(recently_response.body).results.map(&:attributes)
-      # store in cache and return
-      settings.cache.set(cache_key, recently_results, settings.cache_time)
-      recently_results
     end
     return cached_data.to_json
   end
@@ -277,45 +258,11 @@ class AirQualityEgg < Sinatra::Base
 
   private
 
-  def extract_feed_id_and_api_key_from_session
-    [session['response_json']['feed_id'], session['response_json']['apikey']]
-  rescue
-    redirect_with_error('Egg not found')
-  end
-
-  def find_egg_feeds_near(feed, lat=nil, lon=nil)
-    find_egg_feeds(feed, lat, lon)
-  end
-
-  def find_egg_feeds(feed = nil, lat = nil, lon = nil)
-    url = feeds_url(feed, lat, lon)
-    logger.info("GET: #{url} - geosearch")
-    response = Xively::Client.get(url, :headers => {'Content-Type' => 'application/json', 'X-ApiKey' => $api_key})
-    @feeds = Xively::SearchResult.new(response.body).results
-  rescue
-    @feeds = Xively::SearchResult.new().results
-  end
-
-  def feed_url(feed_id)
-    "#{$api_url}/v2/feeds/#{feed_id}.json"
-  end
-
-  def feeds_url(feed, lat, lon)
-    if feed && feed.location_lat && feed.location_lon
-      feeds_near = "&lat=#{feed.location_lat}&lon=#{feed.location_lon}&distance=500&distance_units=kms"
-    elsif lat and lon
-      feeds_near = "&lat=#{lat}&lon=#{lon}&distance=500&distance_units=kms"
-    else
-      feeds_near = ''
-    end
-    "#{$api_url}/v2/feeds.json?user=airqualityegg&mapped=true#{feeds_near}"
-  end
-
-
-  def product_url
-    redirect_with_error('Please enter a serial number') if params[:serial].blank?
-    "#{$api_url}/v2/products/#{$product_id}/devices/#{params[:serial].downcase}/activate"
-  end
+  # def extract_feed_id_and_api_key_from_session
+  #   [session['response_json']['feed_id'], session['response_json']['apikey']]
+  # rescue
+  #   redirect_with_error('Egg not found')
+  # end
 
   def redirect_with_error(message)
     session['error'] = message
