@@ -229,8 +229,22 @@ class AirQualityEgg < Sinatra::Base
     [:NO2,:CO,:Dust,:Temperature,:Humidity,:Dust,:VOC,:O3].each do |param|
       data[:datastreams][param] = sql_search_ckan("select feed_id,datetime,parameter,unit,value from \"#{ENV["aqe_data_resource"]}\" where datetime = (select max(datetime) from \"#{ENV["aqe_data_resource"]}\" where feed_id = #{params[:id]} and parameter = '#{param}')").first
     end
-    
-    data.to_json
+
+    if params[:include_recent_history]
+      series = []
+      recent_history_sql = "SELECT feed_id,parameter,datetime,value,unit from \"#{ENV["aqe_data_resource"]}\" WHERE feed_id = #{params[:id]} and datetime > current_date - 45 order by datetime "
+      recent_history = sql_search_ckan(recent_history_sql).compact
+      series_names = recent_history.map{|x| x["parameter"]}.uniq
+      series_names.each do |series_name|
+        series_datapoints = recent_history.select{|x| x["parameter"] == series_name}
+        series << {
+          :data => series_datapoints.map {|x| [x["datetime"].to_time.utc.change(:zone_offset => '0').to_i*1000,x["value"].to_f] },
+          :name => "#{series_name} (#{series_datapoints.first["unit"]})" # assumption: all are the same for a given parameter
+        } 
+      end
+      data[:recent_history] = series
+    end
+    return data.to_json
   end
 
   # View egg dashboard
@@ -243,17 +257,7 @@ class AirQualityEgg < Sinatra::Base
       @datastreams[param] = sql_search_ckan("select feed_id,datetime,parameter,unit,value from \"#{ENV["aqe_data_resource"]}\" where datetime = (select max(datetime) from \"#{ENV["aqe_data_resource"]}\" where feed_id = #{params[:id]} and parameter = '#{param}')").first
     end
 
-    # @no2 = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=NO2/)}
-    # if @no2 && @no2.current_value == "-2147483648"
-    #   remove_instance_variable(:@no2)      # weird AQE bug
-    # end
-    # @co = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=CO/)}
-    # @dust = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Dust/)}
-    # @temperature = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Temperature/)}
-    # @humidity = @feed.datastreams.detect{|d| !d.tags.nil? && d.tags.match(/computed/) && d.tags.match(/sensor_type=Humidity/)}
-
     @local_feed_path = "/eggs/nearby/#{@feed["location_lat"]}/#{@feed["location_lon"]}.json"
-    # [@no2, @co, @temperature, @humidity, @dust].each{|x| @datastreams << x.id if x}
     erb :show
   end
 

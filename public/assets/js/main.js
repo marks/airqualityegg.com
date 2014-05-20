@@ -167,7 +167,7 @@ var AQE = (function ( $ ) {
     }
 
     // if on egg dashboard
-    if($("#dashboard-xively-chart").length){
+    if($("#dashboard-egg-chart").length){
       addAQIGauges()
       graphEggHistoricalData();
     }
@@ -416,91 +416,56 @@ var AQE = (function ( $ ) {
 
   function graphEggHistoricalData(){
     // create skeleton chart
-    $('#dashboard-xively-chart').highcharts({
-        chart: {
-            type: 'spline',
-            zoomType: 'xy',
-        },
-        credits: { enabled: false }, 
-        title: { text: "This Egg's Datastreams" },
-        xAxis: { type: 'datetime' },
-        yAxis: [
-          { title: { text: 'ppb (parts per billion)'}, min: 0},
-          { title: {text: ''}, min: 0, opposite: true }
-        ],
-        tooltip: {
-          formatter: function(){
-            var time = moment(this.x)
-            var series_label = this.series.name.replace(/ \(.+\)/g,"")
-            var series_unit = this.series.name.replace(/.+\ \((.+)\)/,"$1")
-            return ''+time.format("MMM D, YYYY [at] h:mm a ([GMT] Z)")+' ('+time.fromNow()+')<br />'+'<b>'+ series_label +':</b> '+this.y+' '+series_unit;
-          }
-        },
-        series: []
-    });
 
-    $(datastreams).each(function(n,i){
-      xively.datastream.history(feed_id,i, {duration:"14days",interval:7200,limit:1000}, graphEggDatastream)
+    $.getJSON(location.pathname+".json?include_recent_history=1", function(data){
+
+      $.each(data.recent_history, function(i,series){
+        if(series.name.match(/ppb/gi)){
+          series.yAxis = 0
+        } else {
+          series.yAxis = 1
+        }
+      })
+
+      $('#dashboard-egg-chart').highcharts({
+          chart: {
+              type: 'spline',
+              zoomType: 'xy',
+          },
+          credits: { enabled: false }, 
+          title: { text: "This Egg's Datastreams" },
+          xAxis: { type: 'datetime' },
+          yAxis: [
+            { title: { text: 'ppb (parts per billion)'}, min: 0},
+            { title: {text: ''}, min: 0, opposite: true }
+          ],
+          tooltip: {
+            formatter: function(){
+              var time = moment(this.x)
+              var series_label = this.series.name.replace(/ \(.+\)/g,"")
+              var series_unit = this.series.name.replace(/.+\ \((.+)\)/,"$1")
+              return ''+time.format("MMM D, YYYY [at] h:mm a ([GMT] Z)")+' ('+time.fromNow()+')<br />'+'<b>'+ series_label +':</b> '+this.y+' '+series_unit;
+            }
+          },
+          series: data.recent_history
+      });
+
     })
 
   }
-
-  function graphEggDatastream(data){
-    var new_series = {id: data.id, name: data.id.split("_")[0]}
-
-    new_series.data = $(data.datapoints).map(function(n,i){
-      var date = new Date(i.at)
-      var x_value = date.getTime()
-      var y_value = parseFloat(i.value)
-      if(new_series.name == "Temperature"){ y_value = celsiusToFahrenheit(y_value) }
-
-      return {x: x_value,y: y_value}
-    })
-
-    // put CO and NO2 on yAxisY=0, all others on the second (right) y-axis
-    if(new_series.name == "CO" || new_series.name == "NO2"){
-    } else {
-      new_series.yAxis = 1;
-    }
-
-    // change namem and define order and axis of series
-    switch (new_series.name) {
-      case "NO2":
-        new_series.name = "NO2 (ppb)"
-        new_series.index = 1
-        new_series.yAxis = 0
-        break;
-      case "CO":
-        new_series.name = "CO (ppb)"
-        new_series.index = 2
-        new_series.yAxis = 0
-        break;
-      case "Dust":
-        new_series.name = "Dust (pcs/283ml)"
-        new_series.index = 3
-        new_series.yAxis = 1
-        break;
-      case "Humidity":
-        new_series.name = "Humidity (%)"
-        new_series.index = 4
-        new_series.yAxis = 1
-        break;
-      case "Temperature":
-        new_series.name = "Temperature (°F)" // we converted it from Celsius above
-        new_series.index = 5
-        new_series.yAxis = 1
-        break;
-    }
-
-    $('#dashboard-xively-chart').highcharts().addSeries(new_series)
-  }
-
 
   function graphAQSHistoricalData(){
     // create skeleton chart
 
     $.getJSON(location.pathname+".json?include_recent_history=1", function(data){
 
+      $.each(data.recent_history, function(i,series){
+        if(series.name.match(/ppb/gi)){
+          series.yAxis = 0
+        } else {
+          series.yAxis = 1
+        }
+      })
 
       $('#dashboard-aqs-chart').highcharts({
           chart: {
