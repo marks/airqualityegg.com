@@ -102,7 +102,7 @@ class AirQualityEgg < Sinatra::Base
     content_type :json
     cache_key = "all_eggs"
     cached_data = settings.cache.fetch(cache_key) do
-      all_aqe_sql = "SELECT id,created,description,feed,location_domain,location_ele,location_exposure,location_lat,location_lon,status,title from \"#{ENV["aqe_site_resource"]}\""
+      all_aqe_sql = "SELECT id,created,description,feed,location_domain,location_ele,location_exposure,location_lat,location_lon,status,title,updated from \"#{ENV["aqe_site_resource"]}\""
       all_aqe_sites = sql_search_ckan(all_aqe_sql)
       all_aqe_sites = all_aqe_sites.to_json
       # store in cache and return
