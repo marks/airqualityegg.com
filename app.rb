@@ -258,7 +258,7 @@ class AirQualityEgg < Sinatra::Base
 
   # View egg dashboard
   get '/egg/:id' do
-    egg_sql = "SELECT feed,status,updated,location_domain,description,location_lon,location_lat,created,location_exposure,location_ele,title from \"#{ENV["aqe_site_resource"]}\" WHERE id = '#{params[:id]}'"
+    egg_sql = "SELECT id,feed,status,updated,location_domain,description,location_lon,location_lat,created,location_exposure,location_ele,title from \"#{ENV["aqe_site_resource"]}\" WHERE id = '#{params[:id]}'"
     @feed = sql_search_ckan(egg_sql).first
 
     @datastreams = {}
