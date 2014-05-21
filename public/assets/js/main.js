@@ -98,6 +98,7 @@ var AQE = (function ( $ ) {
     if(typeof(local_feed_path) != "undefined"){
       // set up leaflet map
       map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer, school_layer]})
+      var hash = new L.Hash(map);
       handleNoGeolocation();
       L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
