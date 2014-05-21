@@ -258,30 +258,33 @@ module AppHelpers
       value = value.round(3)
       return calculate_aqi_from_NO2(value)
     when "DUST"
-      vaule = value.round(0)
-      if value.between?(0,1500)
-        return [0,50]
+      vaule = value.round
+      if value == 0
+        aqi_range = [-1,-1]
+      elsif value.between?(1,1500)
+        aqi_range = [0,50]
       elsif value.between?(1501,1529)
-        return [50.5,50.5]
+        aqi_range = [50.5,50.5]
       elsif value.between?(1530,3000)
-        return [51,100]
+        aqi_range = [51,100]
       elsif value.between?(3001,3059)
-        return [100.5,100.5]
+        aqi_range = [100.5,100.5]
       elsif value.between?(3060,5837)
-        return [101,150]
+        aqi_range = [101,150]
       elsif value.between?(5838,5892)
-        return [150.5,150.5]
+        aqi_range = [150.5,150.5]
       elsif value.between?(5893,8670)
-        return [151,200]
+        aqi_range = [151,200]
       elsif value.between?(8671,8726)
-        return [200.5,200.5]
+        aqi_range = [200.5,200.5]
       elsif value.between?(8727,14336)
-        return [201,300]
+        aqi_range = [201,300]
       elsif value.between?(14337,14364)
-        return [300.5,300.5]
+        aqi_range = [300.5,300.5]
       elsif value >= 14365
-        return [301,500]
-      end      
+        aqi_range = [301,500]
+      end   
+      return aqi_range.sum/2.00   
     else
       return -1
     end 

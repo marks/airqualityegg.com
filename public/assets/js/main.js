@@ -468,7 +468,7 @@ var AQE = (function ( $ ) {
 
   function addAQIGauges(){
     $(".current-value-gauge").each(function(n,span){
-      var value = $(span).data("value")
+      var value = $(span).data("aqi-value")
       var gauge_id = $(span).attr("id")
       if(value > 0){
         $('#'+gauge_id).highcharts({
