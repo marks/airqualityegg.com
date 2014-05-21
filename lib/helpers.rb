@@ -100,7 +100,7 @@ module AppHelpers
     return aqi
   end
 
-  def calculate_aqi_from_PM25(concentration)
+  def calculate_aqi_from_PM25_24hr(concentration)
     concentration = concentration.to_f
     if concentration >= 0 && concentration < 12.1
       aqi = calculate_component_aqi(50,0,12,0,concentration)
@@ -122,57 +122,141 @@ module AppHelpers
     return aqi
   end
 
+  def calculate_aqi_from_PM10_24hr(concentration)
+    concentration = concentration.to_f
+    if concentration >= 0 && concentration < 55
+      aqi = calculate_component_aqi(50,0,54,0,concentration)
+    elsif concentration >=55 && concentration<155
+      aqi = calculate_component_aqi(100,51,154,55,concentration);
+    elsif concentration>=155 && concentration<255
+      aqi = calculate_component_aqi(150,101,254,155,concentration);
+    elsif concentration>=255 && concentration<355
+      aqi = calculate_component_aqi(200,151,354,255,concentration);
+    elsif concentration>=355 && concentration<425
+      aqi = calculate_component_aqi(300,201,424,355,concentration);
+    elsif concentration>=425 && concentration<505
+      aqi = calculate_component_aqi(400,301,504,425,concentration);
+    elsif concentration>=505 && concentration<605
+      aqi = calculate_component_aqi(500,401,604,505,concentration);
+    else
+      aqi = -1
+    end
+    return aqi
+  end
 
+  def calculate_aqi_from_SO2_1hr(concentration)
+    concentration = concentration.to_i
+    if concentration >= 0 && concentration < 36
+      aqi = calculate_component_aqi(50,0,35,0,concentration)
+    elsif concentration >=36 && concentration<76
+      aqi = calculate_component_aqi(100,51,75,36,concentration);
+    elsif concentration>=76 && concentration<186
+      aqi = calculate_component_aqi(150,101,185,76,concentration);
+    elsif concentration>=186 && concentration<304
+      aqi = calculate_component_aqi(200,151,304,186,concentration);
+    else
+      aqi = -1 # AQI values of 201 or greater are calculated with 24-hour SO2 concentrations
+    end
+    return aqi
+  end
+
+  def calculate_aqi_from_SO2_24hr(concentration)
+    concentration = concentration.to_i
+    if concentration >= 0 && concentration < 304
+      aqi = -1 # AQI values less than 201 are calculated with 1-hour SO2 concentrations
+    elsif concentration>=304 && concentration<605
+      aqi = calculate_component_aqi(300,201,604,305,concentration);
+    elsif concentration>=605 && concentration<805
+      aqi = calculate_component_aqi(400,301,804,605,concentration);
+    elsif concentration>=805 && concentration<1004
+      aqi = calculate_component_aqi(500,401,1004,805,concentration);
+    else
+      aqi = -1
+    end
+    return aqi
+  end
+
+
+  def calculate_aqi_from_O3_8hr(concentration)
+    concentration = concentration.to_f
+    if concentration >= 0 && concentration < 0.060
+      aqi = calculate_component_aqi(50,0,0.059,0,concentration)
+    elsif concentration >=0.060 && concentration<0.076
+      aqi = calculate_component_aqi(100,51,0.075,0.060,concentration);
+    elsif concentration>=0.076 && concentration<0.096
+      aqi = calculate_component_aqi(150,101,0.095,0.076,concentration);
+    elsif concentration>=0.096 && concentration<0.116
+      aqi = calculate_component_aqi(200,151,0.115,0.096,concentration);
+    elsif concentration>=0.116 && concentration<0.375
+      aqi = calculate_component_aqi(300,201,0.374,0.116,concentration);
+    elsif concentration>=0.375 && concentration<0.605
+      aqi = -1 # 8-hour ozone values do not define higher AQI values (>=301).  AQI values of 301 or greater are calculated with 1-hour ozone concentrations.
+    else
+      aqi = -1
+    end
+    return aqi
+  end
+
+  def calculate_aqi_from_O3_1hr(concentration)
+    concentration = concentration.to_f
+    if concentration >= 0.125 && concentration < 0.165
+      aqi = calculate_component_aqi(150,101,0.164,0.125,concentration);
+    elsif concentration>=0.165 && concentration<0.205
+      aqi = calculate_component_aqi(200,151,0.204,0.165,concentration);
+    elsif concentration>=0.205 && concentration<0.405
+      aqi = calculate_component_aqi(300,201,0.404,0.205,concentration);
+    elsif concentration>=0.405 && concentration<0.505
+      aqi = calculate_component_aqi(400,301,0.504,0.405,concentration);
+    elsif concentration>=0.505 && concentration<0.605
+      aqi = calculate_component_aqi(500,401,0.604,0.505,concentration);
+    else
+      aqi = -1
+    end
+    return aqi
+  end
+
+    def calculate_aqi_from_NO2(concentration)
+    concentration = concentration.to_f
+    if concentration >= 0 && concentration < 0.054
+      aqi = calculate_component_aqi(50,0,0.053,0,concentration)
+    elsif concentration >=0.054 && concentration<0.101
+      aqi = calculate_component_aqi(100,51,0.100,0.054,concentration);
+    elsif concentration>=0.101 && concentration<0.361
+      aqi = calculate_component_aqi(150,101,0.360,0.101,concentration);
+    elsif concentration>=0.361 && concentration<0.650
+      aqi = calculate_component_aqi(200,151,0.649,0.361,concentration);
+    elsif concentration>=0.650 && concentration<1.250
+      aqi = calculate_component_aqi(300,201,1.249,0.650,concentration);
+    elsif concentration>=1.250 && concentration<1.650
+      aqi = calculate_component_aqi(400,301,1.649,1.250,concentration);
+    elsif concentration>=1.650 && concentration<2.049
+      aqi = calculate_component_aqi(500,401,2.049,1.650,concentration);
+    else
+      aqi = -1
+    end
+    return aqi
+  end
 
 
   def determine_aqi(parameter,value,unit)
-    case parameter
+    case parameter.upcase
     when "OZONE-8HR"
       value = value/1000.00 if unit.upcase == "PPB"
-      value = value.round(3)
-      if value.between?(0,0.064)
-        return [0,50]
-      elsif value.between?(0.065,0.084)
-        return [51,100]
-      elsif value.between?(0.085,0.104)
-        return [101,150]
-      elsif value.between?(0.105,0.124)
-        return [151,200]
-      elsif value.between?(0.125,0.374)
-        return [201,300]
-      elsif value >= 0.375
-        return [301,500]
-      end
+      return calculate_aqi_from_O3_8hr(value)
     when "OZONE-1HR"
       value = value/1000.00 if unit.upcase == "PPB"
-      if value.between?(0,0.124)
-        return [0,100]
-      elsif value.between?(0.125,0.164)
-        return [101,150]
-      elsif value.between?(0.165,0.204)
-        return [151,200]
-      elsif value.between?(0.205,0.404)
-        return [201,300]
-      elsif value.between?(0.405,0.504)
-        return [301,400]
-      elsif value >= 0.505
-        return [401,500]
-      end
-    when "PM2.5"
-      calculate_aqi_from_PM25(value)
+      return calculate_aqi_from_O3_1hr(value)
+    when "PM10-24HR"
+      return calculate_aqi_from_PM10_24hr(value)
+    when "PM2.5-24HR"
+      return calculate_aqi_from_PM25_24hr(value)
     when "CO"
       value = value/1000.00 if unit.upcase == "PPB"
       return calculate_aqi_from_CO(value)
     when "NO2"
       value = value/1000.00 if unit.upcase == "PPB"
       value = value.round(3)
-      if value.between?(0.65,1.24)
-        return [201,300]
-      elsif value.between?(1.25,1.64)
-        return [301,400]
-      elsif value >= 1.65
-        return [401,500]
-      end
+      return calculate_aqi_from_NO2(value)
     when "DUST"
       vaule = value.round(0)
       if value.between?(0,1500)
@@ -199,7 +283,7 @@ module AppHelpers
         return [301,500]
       end      
     else
-      return nil
+      return -1
     end 
   end
 

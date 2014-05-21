@@ -470,7 +470,7 @@ var AQE = (function ( $ ) {
     $(".current-value-gauge").each(function(n,span){
       var value = $(span).data("value")
       var gauge_id = $(span).attr("id")
-      if(value){
+      if(value > 0){
         $('#'+gauge_id).highcharts({
                 chart: {
                     type: 'gauge',
