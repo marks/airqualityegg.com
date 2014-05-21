@@ -219,12 +219,12 @@ namespace :ckan do
               data = ftp.getbinaryfile(file, nil, 1024)
               puts "Processing #{file}"
               CSV.parse(data, :col_sep => "|", :encoding => 'ISO8859-1') do |row|
-                if ["NO2T","NO2","NO2Y","CO","CO-8HR","RHUM","TEMP","PM2.5","WS","WD","PM2.5-24hr","SO2-24HR"].include?(row[5])
+                if ["NO2T","NO2","NO2Y","CO","CO-8HR","RHUM","TEMP","PM2.5","WS","WD","PM2.5-24HR","SO2-24HR","SO2","PM10","PM10-24HR"].include?(row[5].upcase)
                   monitoring_data = {
                     :aqs_id => row[2],
                     :date => Time.strptime(row[0],'%m/%d/%y').strftime("%Y-%m-%d"),
                     :time => "#{row[1]}:00",
-                    :parameter => row[5],
+                    :parameter => row[5].upcase,
                     :unit => row[6],
                     :value => row[7].to_f,
                     :data_source => fix_encoding(row[8]),
