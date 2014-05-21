@@ -78,7 +78,7 @@ module AppHelpers
     return component_aqi.to_i
   end
 
-  def calculate_aqi_from_CO_ppm(concentration)
+  def calculate_aqi_from_CO(concentration)
     concentration = concentration.to_f
     if concentration >= 0 && concentration < 4.5
       aqi = calculate_component_aqi(50,0,4.4,0,concentration)
@@ -100,6 +100,31 @@ module AppHelpers
     return aqi
   end
 
+  def calculate_aqi_from_PM25(concentration)
+    concentration = concentration.to_f
+    if concentration >= 0 && concentration < 12.1
+      aqi = calculate_component_aqi(50,0,12,0,concentration)
+    elsif concentration >=12.1 && concentration<35.5
+      aqi = calculate_component_aqi(100,51,35.4,12.1,concentration);
+    elsif concentration>=35.5 && concentration<55.5
+      aqi = calculate_component_aqi(150,101,55.4,35.5,concentration);
+    elsif concentration>=55.5 && concentration<150.5
+      aqi = calculate_component_aqi(200,151,150.4,55.5,concentration);
+    elsif concentration>=150.5 && concentration<250.5
+      aqi = calculate_component_aqi(300,201,250.4,150.5,concentration);
+    elsif concentration>=250.5 && concentration<350.5
+      aqi = calculate_component_aqi(400,301,350.4,250.5,concentration);
+    elsif concentration>=350.5 && concentration<500.5
+      aqi = calculate_component_aqi(500,401,500.4,350.5,concentration);
+    else
+      aqi = -1
+    end
+    return aqi
+  end
+
+
+
+
   def determine_aqi(parameter,value,unit)
     case parameter
     when "OZONE-8HR"
@@ -120,7 +145,6 @@ module AppHelpers
       end
     when "OZONE-1HR"
       value = value/1000.00 if unit.upcase == "PPB"
-      value = value.round(3)
       if value.between?(0,0.124)
         return [0,100]
       elsif value.between?(0.125,0.164)
@@ -135,25 +159,10 @@ module AppHelpers
         return [401,500]
       end
     when "PM2.5"
-      vaule = value.round(1)
-      if value.between?(0,15.4)
-        return [0,51]
-      elsif value.between?(15.5,40.4)
-        return [51,100]
-      elsif value.between?(40.5,65.4)
-        return [101,150]
-      elsif value.between?(65.5,150.4)
-        return [151,200]
-      elsif value.between?(150.5,250.4)
-        return [201,300]
-      elsif value.between?(250.5,350.4)
-        return [301,400]
-      elsif value >= 350.5
-        return [401,500]
-      end
+      calculate_aqi_from_PM25(value)
     when "CO"
       value = value/1000.00 if unit.upcase == "PPB"
-      return calculate_aqi_from_CO_ppm(value)
+      return calculate_aqi_from_CO(value)
     when "NO2"
       value = value/1000.00 if unit.upcase == "PPB"
       value = value.round(3)
