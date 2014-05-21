@@ -224,7 +224,7 @@ var AQE = (function ( $ ) {
       var daily_data = $.map(data.latest_daily, function(i){
         var item_html = ""
         item_html += i.parameter+": "+i.value+" "+i.unit
-        if(i.aqi){ item_html += " <span style='padding: 0 2px; border:2px solid "+aqiToColor(i.aqi)+"'>AQI: "+i.aqi+"</span> " }
+        if(i.aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+i.aqi_cat.color+"; background-color: "+i.aqi_cat.color+"; color: "+i.aqi_cat.font+" '><strong>"+i.aqi_cat.name+" (AQI = "+i.aqi+")</strong></span> " }
         item_html += " ("+moment(i.date).format("MM/DD/YYYY")+")"
         return item_html
       })     
