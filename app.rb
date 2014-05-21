@@ -263,6 +263,8 @@ class AirQualityEgg < Sinatra::Base
     egg_sql = "SELECT id,feed,status,updated,location_domain,description,location_lon,location_lat,created,location_exposure,location_ele,title from \"#{ENV["aqe_site_resource"]}\" WHERE id = '#{params[:id]}'"
     @feed = sql_search_ckan(egg_sql).first
 
+    redirect_with_error("Egg not found") if @feed.nil? 
+
     @datastreams = {}
     datastreams_sql = <<-EOS
       SELECT
