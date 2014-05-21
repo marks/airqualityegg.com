@@ -282,6 +282,8 @@ class AirQualityEgg < Sinatra::Base
       @datastreams[datastream["parameter"].to_sym] = datastream if datastream
     end
 
+    @prevailing_aqi_component = @datastreams.sort_by{|key,hash| hash["aqi"]}.last.last
+
     @local_feed_path = "/eggs/nearby/#{@feed["location_lat"]}/#{@feed["location_lon"]}.json"
     erb :show
   end

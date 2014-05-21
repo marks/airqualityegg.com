@@ -516,7 +516,7 @@ var AQE = (function ( $ ) {
                     plotBands: [{
                         from: 0,
                         to: 50,
-                        color: '#00E400'
+                        color: '#00E000'
                     }, {
                         from: 51,
                         to: 100,

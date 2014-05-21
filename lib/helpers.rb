@@ -22,6 +22,7 @@ module AppHelpers
 
   def transform_row(row)
     row["aqi"] = determine_aqi(row["parameter"],row["value"],row["unit"]) if (row["parameter"] && row["value"] && row["unit"])
+    row["aqi_cat"] = aqi_to_category(row["aqi"]) if row["aqi"]
     row["unit"] = "%" if row["unit"] == "PERCENT"
     if (row["parameter"] == "TEMP" && row["unit"] == "C") or (row["parameter"] == "Temperature" && row["unit"] == "deg C")
       row["unit"] = "°F"
@@ -288,6 +289,25 @@ module AppHelpers
     else
       return -1
     end 
+  end
+
+  def aqi_to_category(aqi)
+    aqi = aqi.to_i
+    if aqi <= 0
+      return {:name => "Out of range", :color => "#FFF", :font => "#000"}
+    elsif aqi <= 50
+      return {:name => "Good", :color => "#00E000", :font => "#000"}
+    elsif aqi > 50 && aqi <= 100
+      return {:name => "Moderate", :color => "#FFFF00", :font => "#000"}
+    elsif aqi > 100 && aqi <= 150
+      return {:name => "Unhealthy for Sensitive Groups", :color => "#FF7E00", :font => "#000"}
+    elsif aqi > 150 && aqi <= 200
+      return {:name => "Unhealthy", :color => "#FF0000", :font => "#000"}
+    elsif aqi > 200 && aqi <= 300
+      return {:name => "Very Unhealthy", :color => "#99004C", :font => "#FFF"}
+    elsif aqi > 300 
+      return {:name => "Hazardous", :color => "#4C0026", :font => "#FFF"}
+    end
   end
 
 end
