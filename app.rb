@@ -91,10 +91,8 @@ class AirQualityEgg < Sinatra::Base
     erb :home
   end
 
-  get '/heat' do
-    @local_feed_path = '/all_eggs.json'
-    @error = session.delete(:error)
-    erb :home
+  get '/boston' do
+    redirect '/#12/42.3593/-71.1315'
   end
 
 
