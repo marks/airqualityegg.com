@@ -187,7 +187,7 @@ var AQE = (function ( $ ) {
       $.each(data.datastreams, function(name,item){
         if(item){
           html += "<br />"+name+": "+item.value + " " + item.unit
-          if(item.aqi_range){ html += " <span style='padding: 0 2px; border:2px solid "+aqiRangeToColor(item.aqi_range)+"'>AQI range: "+item.aqi_range[0]+"-"+item.aqi_range[1]+"</span> " }
+          if(item.aqi){ html += " <span style='padding: 0 2px; border:2px solid "+aqiToColor(item.aqi)+"'>AQI: "+item.aqi+"</span> " }
           html += " (" + moment(item.at).fromNow() +  ")"  
         }        
       })
@@ -224,7 +224,7 @@ var AQE = (function ( $ ) {
       var daily_data = $.map(data.latest_daily, function(i){
         var item_html = ""
         item_html += i.parameter+": "+i.value+" "+i.unit
-        if(i.aqi_range){ item_html += " <span style='padding: 0 2px; border:2px solid "+aqiRangeToColor(i.aqi_range)+"'>AQI range: "+i.aqi_range[0]+"-"+i.aqi_range[1]+"</span> " }
+        if(i.aqi){ item_html += " <span style='padding: 0 2px; border:2px solid "+aqiToColor(i.aqi)+"'>AQI: "+i.aqi+"</span> " }
         item_html += " ("+moment(i.date).format("MM/DD/YYYY")+")"
         return item_html
       })     
@@ -468,10 +468,9 @@ var AQE = (function ( $ ) {
 
   function addAQIGauges(){
     $(".current-value-gauge").each(function(n,span){
-      var values = $(span).data("value")
+      var value = $(span).data("value")
       var gauge_id = $(span).attr("id")
-      if(values){
-        var value = parseFloat(values[0]+values[1])/2
+      if(value){
         $('#'+gauge_id).highcharts({
                 chart: {
                     type: 'gauge',
@@ -542,13 +541,13 @@ var AQE = (function ( $ ) {
                 },
                 tooltip: {
                   formatter: function(){
-                    return 'AQI b/w '+this.point.range[0]+'-'+this.point.range[1];
+                    return 'AQI = '+this.point.y;
                   }
                 },
 
                 series: [{
                     name: 'AQI',
-                    data: [{y: value, range:values}],
+                    data: [{y: value}],
                 }]
 
             },
@@ -564,8 +563,8 @@ var AQE = (function ( $ ) {
     return parseFloat(value) * 9 / 5 + 32
   }
 
-  function aqiRangeToColor(range){
-    var aqi = (range[0]+range[1])/2.00
+  function aqiToColor(aqi){
+    // var aqi = (range[0]+range[1])/2.00
     var color;
     if (aqi <= 50) { color = "#00E400" }
     else if(aqi > 51 && aqi <= 100) { color = "#FFFF00"}

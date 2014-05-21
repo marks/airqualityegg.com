@@ -21,7 +21,7 @@ module AppHelpers
   end
 
   def transform_row(row)
-    row["aqi_range"] = determine_aqi_range(row["parameter"],row["value"],row["unit"]) if (row["parameter"] && row["value"] && row["unit"])
+    row["aqi"] = determine_aqi(row["parameter"],row["value"],row["unit"]) if (row["parameter"] && row["value"] && row["unit"])
     row["unit"] = "%" if row["unit"] == "PERCENT"
     if (row["parameter"] == "TEMP" && row["unit"] == "C") or (row["parameter"] == "Temperature" && row["unit"] == "deg C")
       row["unit"] = "°F"
@@ -73,7 +73,34 @@ module AppHelpers
     value.to_f * 9 / 5 + 32
   end
 
-  def determine_aqi_range(parameter,value,unit)
+  def calculate_component_aqi(aqi_high,aqi_low,concentration_high, concentration_low, concentration)
+    component_aqi = ((concentration-concentration_low)/(concentration_high-concentration_low))*(aqi_high-aqi_low)+aqi_low;
+    return component_aqi.to_i
+  end
+
+  def calculate_aqi_from_CO_ppm(concentration)
+    concentration = concentration.to_f
+    if concentration >= 0 && concentration < 4.5
+      aqi = calculate_component_aqi(50,0,4.4,0,concentration)
+    elsif concentration >=4.5 && concentration<9.5
+      aqi = calculate_component_aqi(100,51,9.4,4.5,concentration);
+    elsif concentration>=9.5 && concentration<12.5
+      aqi = calculate_component_aqi(150,101,12.4,9.5,concentration);
+    elsif concentration>=12.5 && concentration<15.5
+      aqi = calculate_component_aqi(200,151,15.4,12.5,concentration);
+    elsif concentration>=15.5 && concentration<30.5
+      aqi = calculate_component_aqi(300,201,30.4,15.5,concentration);
+    elsif concentration>=30.5 && concentration<40.5
+      aqi = calculate_component_aqi(400,301,40.4,30.5,concentration);
+    elsif concentration>=40.5 && concentration<50.5
+      aqi = calculate_component_aqi(500,401,50.4,40.5,concentration);
+    else
+      aqi = -1
+    end
+    return aqi
+  end
+
+  def determine_aqi(parameter,value,unit)
     case parameter
     when "OZONE-8HR"
       value = value/1000.00 if unit.upcase == "PPB"
@@ -126,22 +153,7 @@ module AppHelpers
       end
     when "CO"
       value = value/1000.00 if unit.upcase == "PPB"
-      value = value.round(3)
-      if value.between?(0,4.4)
-        return [0,50]
-      elsif value.between?(4.5,9.4)
-        return [51,100]
-      elsif value.between?(9.5,12.4)
-        return [101,150]
-      elsif value.between?(12.5,15.4)
-        return [151,200]
-      elsif value.between?(15.5,30.4)
-        return [201,300]
-      elsif value.between?(30.5,40.4)
-        return [301,400]
-      elsif value >= 40.5
-        return [401,500]
-      end
+      return calculate_aqi_from_CO_ppm(value)
     when "NO2"
       value = value/1000.00 if unit.upcase == "PPB"
       value = value.round(3)
