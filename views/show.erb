@@ -1,7 +1,7 @@
 <script type="text/javascript">
-  var datastreams = <%= @datastreams.to_json %>;
   var local_feed_path = '<%= @local_feed_path %>';
   var feed_id = '<%= @feed["id"]%>';
+  var feed_location = ['<%= @feed["location_lat"] %>', '<%= @feed["location_lon"] %>'];
 </script>
 
 <section class="dashboard-current">

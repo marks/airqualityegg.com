@@ -107,7 +107,13 @@ var AQE = (function ( $ ) {
       L.control.locate({locateOptions: {maxZoom: 9}}).addTo(map);
       legend.addTo(map)
 
+      // if on an egg's page, zoom in close to the egg
+      if ( $(".dashboard-map").length && feed_location) {
+        map.setView(feed_location,9)
+      }
+
       $.getJSON(local_feed_path, function(mapmarkers){
+
         // add eggs to map
         for ( var x = 0, len = mapmarkers.length; x < len; x++ ) {
           addEggMapMarker(mapmarkers[x]);
