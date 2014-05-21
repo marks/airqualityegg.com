@@ -7,6 +7,7 @@
 <section class="dashboard-current">
   <img class="dashboard-current-prop" src="/assets/img/prop-bigegg.png">
   <div class="dashboard-current-values clearfix">
+  
     <% if @prevailing_aqi_component["aqi"] > 0 %>
       <div class="" style="padding: 1px 15px 1px 15px; background-color:<%= @prevailing_aqi_component["aqi_cat"][:color] %>; color:<%= @prevailing_aqi_component["aqi_cat"][:font] %>">
         <p style="font-size:130%; line-height: 23px;"><strong>The air quality at this location is currently <%= @prevailing_aqi_component["aqi_cat"][:name].downcase %></strong> (<%= @prevailing_aqi_component["aqi"] %> is the AQI value of <%= @prevailing_aqi_component["parameter"] %>)</p>

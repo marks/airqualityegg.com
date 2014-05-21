@@ -187,7 +187,7 @@ var AQE = (function ( $ ) {
       $.each(data.datastreams, function(name,item){
         if(item){
           html += "<br />"+name+": "+item.value + " " + item.unit
-          if(item.aqi){ html += " <span style='padding: 0 2px; border:2px solid "+aqiToColor(item.aqi)+"'>AQI: "+item.aqi+"</span> " }
+          if(item.aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+item.aqi_cat.color+"; background-color: "+item.aqi_cat.color+"; color: "+item.aqi_cat.font+" '><strong>"+item.aqi_cat.name+" (AQI = "+item.aqi+")</strong></span> " }
           html += " (" + moment(item.at).fromNow() +  ")"  
         }        
       })

@@ -163,6 +163,8 @@ class AirQualityEgg < Sinatra::Base
     hourly_sql = "SELECT T.id,tm.MaxTimestamp AS date,T.parameter,T.unit,T.value,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\". PARAMETER,  MAX((\"#{ENV["aqs_data_resource"]}\".date||' '||\"#{ENV["aqs_data_resource"]}\".time)::timestamp) as MaxTimestamp FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY PARAMETER) tm ON T . PARAMETER = tm. PARAMETER AND (T.date||' '||T.time)::timestamp = tm.MaxTimestamp AND T .aqs_id = '#{params['aqs_id']}'"
     @latest_hourly_data = sql_search_ckan(hourly_sql)
 
+    @prevailing_aqi_component = (@latest_hourly_data + @latest_daily_data).sort_by{|hash| hash["aqi"]}.last
+
     @local_feed_path = "/eggs/nearby/#{@site["lat"]}/#{@site["lon"]}.json"
     erb :show_aqs
   end
