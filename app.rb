@@ -132,11 +132,9 @@ class AirQualityEgg < Sinatra::Base
     datastreams_sql = <<-EOS
       SELECT
         data_table.aqs_id,data_table.date, data_table.time,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
-      FROM
-        "#{ENV["aqs_site_resource"]}" sites_table
-      INNER JOIN "#{ENV["aqs_data_resource"]}" data_table ON sites_table.aqs_id = data_table.aqs_id
-      WHERE sites_table.aqs_id = '#{params[:aqs_id]}'
-      order by date desc, time desc
+      FROM "#{ENV["aqs_data_resource"]}" data_table
+      WHERE data_table.aqs_id = '#{params[:aqs_id]}'
+      ORDER BY date desc,time desc
       LIMIT (
         SELECT COUNT(DISTINCT(data_table.parameter))
         FROM "#{ENV["aqs_data_resource"]}" data_table
@@ -176,11 +174,9 @@ class AirQualityEgg < Sinatra::Base
     datastreams_sql = <<-EOS
       SELECT
         data_table.aqs_id,data_table.date, data_table.time,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
-      FROM
-        "#{ENV["aqs_site_resource"]}" sites_table
-      INNER JOIN "#{ENV["aqs_data_resource"]}" data_table ON sites_table.aqs_id = data_table.aqs_id
-      WHERE sites_table.aqs_id = '#{params[:aqs_id]}'
-      order by date desc, time desc
+      FROM "#{ENV["aqs_data_resource"]}" data_table
+      WHERE data_table.aqs_id = '#{params[:aqs_id]}'
+      ORDER BY date desc,time desc
       LIMIT (
         SELECT COUNT(DISTINCT(data_table.parameter))
         FROM "#{ENV["aqs_data_resource"]}" data_table
