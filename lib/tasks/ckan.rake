@@ -345,34 +345,32 @@ namespace :ckan do
         search_results = JSON.parse(search_raw)
         # resource we want to use is the first match
         resource = search_results["result"]["results"].first
-        # if there is no resource, create it
-        if resource.nil?
-          create_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_create",
-            {:resource => {
-                :package_id => ENV['CKAN_AQE_DATASET_ID'],
-                :name => ENV['CKAN_AQE_DATA_RESOURCE_NAME']
-              },
-              :primary_key => 'id',
-              :indexes => 'id,feed_id,datetime,parameter,unit',
-              :fields => [
-                {:id => "id", :type => "text"},
-                {:id => "feed_id", :type => "int"},
-                {:id => "datetime", :type => "timestamp"},
-                {:id => "parameter", :type => "text"},
-                {:id => "unit", :type => "text"},
-                {:id => "value", :type => "float"},
-              ],
-              :records => []
-            }.to_json,
-            {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
-          create_results = JSON.parse(create_raw)
-          resource_id = create_results["result"]["resource_id"]
-          puts "Created a new resource named '#{ENV['CKAN_AQE_DATA_RESOURCE_NAME']}'"
-        else
-          resource_id = resource["id"]
-          puts "Resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}' already existed"
+        create_resource_data = {
+          :primary_key => 'id',
+          :indexes => 'id,feed_id,datetime,parameter,unit',
+          :fields => [
+            {:id => "id", :type => "text"},
+            {:id => "feed_id", :type => "int"},
+            {:id => "datetime", :type => "timestamp"},
+            {:id => "parameter", :type => "text"},
+            {:id => "unit", :type => "text"},
+            {:id => "value", :type => "float"},
+            {:id => "computed_aqi", :type => "int"},
+            {:id => "lat", :type => "float"},
+            {:id => "lon", :type => "float"},
+          ],
+          :records => []
+        }
+        if resource.nil? # if there is no resource, create it inside the right package
+          create_resource_data[:resource] = {:package_id => ENV['CKAN_AQE_DATASET_ID'], :name => ENV['CKAN_AQE_DATA_RESOURCE_NAME'] }
+        else # update existing resource
+          create_resource_data[:resource_id] = resource["id"]
         end
-        puts "Resource ID = #{resource_id}"
+        create_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_create", create_resource_data.to_json,
+          {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+        create_results = JSON.parse(create_raw)
+        resource_id = create_results["result"]["resource_id"]
+        puts "Created or updated a new resource named '#{ENV['CKAN_AQE_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
         # invoke upsert rake tasks
         Rake.application.invoke_task("ckan:airqualityeggs:data:upsert[#{resource_id}]")
       end
@@ -392,7 +390,7 @@ namespace :ckan do
             datastream_records = []
             datastream_name = datastream["id"].split("_").first
             datastream["datapoints"].to_a.each do |datapoint|
-              row = {:feed_id => feed_id, :datetime => datapoint["at"], :value => datapoint["value"].to_f, :unit => datastream["unit"]["label"], :parameter => datastream_name}
+              row = {:feed_id => feed_id, :datetime => datapoint["at"], :value => datapoint["value"].to_f, :unit => datastream["unit"]["label"], :parameter => datastream_name, :lat => egg["location_lat"], :lon => egg["location_lon"]}
               row[:id] = "#{row[:feed_id]}|#{row[:datetime]}|#{row[:parameter]}"
               datastream_records << row
             end
@@ -401,7 +399,7 @@ namespace :ckan do
             post_data = {:resource_id => args[:resource_id], :records => datastream_records, :method => 'upsert'}.to_json
             upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
             upsert_result = JSON.parse(upsert_raw)
-            sleep 3
+            sleep 2
           end
         end
 
