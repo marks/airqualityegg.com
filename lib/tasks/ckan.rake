@@ -133,36 +133,37 @@ namespace :ckan do
         search_results = JSON.parse(search_raw)
         # resource we want to use is the first match
         resource = search_results["result"]["results"].first
-        # if there is no resource, create it
-        if resource.nil?
-          create_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_create",
-            {:resource => {
-                :package_id => ENV['CKAN_AQS_DATASET_ID'],
-                :name => ENV['CKAN_AQS_DATA_RESOURCE_NAME']
-              },
-              :primary_key => 'id',
-              :indexes => 'id,aqs_id,date,time,parameter',
-              :fields => [
-                {:id => "id", :type => "text"},
-                {:id => "aqs_id", :type => "text"},
-                {:id => "date", :type => "date"},
-                {:id => "time", :type => "time"},
-                {:id => "parameter", :type => "text"},
-                {:id => "unit", :type => "text"},
-                {:id => "value", :type => "float"},
-                {:id => "data_source", :type => "text"},                
-              ],
-              :records => []
-            }.to_json,
-            {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
-          create_results = JSON.parse(create_raw)
-          resource_id = create_results["result"]["resource_id"]
-          puts "Created a new resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}'"
-        else
-          resource_id = resource["id"]
-          puts "Resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}' already existed"
+
+
+        create_resource_data = {
+          :primary_key => 'id',
+          :indexes => 'id,aqs_id,date,time,parameter',
+          :fields => [
+            {:id => "id", :type => "text"},
+            {:id => "aqs_id", :type => "text"},
+            {:id => "date", :type => "date"},
+            {:id => "time", :type => "time"},
+            {:id => "parameter", :type => "text"},
+            {:id => "unit", :type => "text"},
+            {:id => "value", :type => "float"},
+            {:id => "data_source", :type => "text"},                
+            {:id => "computed_aqi", :type => "int"},                
+          ],
+          :records => []
+        }
+
+        if resource.nil? # if there is no resource, create it inside the right package
+          create_resource_data[:resource] = {:package_id => ENV['CKAN_AQS_DATASET_ID'], :name => ENV['CKAN_AQS_DATA_RESOURCE_NAME'] }
+        else # update existing resource
+          create_resource_data[:resource_id] = resource["id"]
         end
-        puts "Resource ID = #{resource_id}"
+
+        create_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_create", create_resource_data.to_json,
+          {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+        create_results = JSON.parse(create_raw)
+        resource_id = create_results["result"]["resource_id"]
+        puts "Created or updated a new resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
+
         # invoke upsert rake tasks
         Rake.application.invoke_task("ckan:airnow:data:upsert_daily[#{resource_id}]")
         Rake.application.invoke_task("ckan:airnow:data:upsert_hourly[#{resource_id}]")
@@ -190,6 +191,7 @@ namespace :ckan do
             :parameter => row[3],
             :unit => row[4],
             :value => row[5].to_f,
+            :computed_aqi => determine_aqi(row[3], row[5].to_f, row[4]),
             :data_source => fix_encoding(row[7]),
           }
           monitoring_data[:id] = "#{monitoring_data[:aqs_id]}|#{monitoring_data[:date]}|#{monitoring_data[:time]}|#{monitoring_data[:parameter]}"
@@ -355,9 +357,9 @@ namespace :ckan do
             {:id => "parameter", :type => "text"},
             {:id => "unit", :type => "text"},
             {:id => "value", :type => "float"},
-            {:id => "computed_aqi", :type => "int"},
             {:id => "lat", :type => "float"},
             {:id => "lon", :type => "float"},
+            {:id => "computed_aqi", :type => "int"},
           ],
           :records => []
         }
@@ -390,11 +392,11 @@ namespace :ckan do
             datastream_records = []
             datastream_name = datastream["id"].split("_").first
             datastream["datapoints"].to_a.each do |datapoint|
-              row = {:feed_id => feed_id, :datetime => datapoint["at"], :value => datapoint["value"].to_f, :unit => datastream["unit"]["label"], :parameter => datastream_name, :lat => egg["location_lat"], :lon => egg["location_lon"]}
+              computed_aqi = determine_aqi(datastream_name, datapoint["value"].to_f, datastream["unit"]["label"])
+              row = {:feed_id => feed_id, :datetime => datapoint["at"], :value => datapoint["value"].to_f, :unit => datastream["unit"]["label"], :parameter => datastream_name, :lat => egg["location_lat"], :lon => egg["location_lon"], :computed_aqi => computed_aqi}
               row[:id] = "#{row[:feed_id]}|#{row[:datetime]}|#{row[:parameter]}"
               datastream_records << row
             end
-
             # batch upload datastream_records 
             post_data = {:resource_id => args[:resource_id], :records => datastream_records, :method => 'upsert'}.to_json
             upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})

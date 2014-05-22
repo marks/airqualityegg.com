@@ -3,7 +3,11 @@ module AppHelpers
   def get_ckan_resource_by_name(name)
     search_raw = RestClient.get("#{ENV['CKAN_HOST']}/api/3/action/resource_search?query=name:#{URI.encode(name)}",{"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
     search_results = JSON.parse(search_raw)
-    search_results["result"]["results"].first
+    if search_results["result"]["results"] != []
+      return search_results["result"]["results"].first
+    else
+      return {}
+    end
   end
 
   def sql_search_ckan(sql_query)
@@ -21,7 +25,7 @@ module AppHelpers
   end
 
   def transform_row(row)
-    row["aqi"] = determine_aqi(row["parameter"],row["value"],row["unit"]) if (row["parameter"] && row["value"] && row["unit"])
+    row["aqi"] = determine_aqi(row["parameter"],row["value"],row["unit"]) if !row["api"] && (row["parameter"] && row["value"] && row["unit"])
     row["aqi_cat"] = aqi_to_category(row["aqi"]) if row["aqi"]
     row["unit"] = "%" if row["unit"] == "PERCENT"
     if (row["parameter"] == "TEMP" && row["unit"] == "C") or (row["parameter"] == "Temperature" && row["unit"] == "deg C")
@@ -96,7 +100,7 @@ module AppHelpers
     elsif concentration>=40.5 && concentration<50.5
       aqi = calculate_component_aqi(500,401,50.4,40.5,concentration);
     else
-      aqi = -1
+      aqi = nil
     end
     return aqi
   end
@@ -118,7 +122,7 @@ module AppHelpers
     elsif concentration>=350.5 && concentration<500.5
       aqi = calculate_component_aqi(500,401,500.4,350.5,concentration);
     else
-      aqi = -1
+      aqi = nil
     end
     return aqi
   end
@@ -140,7 +144,7 @@ module AppHelpers
     elsif concentration>=505 && concentration<605
       aqi = calculate_component_aqi(500,401,604,505,concentration);
     else
-      aqi = -1
+      aqi = nil
     end
     return aqi
   end
@@ -156,7 +160,7 @@ module AppHelpers
     elsif concentration>=186 && concentration<304
       aqi = calculate_component_aqi(200,151,304,186,concentration);
     else
-      aqi = -1 # AQI values of 201 or greater are calculated with 24-hour SO2 concentrations
+      aqi = nil # AQI values of 201 or greater are calculated with 24-hour SO2 concentrations
     end
     return aqi
   end
@@ -164,7 +168,7 @@ module AppHelpers
   def calculate_aqi_from_SO2_24hr(concentration)
     concentration = concentration.to_i
     if concentration >= 0 && concentration < 304
-      aqi = -1 # AQI values less than 201 are calculated with 1-hour SO2 concentrations
+      aqi = nil # AQI values less than 201 are calculated with 1-hour SO2 concentrations
     elsif concentration>=304 && concentration<605
       aqi = calculate_component_aqi(300,201,604,305,concentration);
     elsif concentration>=605 && concentration<805
@@ -172,7 +176,7 @@ module AppHelpers
     elsif concentration>=805 && concentration<1004
       aqi = calculate_component_aqi(500,401,1004,805,concentration);
     else
-      aqi = -1
+      aqi = nil
     end
     return aqi
   end
@@ -191,9 +195,9 @@ module AppHelpers
     elsif concentration>=0.116 && concentration<0.375
       aqi = calculate_component_aqi(300,201,0.374,0.116,concentration);
     elsif concentration>=0.375 && concentration<0.605
-      aqi = -1 # 8-hour ozone values do not define higher AQI values (>=301).  AQI values of 301 or greater are calculated with 1-hour ozone concentrations.
+      aqi = nil # 8-hour ozone values do not define higher AQI values (>=301).  AQI values of 301 or greater are calculated with 1-hour ozone concentrations.
     else
-      aqi = -1
+      aqi = nil
     end
     return aqi
   end
@@ -211,7 +215,7 @@ module AppHelpers
     elsif concentration>=0.505 && concentration<0.605
       aqi = calculate_component_aqi(500,401,0.604,0.505,concentration);
     else
-      aqi = -1
+      aqi = nil
     end
     return aqi
   end
@@ -233,7 +237,7 @@ module AppHelpers
     elsif concentration>=1.650 && concentration<2.049
       aqi = calculate_component_aqi(500,401,2.049,1.650,concentration);
     else
-      aqi = -1
+      aqi = nil
     end
     return aqi
   end
@@ -261,7 +265,7 @@ module AppHelpers
     when "DUST"
       vaule = value.round
       if value == 0
-        aqi_range = [-1,-1]
+        aqi_range = [0,0]
       elsif value.between?(1,1500)
         aqi_range = [0,50]
       elsif value.between?(1501,1529)
@@ -287,7 +291,7 @@ module AppHelpers
       end   
       return aqi_range.sum/2.00   
     else
-      return -1
+      return nil
     end 
   end
 
