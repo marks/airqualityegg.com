@@ -25,8 +25,8 @@ module AppHelpers
   end
 
   def transform_row(row)
-    row["aqi"] = determine_aqi(row["parameter"],row["value"],row["unit"]) if !row["api"] && (row["parameter"] && row["value"] && row["unit"])
-    row["aqi_cat"] = aqi_to_category(row["aqi"]) if row["aqi"]
+    row["computed_aqi"] = determine_aqi(row["parameter"],row["value"],row["unit"]) if !row["computed_aqi"] && (row["parameter"] && row["value"] && row["unit"])
+    row["aqi_cat"] = aqi_to_category(row["computed_aqi"]) if row["computed_aqi"]
     row["unit"] = "%" if row["unit"] == "PERCENT"
     if (row["parameter"] == "TEMP" && row["unit"] == "C") or (row["parameter"] == "Temperature" && row["unit"] == "deg C")
       row["unit"] = "°F"

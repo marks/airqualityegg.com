@@ -125,14 +125,31 @@ class AirQualityEgg < Sinatra::Base
   get '/aqs/:aqs_id.json' do
     content_type :json
 
-    site_sql = "SELECT aqs_id,site_name,agency_name,elevation,msa_name,cmsa_name,county_name,status,lat,lon from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{params[:aqs_id]}'"
+    site_sql = "SELECT aqs_id,site_name,agency_name,elevation,msa_name,cmsa_name,county_name,status,lat,lon,gmt_offset from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{params[:aqs_id]}'"
     data = sql_search_ckan(site_sql).first
 
-    daily_sql = "SELECT T.id,T.date,T.parameter,T.unit,T.value,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\".parameter, MAX (DATE) AS MaxDate FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY parameter) tm ON T.parameter = tm.parameter AND T.date = tm.MaxDate and T.aqs_id = '#{params['aqs_id']}' and T.time is NULL"
-    data[:latest_daily] = sql_search_ckan(daily_sql)
+    data[:datastreams] = {}
+    datastreams_sql = <<-EOS
+      SELECT
+        data_table.aqs_id,data_table.date, data_table.time,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
+      FROM
+        "#{ENV["aqs_site_resource"]}" sites_table
+      INNER JOIN "#{ENV["aqs_data_resource"]}" data_table ON sites_table.aqs_id = data_table.aqs_id
+      WHERE sites_table.aqs_id = '#{params[:aqs_id]}'
+      order by date,time desc
+      LIMIT (
+        SELECT COUNT(DISTINCT(data_table.parameter))
+        FROM "#{ENV["aqs_data_resource"]}" data_table
+        WHERE data_table.aqs_id = '#{params[:aqs_id]}'
+      )
+    EOS
+    datastreams_data = sql_search_ckan(datastreams_sql)
+    datastreams_data.each do |datastream|
+      data[:datastreams][datastream["parameter"].to_sym] = datastream if datastream
+    end    
 
-    hourly_sql = "SELECT T.id,tm.MaxTimestamp AS date,T.parameter,T.unit,T.value,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\". PARAMETER,  MAX((\"#{ENV["aqs_data_resource"]}\".date||' '||\"#{ENV["aqs_data_resource"]}\".time)::timestamp) as MaxTimestamp FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY PARAMETER) tm ON T . PARAMETER = tm. PARAMETER AND (T.date||' '||T.time)::timestamp = tm.MaxTimestamp AND T .aqs_id = '#{params['aqs_id']}'"
-    data[:latest_hourly] = sql_search_ckan(hourly_sql)
+    datastreams_aqi_asc = data[:datastreams].sort_by{|key,hash| hash["computed_aqi"].to_i}.last
+    data[:prevailing_aqi] = datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
 
     if params[:include_recent_history]
       series = []
@@ -155,62 +172,42 @@ class AirQualityEgg < Sinatra::Base
     site_sql = "SELECT * from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{params[:aqs_id]}'"
     @site = sql_search_ckan(site_sql).first
 
-    daily_sql = "SELECT T.id,T.date,T.parameter,T.unit,T.value,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\".parameter, MAX (DATE) AS MaxDate FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY parameter) tm ON T.parameter = tm.parameter AND T.date = tm.MaxDate and T.aqs_id = '#{params['aqs_id']}' and T.time is NULL"
-    @latest_daily_data = sql_search_ckan(daily_sql)
+    @datastreams = {}
+    datastreams_sql = <<-EOS
+      SELECT
+        data_table.aqs_id,data_table.date, data_table.time,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
+      FROM
+        "#{ENV["aqs_site_resource"]}" sites_table
+      INNER JOIN "#{ENV["aqs_data_resource"]}" data_table ON sites_table.aqs_id = data_table.aqs_id
+      WHERE sites_table.aqs_id = '#{params[:aqs_id]}'
+      order by date,time desc
+      LIMIT (
+        SELECT COUNT(DISTINCT(data_table.parameter))
+        FROM "#{ENV["aqs_data_resource"]}" data_table
+        WHERE data_table.aqs_id = '#{params[:aqs_id]}'
+      )
+    EOS
+    datastreams_data = sql_search_ckan(datastreams_sql)
+    datastreams_data.each do |datastream|
+      @datastreams[datastream["parameter"].to_sym] = datastream if datastream
+    end    
 
-    hourly_sql = "SELECT T.id,tm.MaxTimestamp AS date,T.parameter,T.unit,T.value,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\". PARAMETER,  MAX((\"#{ENV["aqs_data_resource"]}\".date||' '||\"#{ENV["aqs_data_resource"]}\".time)::timestamp) as MaxTimestamp FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY PARAMETER) tm ON T . PARAMETER = tm. PARAMETER AND (T.date||' '||T.time)::timestamp = tm.MaxTimestamp AND T .aqs_id = '#{params['aqs_id']}'"
-    @latest_hourly_data = sql_search_ckan(hourly_sql)
+    datastreams_aqi_asc = @datastreams.sort_by{|key,hash| hash["computed_aqi"].to_i}.last
+    @prevailing_aqi_component = datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
 
-    @prevailing_aqi_component = (@latest_hourly_data + @latest_daily_data).sort_by{|hash| hash["aqi"]}.last
+
+    # daily_sql = "SELECT T.id,T.date,T.parameter,T.unit,T.value,T.computed_aqi,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\".parameter, MAX (DATE) AS MaxDate FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY parameter) tm ON T.parameter = tm.parameter AND T.date = tm.MaxDate and T.aqs_id = '#{params['aqs_id']}' and T.time is NULL"
+    # @latest_daily_data = sql_search_ckan(daily_sql)
+
+    # hourly_sql = "SELECT T.id,tm.MaxTimestamp AS date,T.parameter,T.unit,T.computed_aqi,T.value,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\". PARAMETER,  MAX((\"#{ENV["aqs_data_resource"]}\".date||' '||\"#{ENV["aqs_data_resource"]}\".time)::timestamp) as MaxTimestamp FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY PARAMETER) tm ON T . PARAMETER = tm. PARAMETER AND (T.date||' '||T.time)::timestamp = tm.MaxTimestamp AND T .aqs_id = '#{params['aqs_id']}'"
+    # @latest_hourly_data = sql_search_ckan(hourly_sql)
+
+    # datastreams_aqi_asc = (@latest_hourly_data + @latest_daily_data).sort_by{|hash| hash["computed_aqi"].to_i }
+    # @prevailing_aqi_component =datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
 
     @local_feed_path = "/eggs/nearby/#{@site["lat"]}/#{@site["lon"]}.json"
     erb :show_aqs
   end
-
-
-  # Edit egg metadata
-  # get '/egg/:id/edit' do
-  #   feed_id, api_key = extract_feed_id_and_api_key_from_session
-  #   redirect_with_error('Not your egg') if feed_id.to_s != params[:id]
-  #   response = Xively::Client.get(feed_url(feed_id), :headers => {'Content-Type' => 'application/json', "X-ApiKey" => api_key})
-  #   @feed = Xively::Feed.new(response.body)
-  #   erb :edit
-  # end
-
-  # Register your egg
-  # post '/register' do
-  #   begin
-  #     logger.info("GET: #{product_url}")
-  #     response = Xively::Client.get(product_url, :headers => {'Content-Type' => 'application/json', "X-ApiKey" => $api_key})
-  #     json = MultiJson.load(response.body)
-  #     session['response_json'] = json
-  #     feed_id, api_key = extract_feed_id_and_api_key_from_session
-  #     redirect_with_error("Egg not found") unless feed_id
-  #     redirect "/egg/#{feed_id}/edit"
-  #   rescue
-  #     redirect_with_error "Egg not found"
-  #   end
-  # end
-
-  # Update egg metadata
-  # post '/egg/:id/update' do
-  #   feed_id, api_key = extract_feed_id_and_api_key_from_session
-  #   redirect_with_error('Not your egg') if feed_id.to_s != params[:id]
-  #   new_tags = [params[:existing_tags], "device:type=airqualityegg"].compact.delete_if {|tag| tag.empty?}
-  #   feed = Xively::Feed.new({
-  #     :title => params[:title],
-  #     :description => params[:description],
-  #     :id => feed_id,
-  #     :private => false,
-  #     :location_ele => params[:location_ele],
-  #     :location_lat => params[:location_lat],
-  #     :location_lon => params[:location_lon],
-  #     :location_exposure => params[:location_exposure],
-  #     :tags => new_tags.join(',')
-  #   })
-  #   response = Xively::Client.put(feed_url(feed_id), :headers => {'Content-Type' => 'application/json', "X-ApiKey" => api_key}, :body => feed.to_json)
-  #   redirect "/egg/#{feed_id}"
-  # end
 
   get '/egg/:id.json' do
     content_type :json
@@ -221,8 +218,7 @@ class AirQualityEgg < Sinatra::Base
     data[:datastreams] = {}
     datastreams_sql = <<-EOS
       SELECT
-        data_table.feed_id,data_table.datetime,data_table.parameter,data_table.value,data_table.unit,
-        sites_table.location_lat, sites_table.location_lon
+        data_table.feed_id,data_table.datetime,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
       FROM
         "#{ENV["aqe_site_resource"]}" sites_table
       INNER JOIN "#{ENV["aqe_data_resource"]}" data_table ON sites_table.id = data_table.feed_id
@@ -238,6 +234,10 @@ class AirQualityEgg < Sinatra::Base
     datastreams_data.each do |datastream|
       data[:datastreams][datastream["parameter"].to_sym] = datastream if datastream
     end    
+
+    datastreams_aqi_asc = data[:datastreams].sort_by{|key,hash| hash["computed_aqi"].to_i}.last
+    data[:prevailing_aqi] = datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
+
 
     if params[:include_recent_history]
       series = []
@@ -266,8 +266,7 @@ class AirQualityEgg < Sinatra::Base
     @datastreams = {}
     datastreams_sql = <<-EOS
       SELECT
-        data_table.feed_id,data_table.datetime,data_table.parameter,data_table.value,data_table.unit,
-        sites_table.location_lat, sites_table.location_lon
+        data_table.feed_id,data_table.datetime,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
       FROM
         "#{ENV["aqe_site_resource"]}" sites_table
       INNER JOIN "#{ENV["aqe_data_resource"]}" data_table ON sites_table.id = data_table.feed_id
@@ -285,7 +284,8 @@ class AirQualityEgg < Sinatra::Base
     end
 
 
-    @prevailing_aqi_component = @datastreams.sort_by{|key,hash| hash["aqi"]}.last.last if @datastreams.sort_by{|key,hash| hash["aqi"]}.last
+    datastreams_aqi_asc = @datastreams.sort_by{|key,hash| hash["computed_aqi"].to_i}.last
+    @prevailing_aqi_component =datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
 
     @local_feed_path = "/eggs/nearby/#{@feed["location_lat"]}/#{@feed["location_lon"]}.json"
     erb :show

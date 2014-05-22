@@ -7,42 +7,25 @@
   <img class="dashboard-current-prop" src="/assets/img/prop-bigegg.png">
   <div class="dashboard-current-values clearfix">
 
-    <% if @prevailing_aqi_component && @prevailing_aqi_component["aqi"] > 0 %>
+    <% if @prevailing_aqi_component && @prevailing_aqi_component["computed_aqi"].to_i > 0 %>
       <div class="" style="padding: 1px 15px 1px 15px; background-color:<%= @prevailing_aqi_component["aqi_cat"][:color] %>; color:<%= @prevailing_aqi_component["aqi_cat"][:font] %>">
-        <p style="font-size:130%; line-height: 23px;"><strong>The air quality at this location is currently <%= @prevailing_aqi_component["aqi_cat"][:name].downcase %></strong> (<%= @prevailing_aqi_component["aqi"] %> is the AQI value of <%= @prevailing_aqi_component["parameter"] %>)</p>
+        <p style="font-size:130%; line-height: 23px;"><strong>The air quality at this location is currently <%= @prevailing_aqi_component["aqi_cat"][:name].downcase %></strong> (<%= @prevailing_aqi_component["computed_aqi"] %> is the AQI value of <%= @prevailing_aqi_component["parameter"] %>)</p>
       </div>
     <% end %>
 
-    <% @latest_hourly_data.each do |data| %>
+    <% @datastreams.each do |ds,data| %>
       <div class="current current-right current-dust">
         <h2 class="current-id heading-narrow"><%= data["parameter"].upcase %></h2>
         <div class="current-value" style="margin-top:0px;height:20px;">
           <p class="current-value-measure" style="border-top:none; text-align:left;">
             <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data["value"].to_f.round(2)} #{data["unit"]}" %></span>
-            <div class="current-value-gauge" data-aqi-value="<%= data["aqi"] %>" id="current-gauge_<%= data["parameter"].gsub(/\W/,"") %>"></div>
+            <div class="current-value-gauge" data-aqi-value="<%= data["computed_aqi"] %>" id="current-gauge_<%= data["parameter"].gsub(/\W/,"") %>"></div>
           </p>
         </div>
-        <p class="current-value-updated-at">As of <%= data["date"].to_time.in_time_zone(settings.time_zone) %></p>
+        <p class="current-value-updated-at">As of <%= data["date"].to_time.change(:hour => data["time"]).in_time_zone(settings.time_zone) %></p>
       </div>
     <% end %>
   </div>
-
-  <div class="dashboard-current-values clearfix">
-    <% @latest_daily_data.each do |data| %>
-      <div class="current current-right current-dust">
-        <h2 class="current-id heading-narrow"><%= data["parameter"].upcase %></h2>
-        <h3 class="current-id-full"></h3>
-        <div class="current-value" style="margin-top:0px;height:20px;">
-          <p class="current-value-measure" style="border-top:none; text-align:left;">
-            <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data["value"].to_f.round(2)} #{data["unit"]}" %></span>
-            <div class="current-value-gauge" data-aqi-value="<%= data["aqi"] %>" id="current-gauge_<%= data["parameter"].gsub(/\W/,"") %>"></div>
-          </p>
-        </div>
-        <p class="current-value-updated-at">Updated <%= data["date"].to_date.in_time_zone(settings.time_zone).strftime("%m/%d/%y") %></p>
-      </div>
-    <% end %>
-  </div>
-
 
   <p class="dashboard-xively-link">
     <a class='button' href='/assets/docs/HourlyDataFactSheet.pdf' target='blank'>Data Fact Sheet</a>

@@ -175,7 +175,7 @@ var AQE = (function ( $ ) {
     html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
     html += "<tr><td>Created </td><td> "+moment(egg.created).fromNow()+"</td></tr>"
     html += "</table><hr />"
-    html += "<div id='egg_"+egg.id+"'><strong>Latest Readings</strong></div>"
+    html += "<div id='egg_"+egg.id+"'><strong>Latest Data</strong></div>"
     html += "<p style='text-align: right'><a href='/egg/"+egg.id+"'>More about this egg site including historical graphs →</a></p>"
     html += "</div>"
     marker.bindPopup(html)
@@ -192,14 +192,18 @@ var AQE = (function ( $ ) {
     if(typeof(ga)!="undefined"){ ga('send', 'event', 'egg_'+feed_id, 'click', 'egg_on_map', 1); }
     $.getJSON("/egg/"+feed_id+".json", function(data){
       var html = ""
+      if(data.prevailing_aqi){
+        html += "<div style='padding: 0 2px; border:2px solid "+data.prevailing_aqi.aqi_cat.color+"; background-color: "+data.prevailing_aqi.aqi_cat.color+"; color: "+data.prevailing_aqi.aqi_cat.font+" '><strong> This location's air is "+data.prevailing_aqi.aqi_cat.name+"</strong></div> " 
+      }
       $.each(data.datastreams, function(name,item){
         if(item){
           html += "<br />"+name+": "+item.value + " " + item.unit
-          if(item.aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+item.aqi_cat.color+"; background-color: "+item.aqi_cat.color+"; color: "+item.aqi_cat.font+" '><strong>"+item.aqi_cat.name+" (AQI = "+item.aqi+")</strong></span> " }
-          html += " (" + moment(item.at).fromNow() +  ")"  
+          if(item.computed_aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+item.aqi_cat.color+"; background-color: "+item.aqi_cat.color+"; color: "+item.aqi_cat.font+" '><strong>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</strong></span> " }
+          console.log(item.datetime)
+          html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  
         }        
       })
-      if(html == ""){html += "<em>No recent data available</em>"}
+      if(html == ""){html += "<br /><em>No recent data available</em>"}
       $("#egg_"+feed_id).append(html)
     })
   }
@@ -207,7 +211,7 @@ var AQE = (function ( $ ) {
   function addAQSSiteMapMarker(aqs) {
     var marker = L.marker([aqs.lat, aqs.lon],  {icon: aqsIcon})
     var html = "<div><strong>AirNow AQS Site Details</strong><table class='popup_metadata' data-aqs_id='"+aqs.aqs_id+"'>"
-    html += "<tr><td>Name / Code </td><td> <a href='/aqs/"+aqs.aqs_id+"'><strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></a></td></tr>"
+    html += "<tr><td>Site Name / ID </td><td> <a href='/aqs/"+aqs.aqs_id+"'><strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></a></td></tr>"
     html += "<tr><td>Agency </td><td>"+aqs.agency_name+"</td></tr>"
     html += "<tr><td>Position </td><td> "+aqs.elevation+" elevation</td></tr>"
     if(aqs.msa_name){html += "<tr><td>MSA </td><td> "+aqs.msa_name+"</td></tr>"}
@@ -215,7 +219,7 @@ var AQE = (function ( $ ) {
     html += "<tr><td>County </td><td> "+aqs.county_name+"</td></tr>"
     html += "<tr><td>Status </td><td> "+aqs.status+"</td></tr>"
     html += "</table><hr />"
-    html += "<div id='aqs_"+aqs.aqs_id+"'><em>Loading most recent readings..</em></div>"
+    html += "<div id='aqs_"+aqs.aqs_id+"'><strong>Latest Data</strong></div>"
     html += "<p style='text-align: right'><a href='/aqs/"+aqs.aqs_id+"'>More about this AQS site including historical graphs →</a></p>"
     html += "</div>"
     marker.bindPopup(html)
@@ -226,33 +230,22 @@ var AQE = (function ( $ ) {
   function onAQSSiteMapMarkerClick(e){
     var aqs_id = $(".popup_metadata").data("aqs_id")
     if(typeof(ga)!="undefined"){ ga('send', 'event', 'aqs_'+aqs_id, 'click', 'aqs_on_map', 1); }
+    
     $.getJSON("/aqs/"+aqs_id+".json", function(data){
-
-      var daily_html = "<strong>Latest Daily Readings</strong><br />"
-      var daily_data = $.map(data.latest_daily, function(i){
-        var item_html = ""
-        item_html += i.parameter+": "+i.value+" "+i.unit
-        if(i.aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+i.aqi_cat.color+"; background-color: "+i.aqi_cat.color+"; color: "+i.aqi_cat.font+" '><strong>"+i.aqi_cat.name+" (AQI = "+i.aqi+")</strong></span> " }
-        item_html += " ("+moment(i.date).format("MM/DD/YYYY")+")"
-        return item_html
-      })     
-      if(daily_data.length == 0){
-        daily_html += "<em>No daily data available</em>"
-      } else {
-        daily_html += daily_data.join("<br />")
+      var html = ""
+      if(data.prevailing_aqi){
+        html += "<div style='padding: 0 2px; border:2px solid "+data.prevailing_aqi.aqi_cat.color+"; background-color: "+data.prevailing_aqi.aqi_cat.color+"; color: "+data.prevailing_aqi.aqi_cat.font+" '><strong> This location's air is "+data.prevailing_aqi.aqi_cat.name+"</strong></div> " 
       }
-
-      var hourly_html = "<br /><br /><strong>Latest Hourly Readings</strong><br />"
-      var hourly_data = $.map(data.latest_hourly, function(i){
-        return i.parameter+": "+i.value+" "+i.unit+" ("+moment(i.date).format("MM/DD/YYYY h:mm a")+" GMT "+data.gmt_offset+")"
-      })     
-      if(hourly_data.length == 0){
-        hourly_html += "<em>No hourly data available</em>"
-      } else {
-        hourly_html += hourly_data.join("<br />")
-      }
-      
-      $("#aqs_"+aqs_id).html(daily_html+hourly_html)
+      $.each(data.datastreams, function(name,item){
+        if(item){
+          html += "<br />"+name+": "+item.value + " " + item.unit
+          if(item.computed_aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+item.aqi_cat.color+"; background-color: "+item.aqi_cat.color+"; color: "+item.aqi_cat.font+" '><strong>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</strong></span> " }
+          if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
+          else {html += " (" + moment(item.date ).fromNow() +  ")" }
+        }        
+      })
+      if(html == ""){html += "<br /><em>No recent data available</em>"}      
+      $("#aqs_"+aqs_id).append(html)
     })
   }
 
