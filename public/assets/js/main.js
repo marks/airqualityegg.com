@@ -199,7 +199,6 @@ var AQE = (function ( $ ) {
         if(item){
           html += "<br />"+name+": "+item.value + " " + item.unit
           if(item.computed_aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+item.aqi_cat.color+"; background-color: "+item.aqi_cat.color+"; color: "+item.aqi_cat.font+" '><strong>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</strong></span> " }
-          console.log(item.datetime)
           html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  
         }        
       })
