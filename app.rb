@@ -136,7 +136,7 @@ class AirQualityEgg < Sinatra::Base
         "#{ENV["aqs_site_resource"]}" sites_table
       INNER JOIN "#{ENV["aqs_data_resource"]}" data_table ON sites_table.aqs_id = data_table.aqs_id
       WHERE sites_table.aqs_id = '#{params[:aqs_id]}'
-      order by date,time desc
+      order by date desc, time desc
       LIMIT (
         SELECT COUNT(DISTINCT(data_table.parameter))
         FROM "#{ENV["aqs_data_resource"]}" data_table
@@ -180,7 +180,7 @@ class AirQualityEgg < Sinatra::Base
         "#{ENV["aqs_site_resource"]}" sites_table
       INNER JOIN "#{ENV["aqs_data_resource"]}" data_table ON sites_table.aqs_id = data_table.aqs_id
       WHERE sites_table.aqs_id = '#{params[:aqs_id]}'
-      order by date,time desc
+      order by date desc, time desc
       LIMIT (
         SELECT COUNT(DISTINCT(data_table.parameter))
         FROM "#{ENV["aqs_data_resource"]}" data_table
