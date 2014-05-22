@@ -1,4 +1,4 @@
-var map;
+var map, egg_layer, aqs_layer, school_layer, in_bounds, drawn;
 var AQE = (function ( $ ) {
   "use strict";
 
@@ -27,14 +27,14 @@ var AQE = (function ( $ ) {
   thirty_days_ago = thirty_days_ago.setDate(today.getDate()-30)
 
   // Air Quality Egg and AirNow AWS layers
-  var egg_layer = L.layerGroup([]);
+  egg_layer = L.layerGroup([]);
   var egg_layer_inactive = L.layerGroup([]);
   // var egg_heatmap = L.heatLayer([], {radius: 35})
   var egg_heatmap = new L.TileLayer.WebGLHeatMap({size: 5000, autoresize: true})
   var egg_heatmap_layer = L.layerGroup([egg_heatmap])
 
-  var aqs_layer = L.layerGroup([]);
-  var school_layer = L.layerGroup([]);
+  aqs_layer = L.layerGroup([]);
+  school_layer = L.layerGroup([]);
 
   // Propeller Health image overlay and layer 
   // var propellerhealth_layer_url = 'http://s3.amazonaws.com/healthyaws/propeller_health/propeller_health_heatmap_nov13_shared.png';
@@ -97,10 +97,13 @@ var AQE = (function ( $ ) {
     // load feeds and then initialize map and add the markers
     if(typeof(local_feed_path) != "undefined"){
       // set up leaflet map
-      map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer, school_layer]})
+      map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer]})
       handleNoGeolocation();
       var hash = new L.Hash(map);
     
+      var drawControl = new L.Control.Draw({ draw: { polyline: false, marker: false }});
+      map.addControl(drawControl);
+
       L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
           maxZoom: 18
@@ -132,6 +135,37 @@ var AQE = (function ( $ ) {
         }
       })
 
+      map.on('draw:created', function (e) {
+          if(typeof(drawn) != "undefined"){map.removeLayer(drawn)} // remove previously drawn item
+          in_bounds = {} // reset in_bounds away
+
+          var type = e.layerType,
+              layer = e.layer;          
+          drawn = layer
+
+          var sensor_layers = egg_layer.getLayers().concat(aqs_layer.getLayers())
+          $.each(sensor_layers, function(n,item){
+            var layer_in_bounds = drawn.getBounds().contains(item.getLatLng())
+            if(layer_in_bounds){ 
+              if(typeof(in_bounds[item.ref.type]) == "undefined"){ in_bounds[item.ref.type] = [] }
+              in_bounds[item.ref.type].push(item.ref.id)
+            }
+          })
+
+          // open url in new window if there is anything to compare
+          var in_bounds_compare_url = "/compare?"
+          $.each(in_bounds, function(type,ids){
+            in_bounds_compare_url += "&"+type+"="+ids.join(",")
+          })
+          if(in_bounds_compare_url != "/compare?"){
+            window.open(location.origin+in_bounds_compare_url)
+          } else {
+            alert("Draw a shape over some markers to compare them side-by-side in a new window.")
+          }
+
+          map.addLayer(layer);
+      });
+
       //  - load active AQS stations to map
       $.getJSON("/all_aqs_sites.json", function(aqs_mapmarkers){
         for ( var x = 0, len = aqs_mapmarkers.length; x < len; x++ ) {
@@ -158,6 +192,32 @@ var AQE = (function ( $ ) {
       graphAQSHistoricalData();
     }
 
+    $("tr[data-sensor-id]").each(function(n,row){
+      var type = $(row).data("sensor-type")
+      var id = $(row).data("sensor-id")
+
+
+      $.getJSON("/"+type+"/"+id+".json", function(data){
+        var html = ""
+        if(data.prevailing_aqi){
+          html += "<div style='padding: 0 2px; border:2px solid "+data.prevailing_aqi.aqi_cat.color+"; background-color: "+data.prevailing_aqi.aqi_cat.color+"; color: "+data.prevailing_aqi.aqi_cat.font+" '><strong> This location's air is "+data.prevailing_aqi.aqi_cat.name+"</strong></div> " 
+        }
+        $.each(data.datastreams, function(name,item){
+          if(item){
+            html += "<br />"+name+": "+item.value + " " + item.unit
+            if(item.computed_aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+item.aqi_cat.color+"; background-color: "+item.aqi_cat.color+"; color: "+item.aqi_cat.font+" '><strong>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</strong></span> " }
+            if(item.datetime){ html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  }
+            else if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
+            else {html += " (" + moment(item.date ).fromNow() +  ")" }
+          }        
+        })
+        if(html == ""){html += "<br /><em>No recent data available</em>"}
+        $(row).children('td').eq(1).html(html)
+      })
+
+
+
+    })
 
   }
 
@@ -179,6 +239,7 @@ var AQE = (function ( $ ) {
     html += "<p style='text-align: right'><a href='/egg/"+egg.id+"'>More about this egg site including historical graphs →</a></p>"
     html += "</div>"
     marker.bindPopup(html)
+    marker.ref = {type: "aqe", id: egg.id}
     marker.on('click', onEggMapMarkerClick); 
     if(new Date(egg.updated) < thirty_days_ago){
       marker.addTo(egg_layer_inactive);
@@ -222,6 +283,7 @@ var AQE = (function ( $ ) {
     html += "<p style='text-align: right'><a href='/aqs/"+aqs.aqs_id+"'>More about this AQS site including historical graphs →</a></p>"
     html += "</div>"
     marker.bindPopup(html)
+    marker.ref = {type: "aqs", id: aqs.aqs_id}
     marker.on('click', onAQSSiteMapMarkerClick); 
     marker.addTo(aqs_layer);
   }

@@ -68,6 +68,15 @@ class AirQualityEgg < Sinatra::Base
         true
       end
     end
+
+    def sql_for_aqe_site(id)
+      "SELECT id,feed,status,updated,location_domain,description,location_lon,location_lat,created,location_exposure,location_ele,title from \"#{ENV["aqe_site_resource"]}\" WHERE id = '#{id}'"
+    end
+
+    def sql_for_aqs_site(id)
+      "SELECT status,msa_name,elevation,aqs_id,county_name,lat,lon,gmt_offset,agency_name,cmsa_name,site_name from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{id}'"
+    end
+
   end
 
 
@@ -125,8 +134,7 @@ class AirQualityEgg < Sinatra::Base
   get '/aqs/:aqs_id.json' do
     content_type :json
 
-    site_sql = "SELECT aqs_id,site_name,agency_name,elevation,msa_name,cmsa_name,county_name,status,lat,lon,gmt_offset from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{params[:aqs_id]}'"
-    data = sql_search_ckan(site_sql).first
+    data = sql_search_ckan(sql_for_aqs_site(params[:aqs_id])).first
 
     data[:datastreams] = {}
     datastreams_sql = <<-EOS
@@ -167,8 +175,7 @@ class AirQualityEgg < Sinatra::Base
   end
 
   get '/aqs/:aqs_id' do
-    site_sql = "SELECT * from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{params[:aqs_id]}'"
-    @site = sql_search_ckan(site_sql).first
+    @site = sql_search_ckan(sql_for_aqs_site(params[:aqs_id])).first
 
     @datastreams = {}
     datastreams_sql = <<-EOS
@@ -205,11 +212,11 @@ class AirQualityEgg < Sinatra::Base
     erb :show_aqs
   end
 
-  get '/egg/:id.json' do
+  ['/egg/:id.json','/aqe/:id.json'].each do |path|
+  get path do
     content_type :json
 
-    egg_sql = "SELECT feed,status,updated,location_domain,description,location_lon,location_lat,created,location_exposure,location_ele,title from \"#{ENV["aqe_site_resource"]}\" WHERE id = '#{params[:id]}'"
-    data = sql_search_ckan(egg_sql).first
+    data = sql_search_ckan(sql_for_aqe_site(params[:id])).first
 
     data[:datastreams] = {}
     datastreams_sql = <<-EOS
@@ -251,11 +258,12 @@ class AirQualityEgg < Sinatra::Base
     end
     return data.to_json
   end
+  end
 
   # View egg dashboard
-  get '/egg/:id' do
-    egg_sql = "SELECT id,feed,status,updated,location_domain,description,location_lon,location_lat,created,location_exposure,location_ele,title from \"#{ENV["aqe_site_resource"]}\" WHERE id = '#{params[:id]}'"
-    @feed = sql_search_ckan(egg_sql).first
+  ['/egg/:id','/aqe/:id'].each do |path|
+  get path do
+    @feed = sql_search_ckan(sql_for_aqe_site(params[:id])).first
 
     redirect_with_error("Egg not found") if @feed.nil? 
 
@@ -284,7 +292,29 @@ class AirQualityEgg < Sinatra::Base
     @prevailing_aqi_component =datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
 
     @local_feed_path = "/eggs/nearby/#{@feed["location_lat"]}/#{@feed["location_lon"]}.json"
-    erb :show
+    erb :show_aqe
+  end
+  end
+
+  get '/compare' do
+    @sensors = []
+    params.each do |type,ids|
+      ids.split(",").each do |sensor_id|
+        begin
+        @sensors << case type.downcase
+        when "aqe"
+          sql_search_ckan(sql_for_aqe_site(sensor_id)).first.merge("type" => type, "id" => sensor_id)
+        when "aqs"
+          sql_search_ckan(sql_for_aqs_site(sensor_id)).first.merge("type" => type, "id" => sensor_id)
+        else
+          nil
+        end
+        rescue
+        end
+      end
+      @sensors.compact!
+    end
+    erb :compare
   end
 
   get '/eggs/nearby/:lat/:lon.json' do

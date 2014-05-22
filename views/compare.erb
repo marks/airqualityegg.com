@@ -1,0 +1,36 @@
+
+<section class="dashboard-current">
+  <div class="dashboard-current-values clearfix">
+  
+    <% if @prevailing_aqi_component && @prevailing_aqi_component["computed_aqi"] > 0 %>
+      <div class="" style="padding: 1px 15px 1px 15px; background-color:<%= @prevailing_aqi_component["aqi_cat"][:color] %>; color:<%= @prevailing_aqi_component["aqi_cat"][:font] %>">
+        <p style="font-size:130%; line-height: 23px;"><strong>The air quality at this location is currently <%= @prevailing_aqi_component["aqi_cat"][:name].downcase %></strong> (<%= @prevailing_aqi_component["computed_aqi"] %> is the AQI value of <%= @prevailing_aqi_component["parameter"] %>)</p>
+      </div>
+    <% end %>
+
+    <table border=1>
+      <tr>
+        <td><h2>Sensor Site<h2></td>
+        <td><h2>Latest Data</h2></td>
+      </tr>
+      <% @sensors.each do |sensor| %>
+        <tr data-sensor-id="<%= sensor["id"] %>" data-sensor-type="<%= sensor["type"] %>">
+          <td>
+            <h3><%= sensor["title"] or sensor["site_name"] %></h3>
+            <p>data-sensor-id=<%= sensor["id"] %> data-sensor-type=<%= sensor["type"] %></p>
+          </td>
+          <td>Loading...</td>
+        </tr>
+      <% end %>
+    <table>
+
+  </div>
+
+</section>
+
+
+<section class="">
+    <div id="dashboard-chart"></div>
+</section>
+
+<hr />
