@@ -17,7 +17,7 @@
         <tr data-sensor-id="<%= sensor["id"] %>" data-sensor-type="<%= sensor["type"] %>">
           <td>
             <h3><%= sensor["title"] or sensor["site_name"] %></h3>
-            <p>data-sensor-id=<%= sensor["id"] %> data-sensor-type=<%= sensor["type"] %></p>
+            <p><strong><a href='/<%= sensor["type"] %>/<%= sensor["id"] %>'>Go to this sensor's page for more details</a></strong></p>
           </td>
           <td>Loading...</td>
         </tr>
