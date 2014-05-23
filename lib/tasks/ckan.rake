@@ -402,10 +402,12 @@ namespace :ckan do
               datastream_records << row
             end
             # batch upload datastream_records 
-            post_data = {:resource_id => args[:resource_id], :records => datastream_records, :method => 'upsert'}.to_json
-            upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
-            upsert_result = JSON.parse(upsert_raw)
-            sleep 3
+            if datastream_records != []
+              post_data = {:resource_id => args[:resource_id], :records => datastream_records, :method => 'upsert'}.to_json
+              upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+              upsert_result = JSON.parse(upsert_raw)
+              sleep 2
+            end
           end
         end
 
