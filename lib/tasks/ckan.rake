@@ -164,6 +164,7 @@ namespace :ckan do
 
         else # update existing resource
           create_resource_data[:resource_id] = resource["id"]
+          resource_id = resource["id"]
         end
 
 
