@@ -154,15 +154,18 @@ namespace :ckan do
 
         if resource.nil? # if there is no resource, create it inside the right package
           create_resource_data[:resource] = {:package_id => ENV['CKAN_AQS_DATASET_ID'], :name => ENV['CKAN_AQS_DATA_RESOURCE_NAME'] }
+
+
+          create_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_create", create_resource_data.to_json,
+            {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+          create_results = JSON.parse(create_raw)
+          resource_id = create_results["result"]["resource_id"]
+          puts "Created or updated a new resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
+
         else # update existing resource
           create_resource_data[:resource_id] = resource["id"]
         end
 
-        create_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_create", create_resource_data.to_json,
-          {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
-        create_results = JSON.parse(create_raw)
-        resource_id = create_results["result"]["resource_id"]
-        puts "Created or updated a new resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
 
         # invoke upsert rake tasks
         Rake.application.invoke_task("ckan:airnow:data:upsert_daily[#{resource_id}]")
