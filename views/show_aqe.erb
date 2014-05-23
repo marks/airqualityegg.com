@@ -23,7 +23,7 @@
           <% if @datastreams[:NO2] %><div class="current-value-gauge" data-aqi-value="<%= @datastreams[:NO2]["computed_aqi"] %>" id="current-gauge_NO2"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @datastreams[:NO2] ? "Updated #{@datastreams[:NO2]["datetime"].in_time_zone(settings.time_zone)}": ''%></p>      
+      <p class="current-value-updated-at"><%= @datastreams[:NO2] ? "Updated <span class='momentify'>#{@datastreams[:NO2]["datetime"]}Z</span>": ''%></p>      
     </div>
 
     <div class="current current-right">
@@ -35,7 +35,7 @@
           <% if @datastreams[:CO] %><div class="current-value-gauge" data-aqi-value="<%= @datastreams[:CO]["computed_aqi"] %>" id="current-gauge_CO"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @datastreams[:CO] ? "Updated #{@datastreams[:CO]["datetime"].to_time.in_time_zone(settings.time_zone)}": ''%></p>      
+      <p class="current-value-updated-at"><%= @datastreams[:CO] ? "Updated <span class='momentify'>#{@datastreams[:CO]["datetime"]}Z</span>": ''%></p>      
     </div>
 
     <div class="current current-right">
@@ -47,7 +47,7 @@
           <% if @datastreams[:Dust] %><div class="current-value-gauge" data-aqi-value="<%= @datastreams[:Dust]["computed_aqi"] %>" id="current-gauge_Dust"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @datastreams[:Dust] ? "Updated #{@datastreams[:Dust]["datetime"].to_time.in_time_zone(settings.time_zone)}": ''%></p>      
+      <p class="current-value-updated-at"><%= @datastreams[:Dust] ? "Updated <span class='momentify'>#{@datastreams[:Dust]["datetime"]}Z</span>": ''%></p>      
     </div>
 
 
@@ -60,7 +60,7 @@
           <% if @datastreams[:Temperature] %><div class="current-value-gauge" data-aqi-value="<%= @datastreams[:Temperature]["computed_aqi"] %>" id="current-gauge_Temperature"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @datastreams[:Temperature] ? "Updated #{@datastreams[:Temperature]["datetime"].to_time.in_time_zone(settings.time_zone)}": ''%></p>      
+      <p class="current-value-updated-at"><%= @datastreams[:Temperature] ? "Updated <span class='momentify'>#{@datastreams[:Temperature]["datetime"]}Z</span>": ''%></p>      
     </div>
     
     <div class="current current-right">
@@ -72,7 +72,7 @@
           <% if @datastreams[:Humidity] %><div class="current-value-gauge" data-aqi-value="<%= @datastreams[:Humidity]["computed_aqi"] %>" id="current-gauge_Humidity"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @datastreams[:Humidity] ? "Updated #{@datastreams[:Humidity]["datetime"].to_time.in_time_zone(settings.time_zone)}": ''%></p>      
+      <p class="current-value-updated-at"><%= @datastreams[:Humidity] ? "Updated <span class='momentify'>#{@datastreams[:Humidity]["datetime"]}Z</span>": ''%></p>      
     </div>
 
   </div>

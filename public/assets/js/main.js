@@ -195,8 +195,6 @@ var AQE = (function ( $ ) {
     $("tr[data-sensor-id]").each(function(n,row){
       var type = $(row).data("sensor-type")
       var id = $(row).data("sensor-id")
-
-
       $.getJSON("/"+type+"/"+id+".json", function(data){
         var html = ""
         if(data.prevailing_aqi){
@@ -214,10 +212,14 @@ var AQE = (function ( $ ) {
         if(html == ""){html += "<br /><em>No recent data available</em>"}
         $(row).children('td').eq(1).html(html)
       })
-
-
-
     })
+
+    $(".momentify").each(function(n,item){
+      var original = $(item).html()
+      var from_now = moment(original).fromNow()
+      $(item).html("<abbr title='"+original+"'>"+from_now+"</abbr>")
+    })
+
 
   }
 

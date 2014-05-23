@@ -22,7 +22,7 @@
             <div class="current-value-gauge" data-aqi-value="<%= data["computed_aqi"] %>" id="current-gauge_<%= data["parameter"].gsub(/\W/,"") %>"></div>
           </p>
         </div>
-        <p class="current-value-updated-at">As of <%= data["date"].to_time.change(:hour => data["time"]).in_time_zone(settings.time_zone) %></p>
+        <p class="current-value-updated-at">Updated <span class='momentify'><%= data["date"].to_time.change(:hour => data["time"], :offset => @site["gmt_offset"]) %></span></p>
       </div>
     <% end %>
   </div>
