@@ -74,7 +74,7 @@ class AirQualityEgg < Sinatra::Base
     end
 
     def sql_for_aqs_site(id)
-      "SELECT status,msa_name,elevation,aqs_id,county_name,lat,lon,gmt_offset,agency_name,cmsa_name,site_name,state_name,epa_region from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{id}'"
+      "SELECT status,msa_name,elevation,aqs_id,county_name,lat,lon,gmt_offset,agency_name,cmsa_name,site_name,state_name,epa_region,country_code from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{id}'"
     end
 
     def sql_for_aqs_datastreams(id)
