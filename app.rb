@@ -199,6 +199,8 @@ class AirQualityEgg < Sinatra::Base
   get '/aqs/:aqs_id' do
     @site = sql_search_ckan(sql_for_aqs_site(params[:aqs_id])).first
 
+    redirect_with_error("AQS site not found") if @site.nil? 
+
     @datastreams = {}
     datastreams_sql = sql_for_aqs_datastreams(params[:aqs_id])
     datastreams_data = sql_search_ckan(datastreams_sql)
@@ -306,13 +308,6 @@ class AirQualityEgg < Sinatra::Base
   end
 
   private
-
-  # def extract_feed_id_and_api_key_from_session
-  #   [session['response_json']['feed_id'], session['response_json']['apikey']]
-  # rescue
-  #   redirect_with_error('Egg not found')
-  # end
-
   def redirect_with_error(message)
     session['error'] = message
     redirect '/'
