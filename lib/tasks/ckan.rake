@@ -183,25 +183,29 @@ namespace :ckan do
         ftp.login(ENV['AIRNOW_USER'], ENV['AIRNOW_PASS'])
         ftp.passive = true # for Heroku
         puts "Opening file from FTP..."
-        data = ftp.getbinaryfile("DailyData/#{TODAY}-peak.dat", nil, 1024)
-        ftp.close
+        begin
+          data = ftp.getbinaryfile("DailyData/#{TODAY}-peak.dat", nil, 1024)
+          ftp.close
 
-        puts "Parsing daily file and upserting rows..."
-        CSV.parse(data, :col_sep => "|", :encoding => 'UTF-8') do |row|
-          monitoring_data = {
-            :aqs_id => row[1],
-            :date => Time.strptime(row[0],'%m/%d/%y').strftime("%Y-%m-%d"),
-            :time => nil,
-            :parameter => row[3],
-            :unit => row[4],
-            :value => row[5].to_f,
-            :computed_aqi => determine_aqi(row[3], row[5].to_f, row[4]),
-            :data_source => fix_encoding(row[7]),
-          }
-          monitoring_data[:id] = "#{monitoring_data[:aqs_id]}|#{monitoring_data[:date]}|#{monitoring_data[:time]}|#{monitoring_data[:parameter]}"
-          post_data = {:resource_id => args[:resource_id], :records => [monitoring_data], :method => 'upsert'}.to_json
-          upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
-          upsert_result = JSON.parse(upsert_raw)
+          puts "Parsing daily file and upserting rows..."
+          CSV.parse(data, :col_sep => "|", :encoding => 'UTF-8') do |row|
+            monitoring_data = {
+              :aqs_id => row[1],
+              :date => Time.strptime(row[0],'%m/%d/%y').strftime("%Y-%m-%d"),
+              :time => nil,
+              :parameter => row[3],
+              :unit => row[4],
+              :value => row[5].to_f,
+              :computed_aqi => determine_aqi(row[3], row[5].to_f, row[4]),
+              :data_source => fix_encoding(row[7]),
+            }
+            monitoring_data[:id] = "#{monitoring_data[:aqs_id]}|#{monitoring_data[:date]}|#{monitoring_data[:time]}|#{monitoring_data[:parameter]}"
+            post_data = {:resource_id => args[:resource_id], :records => [monitoring_data], :method => 'upsert'}.to_json
+            upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+            upsert_result = JSON.parse(upsert_raw)
+          end
+        rescue
+          puts "ERROR: rescued from AQS daily file"
         end
 
         puts "\nAQS Monitoring daily data upserts complete"
