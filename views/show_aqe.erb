@@ -4,7 +4,6 @@
   var feed_location = ['<%= @site["location_lat"] %>', '<%= @site["location_lon"] %>'];
 </script>
 
-
 <div class="row">
   <div class="col-lg-12">
     <h1 class="page-header"><%= @site["title"] %> <small>Air Quality Egg #<%= @site["id"] %></small></h1>
@@ -28,9 +27,11 @@
         <div class="panel panel-default">
           <div class="panel-heading">
             <h4><%= ds %>
+              <% if data["more_info_url"] %>
               <small><br />
               <a class="current-external-link" href="<%= data["more_info_url"] %>" target="blank"><%= data["name"] %> <i class="fa fa-external-link"></i> 
               </a></small>
+              <% end %>
             </h4>
           </div>
           <div class="panel-body">
@@ -76,18 +77,18 @@
                   </tr>
                   <tr>
                     <td>Past 3 days</td>
-                    <td><%= @averages[3][ds]["avg_value"].to_f.round(1) if @averages[0][ds]["avg_value"] %></td>
-                    <td><%= @averages[3][ds]["avg_aqi"].to_f.round(1) if @averages[0][ds]["avg_aqi"] %></td>
+                    <td><%= @averages[3][ds]["avg_value"].to_f.round(1) if @averages[3][ds]["avg_value"] %></td>
+                    <td><%= @averages[3][ds]["avg_aqi"].to_f.round(1) if @averages[3][ds]["avg_aqi"] %></td>
                   </tr>
                   <tr>
                     <td>Past 7 days</td>
-                    <td><%= @averages[7][ds]["avg_value"].to_f.round(1) if @averages[0][ds]["avg_value"] %></td>
-                    <td><%= @averages[7][ds]["avg_aqi"].to_f.round(1) if @averages[0][ds]["avg_aqi"] %></td>
+                    <td><%= @averages[7][ds]["avg_value"].to_f.round(1) if @averages[7][ds]["avg_value"] %></td>
+                    <td><%= @averages[7][ds]["avg_aqi"].to_f.round(1) if @averages[7][ds]["avg_aqi"] %></td>
                   </tr>
                   <tr>
                     <td>Past 28 days</td>
-                    <td><%= @averages[28][ds]["avg_value"].to_f.round(1) if @averages[0][ds]["avg_value"] %></td>
-                    <td><%= @averages[28][ds]["avg_aqi"].to_f.round(1) if @averages[0][ds]["avg_aqi"] %></td>
+                    <td><%= @averages[28][ds]["avg_value"].to_f.round(1) if @averages[28][ds]["avg_value"] %></td>
+                    <td><%= @averages[28][ds]["avg_aqi"].to_f.round(1) if @averages[28][ds]["avg_aqi"] %></td>
                   </tr>
                 </tbody>
               </table>

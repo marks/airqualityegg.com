@@ -3,85 +3,177 @@
   var feed_location = ['<%= @site["lat"] %>', '<%= @site["lon"] %>'];
 </script>
 
-<section class="dashboard-current">
-  <img class="dashboard-current-prop" src="/assets/img/prop-bigegg.png">
-  <div class="dashboard-current-values clearfix">
 
-    <% if @prevailing_aqi_component && @prevailing_aqi_component["computed_aqi"].to_i > 0 %>
-      <div class="" style="padding: 1px 15px 1px 15px; background-color:<%= @prevailing_aqi_component["aqi_cat"][:color] %>; color:<%= @prevailing_aqi_component["aqi_cat"][:font] %>">
-        <p style="font-size:130%; line-height: 23px;"><strong>The air quality at this location is currently <%= @prevailing_aqi_component["aqi_cat"][:name].downcase %></strong> (<%= @prevailing_aqi_component["computed_aqi"] %> is the AQI value of <%= @prevailing_aqi_component["parameter"] %>)</p>
-      </div>
-    <% end %>
+<div class="row">
+  <div class="col-lg-12">
+    <h1 class="page-header"><%= @site["site_name"] %> <small>AQS Site #<%= @site["aqs_id"] %></small></h1>
+  </div>
+</div>
 
-    <% @datastreams.each do |ds,data| %>
-      <div class="current current-right current-dust">
-        <h2 class="current-id heading-narrow"><%= data["parameter"].upcase %></h2>
-        <div class="current-value" style="margin-top:0px;height:20px;">
-          <p class="current-value-measure" style="border-top:none; text-align:left;">
-            <span class="current-value-measure-wrap" style="padding-left:0px;"><%= "#{data["value"].to_f.round(2)} #{data["unit"]}" %></span>
-            <div class="current-value-gauge" data-aqi-value="<%= data["computed_aqi"] %>" id="current-gauge_<%= data["parameter"].gsub(/\W/,"") %>"></div>
-          </p>
+<% if @prevailing_aqi_component && @prevailing_aqi_component["computed_aqi"] > 0 %>
+<div class="row">
+  <div class="col-lg-12">
+    <div class="alert" style="background-color:<%= @prevailing_aqi_component["aqi_cat"][:color] %>; color:<%= @prevailing_aqi_component["aqi_cat"][:font] %>">
+      <p style="font-size:130%; line-height: 23px;"><strong>The air quality at this location is currently <%= @prevailing_aqi_component["aqi_cat"][:name].downcase %></strong> (<%= @prevailing_aqi_component["computed_aqi"] %> is the AQI value of <%= @prevailing_aqi_component["parameter"] %>)</p>
+    </div>
+  </div>
+</div>
+<% end %>
+
+<div class="row">
+    <% @datastreams.each_with_index do |(ds,data),i| %>
+      <div class="col-lg-3 aqe datastream" style="height: 600px;">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4><%= ds %>
+              <% if data["more_info_url"] %>
+              <small><br />
+              <a class="current-external-link" href="<%= data["more_info_url"] %>" target="blank"><%= data["name"] %> <i class="fa fa-external-link"></i> 
+              </a></small>
+              <% end %>
+            </h4>
+          </div>
+          <div class="panel-body">
+            <div class="table-responsive">
+              <table class="table" style="margin-bottom:0px;">
+                <thead>
+                    <tr>
+                      <th style="width:50%">Sensor Value</th>
+                      <th style="width:50%">AQI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                      <td>
+                        <%= "#{data["value"].to_f.round(2)} #{data["unit"]}" %>
+                      </td>
+                      <td>
+                        <% if data["computed_aqi"] %>
+                          <div class="alert" style="padding: 5px; background-color:<%= data["aqi_cat"][:color] %>; color:<%= data["aqi_cat"][:font] %>"><%= data["computed_aqi"] %> - <%= data["aqi_cat"][:name] %>
+                          </div>
+                        <% else %>
+                          <span class="text-muted">N/A</span>
+                        <% end %>
+                      </td>
+                    </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-responsive">
+              <table class="table" style="margin-bottom:0px;">
+                <thead>
+                  <tr>
+                    <th style="width:44%">Time period</th>
+                    <th style="width:28%">Avg Value</th>
+                    <th style="width:28%">Avg AQI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Today</td>
+                    <td><%= @averages[0][ds]["avg_value"].to_f.round(1) if @averages[0][ds] && @averages[0][ds]["avg_value"] %></td>
+                    <td><%= @averages[0][ds]["avg_aqi"].to_f.round(1) if @averages[0][ds] &&  @averages[0][ds]["avg_aqi"] %></td>
+                  </tr>
+                  <tr>
+                    <td>Past 3 days</td>
+                    <td><%= @averages[3][ds]["avg_value"].to_f.round(1) if @averages[3][ds] &&  @averages[3][ds]["avg_value"] %></td>
+                    <td><%= @averages[3][ds]["avg_aqi"].to_f.round(1) if @averages[3][ds] &&  @averages[3][ds]["avg_aqi"] %></td>
+                  </tr>
+                  <tr>
+                    <td>Past 7 days</td>
+                    <td><%= @averages[7][ds]["avg_value"].to_f.round(1) if @averages[7][ds] &&  @averages[7][ds]["avg_value"] %></td>
+                    <td><%= @averages[7][ds]["avg_aqi"].to_f.round(1) if @averages[7][ds] &&  @averages[7][ds]["avg_aqi"] %></td>
+                  </tr>
+                  <tr>
+                    <td>Past 28 days</td>
+                    <td><%= @averages[28][ds]["avg_value"].to_f.round(1) if @averages[28][ds] &&  @averages[28][ds]["avg_value"] %></td>
+                    <td><%= @averages[28][ds]["avg_aqi"].to_f.round(1) if @averages[28][ds] &&  @averages[28][ds]["avg_aqi"] %></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+          <div class="panel-footer text-right">
+            <span class="text-muted"><%= @datastreams[ds] ? "Updated <span class='momentify'>#{@datastreams[ds]["datetime"]}Z</span>": ''%></span>
+          </div>
         </div>
-        <p class="current-value-updated-at">Updated <span class='momentify'><%= data["date"].to_time.change(:hour => data["time"], :offset => @site["gmt_offset"]) %></span></p>
       </div>
     <% end %>
+</div>
+
+<div class="row"><div class="col-lg-12"><hr /></div></div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <hr />
+    <div id="dashboard-aqs-chart"></div>
+  </div>
+</div>
+
+<div class="row"><div class="col-lg-12"><hr /></div></div>
+
+<div class="row">
+  <div class="col-lg-6">
+    <div class="map dashboard-map" id="map_canvas" style="width:100%;height:400px;"></div>
   </div>
 
-  <p class="dashboard-xively-link">
-    <a class='button' href='/assets/docs/HourlyDataFactSheet.pdf' target='blank'>Data Fact Sheet</a>
-    <a class='button' href='http://www.epa.gov/ttn/airs/airsaqs/' target='blank'>All about the EPA Air Quality System (AQS)</a>
-  </p>
-  <p class="dashboard-updated"></p>
-
-</section>
-
-<section class="dashboard-metadata">
-  <h1 class="metadata-feed-title"><%= @site["site_name"] %></h1>
-  <h2 class="metadata-title">Agency Name</h2>
-  <p class="metadata-value metadata-description"><%= @site["agency_name"] %></p>
-
-  <h2 class="metadata-title">Elevation</h2>
-  <p class="metadata-value"><%= @site["elevation"] %></p>
-
-  <% if @site["msa_name"] %>
-    <h2 class="metadata-title">MSA</h2>
-    <p class="metadata-value metadata-description"><%= @site["msa_name"] %></p>
-  <% end %>
-
-  <% if @site["cmsa_name"] %>
-    <h2 class="metadata-title">CMSA</h2>
-    <p class="metadata-value metadata-description"><%= @site["cmsa_name"] %></p>
-  <% end %>
-
-  <% if @site["epa_region"] %>
-    <h2 class="metadata-title">EPA Region</h2>
-    <p class="metadata-value metadata-description"><%= @site["epa_region"] %></p>
-  <% end %>
-
-  <% if @site["county_name"] %>
-    <h2 class="metadata-title">County</h2>
-    <p class="metadata-value metadata-description"><%= @site["county_name"] %></p>
-  <% end %>
-
-  <% if @site["state_name"] %>
-    <h2 class="metadata-title">State</h2>
-    <p class="metadata-value metadata-description"><%= @site["state_name"] %></p>
-  <% end %>
-
-
-  <h2 class="metadata-title">Country / GMT Offset</h2>
-  <p class="metadata-value metadata-description"><%= @site["country_code"] %> / GMT <%= @site["gmt_offset"] %></p>
-
-</section>
-
-<section class="dashboard-map-container">
-  <div class="map dashboard-map" id="map_canvas" style="width:100%;height:500px;"></div>
-  <div class="map-overlay">
-    <p class="map-overlay-loading">Loading Egg <span>.</span><span>.</span><span>.</span></p>
+  <div class="col-lg-6">
+    <div class="table-responsive">
+      <table class="table">
+          <thead>
+              <tr>
+                  <th>AQS Site Name</th>
+                  <th><%= @site["site_name"] %></th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+                  <td>Agency Name</td>
+                  <td><%= @site["agency_name"] %></td>
+              </tr>
+              <tr>
+                  <td>MSA Name</td>
+                  <td><%= @site["msa_name"] %></td>
+              </tr>
+              <tr>
+                  <td>CMSA Name</td>
+                  <td><%= @site["cmsa_name"] %></td>
+              </tr>
+              <tr>
+                  <td>EPA Region</td>
+                  <td><%= @site["epa_region"] %></td>
+              </tr>
+              <tr>
+                  <td>County Name</td>
+                  <td><%= @site["county_name"] %></td>
+              </tr>
+              <tr>
+                  <td>State Name</td>
+                  <td><%= @site["state_name"] %></td>
+              </tr>
+              <tr>
+                  <td>Country Code</td>
+                  <td><%= @site["state_name"] %></td>
+              </tr>
+              <tr>
+                  <td>GMT Offset</td>
+                  <td><%= @site["gmt_offset"] %></td>
+              </tr>
+              <tr>
+                  <td>Elevation</td>
+                  <td><%= @site["elevation"] %></td>
+              </tr>
+              <tr>
+                  <td>Latitude, Longitude</td>
+                  <td><%= @site["lat"] %>, <%= @site["lon"] %></td>
+              </tr>
+              <tr>
+                  <td>Status</td>
+                  <td><%= @site["status"] %></td>
+              </tr>
+          </tbody>
+      </table>
   </div>
-  <input id="pac-input" class="controls" type="text" placeholder="Zoom to location by searching" style="display:none;">
-</section>
- 
-<section class="">
-  <div id="dashboard-aqs-chart"></div>
-</section>
+</div>
+
