@@ -33,29 +33,24 @@ module AppHelpers
       row["value"] = celsius_to_fahrenheit(row["value"])
       row["name"] = "Temperature"
       row["more_info_url"] = "http://www.weather.gov/"
-      row["more_info_text"] = "Learn more at Weather.gov"
     end
 
     if row["parameter"] == "CO"
       row["name"] = "Carbon Monoxide"
       row["more_info_url"] = "http://www.epa.gov/airquality/carbonmonoxide/"
-      row["more_info_text"] = "Learn more at EPA.gov"
     end
     if row["parameter"] == "NO2"
       row["name"] = "Nitrogen Dioxide"
       row["more_info_url"] = "http://www.epa.gov/air/nitrogenoxides/"
-      row["more_info_text"] = "Learn more at EPA.gov"
     end
 
     if row["parameter"] == "RHUM" or row["parameter"] == "Humidity"
       row["name"] = "Relative Humidity"
       row["more_info_url"] = "http://www.crh.noaa.gov/lmk/soo/docu/humidity.php"
-      row["more_info_text"] = "Learn more at NOAA.gov"
     end
     if row["parameter"] == "Dust"
       row["name"] = "Dust"
       row["more_info_url"] = "http://www.epa.gov/asthma/dustmites.html"
-      row["more_info_text"] = "Learn more at EPA.gov"
     end
 
 
