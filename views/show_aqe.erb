@@ -1,13 +1,13 @@
 <script type="text/javascript">
   var local_feed_path = '<%= @local_feed_path %>';
-  var feed_id = '<%= @feed["id"]%>';
-  var feed_location = ['<%= @feed["location_lat"] %>', '<%= @feed["location_lon"] %>'];
+  var feed_id = '<%= @site["id"]%>';
+  var feed_location = ['<%= @site["location_lat"] %>', '<%= @site["location_lon"] %>'];
 </script>
 
 
 <div class="row">
   <div class="col-lg-12">
-    <h1 class="page-header"><%= @feed["title"] %> <small>Air Quality Egg #<%= @feed["id"] %></small></h1>
+    <h1 class="page-header"><%= @site["title"] %> <small>Air Quality Egg #<%= @site["id"] %></small></h1>
   </div>
 </div>
 
@@ -27,11 +27,11 @@
       <div class="col-lg-3 aqe datastream" style="height: 600px;">
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3><%= ds %>
+            <h4><%= ds %>
               <small><br />
               <a class="current-external-link" href="<%= data["more_info_url"] %>" target="blank"><%= data["name"] %> <i class="fa fa-external-link"></i> 
               </a></small>
-            </h3>
+            </h4>
           </div>
           <div class="panel-body">
             <div class="table-responsive">
@@ -59,15 +59,13 @@
                 </tbody>
               </table>
             </div>
-            <p class="text-right text-muted"><%= @datastreams[ds] ? "Updated <span class='momentify'>#{@datastreams[ds]["datetime"]}Z</span>": ''%></p>
-            <hr />
             <div class="table-responsive">
               <table class="table" style="margin-bottom:0px;">
                 <thead>
                   <tr>
-                    <th style="width:40%">Time period</th>
-                    <th style="width:30%">Average Value</th>
-                    <th style="width:30%">Average AQI</th>
+                    <th style="width:44%">Time period</th>
+                    <th style="width:28%">Avg Value</th>
+                    <th style="width:28%">Avg AQI</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -96,6 +94,9 @@
             </div>
 
           </div>
+          <div class="panel-footer text-right">
+            <span class="text-muted"><%= @datastreams[ds] ? "Updated <span class='momentify'>#{@datastreams[ds]["datetime"]}Z</span>": ''%></span>
+          </div>
         </div>
       </div>
     <% end %>
@@ -123,41 +124,41 @@
           <thead>
               <tr>
                   <th>Egg title</th>
-                  <th><%= @feed["title"] %></th>
+                  <th><%= @site["title"] %></th>
               </tr>
           </thead>
           <tbody>
               <tr>
                   <td>Description</td>
-                  <td><%= @feed["description"] %></td>
+                  <td><%= @site["description"] %></td>
               </tr>
               <tr>
                   <td>Data source</td>
-                  <td><a href="http://xively.com/feeds/<%= @feed["id"] %>" target='blank'>http://xively.com/feeds/<%= @feed["id"] %></a></td>
+                  <td><a href="http://xively.com/feeds/<%= @site["id"] %>" target='blank'>http://xively.com/feeds/<%= @site["id"] %></a></td>
               </tr>
               <tr>
                   <td>Exposure</td>
-                  <td><%= @feed["location_exposure"] %></td>
+                  <td><%= @site["location_exposure"] %></td>
               </tr>
               <tr>
                   <td>Elevation</td>
-                  <td><%= @feed["location_ele"] %></td>
+                  <td><%= @site["location_ele"] %></td>
               </tr>
               <tr>
                   <td>Latitude, Longitude</td>
-                  <td><%= @feed["location_lat"] %>, <%= @feed["location_lon"] %></td>
+                  <td><%= @site["location_lat"] %>, <%= @site["location_lon"] %></td>
               </tr>
               <tr>
                   <td>Status</td>
-                  <td><%= @feed["status"] %></td>
+                  <td><%= @site["status"] %></td>
               </tr>
               <tr>
                   <td>Created</td>
-                  <td><span class='momentify'><%= @feed["created"] %>Z</span></td>
+                  <td><span class='momentify'><%= @site["created"] %>Z</span></td>
               </tr>
               <tr>
                   <td>Updated</td>
-                  <td><span class='momentify'><%= @feed["updated"] %>Z</span></td>
+                  <td><span class='momentify'><%= @site["updated"] %>Z</span></td>
               </tr>
           </tbody>
       </table>

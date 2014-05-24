@@ -92,6 +92,10 @@ class AirQualityEgg < Sinatra::Base
       EOS
     end
 
+    def sql_for_aqe_average_over_days(id,n_days)
+      "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{ENV["aqe_data_resource"]}\" WHERE feed_id=#{id} AND datetime > current_date - #{n_days} GROUP BY parameter"
+    end
+
     def sql_for_aqe_datastreams(id)
       <<-EOS
         SELECT
@@ -231,7 +235,6 @@ class AirQualityEgg < Sinatra::Base
     datastreams_aqi_asc = data[:datastreams].sort_by{|key,hash| hash["computed_aqi"].to_i}.last
     data[:prevailing_aqi] = datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
 
-
     if params[:include_recent_history]
       series = []
       recent_history_sql = "SELECT feed_id,parameter,datetime,value,unit from \"#{ENV["aqe_data_resource"]}\" WHERE feed_id = #{params[:id]} and datetime > current_date - 45 order by datetime "
@@ -246,6 +249,18 @@ class AirQualityEgg < Sinatra::Base
       end
       data[:recent_history] = series
     end
+
+    if params[:include_averages]
+      data[:averages] = {}
+      [0, 3, 7, 28].each do |days|
+        data[:averages][days] = {}
+        results = sql_search_ckan(sql_for_aqe_average_over_days(params[:id], days))
+        results.each do |result|
+          data[:averages][days][result["parameter"].to_sym] = result
+        end
+      end
+    end
+
     return data.to_json
   end
   end
@@ -253,9 +268,9 @@ class AirQualityEgg < Sinatra::Base
   # View egg dashboard
   ['/egg/:id','/aqe/:id'].each do |path|
   get path do
-    @feed = sql_search_ckan(sql_for_aqe_site(params[:id])).first
+    @site = sql_search_ckan(sql_for_aqe_site(params[:id])).first
 
-    redirect_with_error("Egg not found") if @feed.nil? 
+    redirect_with_error("Egg not found") if @site.nil? 
 
     @datastreams = {}
     datastreams_sql = sql_for_aqe_datastreams(params[:id]) 
@@ -270,13 +285,13 @@ class AirQualityEgg < Sinatra::Base
     @averages = {}
     [0, 3, 7, 28].each do |days|
       @averages[days] = {}
-      results = sql_search_ckan("SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{ENV["aqe_data_resource"]}\" WHERE feed_id=#{params[:id]} AND datetime > current_date - #{days} GROUP BY parameter")
+      results = sql_search_ckan(sql_for_aqe_average_over_days(params[:id], days))
       results.each do |result|
         @averages[days][result["parameter"].to_sym] = result
       end
     end
 
-    @local_feed_path = "/eggs/nearby/#{@feed["location_lat"]}/#{@feed["location_lon"]}.json"
+    @local_feed_path = "/eggs/nearby/#{@site["location_lat"]}/#{@site["location_lon"]}.json"
     erb :show_aqe
   end
   end
