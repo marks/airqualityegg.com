@@ -77,6 +77,39 @@ class AirQualityEgg < Sinatra::Base
       "SELECT status,msa_name,elevation,aqs_id,county_name,lat,lon,gmt_offset,agency_name,cmsa_name,site_name from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{id}'"
     end
 
+    def sql_for_aqs_datastreams(id)
+      <<-EOS
+        SELECT
+          data_table.aqs_id,data_table.date, data_table.time,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
+        FROM "#{ENV["aqs_data_resource"]}" data_table
+        WHERE data_table.aqs_id = '#{id}'
+        ORDER BY date desc,time desc
+        LIMIT (
+          SELECT COUNT(DISTINCT(data_table.parameter))
+          FROM "#{ENV["aqs_data_resource"]}" data_table
+          WHERE data_table.aqs_id = '#{id}'
+        )
+      EOS
+    end
+
+    def sql_for_aqe_datastreams(id)
+      <<-EOS
+        SELECT
+          data_table.feed_id,data_table.datetime,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
+        FROM
+          "#{ENV["aqe_site_resource"]}" sites_table
+        INNER JOIN "#{ENV["aqe_data_resource"]}" data_table ON sites_table.id = data_table.feed_id
+        WHERE sites_table.id = #{id}
+        order by datetime desc
+        LIMIT (
+          SELECT COUNT(DISTINCT(data_table.parameter))
+          FROM "#{ENV["aqe_data_resource"]}" data_table
+          WHERE data_table.feed_id = #{id}
+        )
+      EOS
+
+    end
+
   end
 
 
@@ -137,18 +170,7 @@ class AirQualityEgg < Sinatra::Base
     data = sql_search_ckan(sql_for_aqs_site(params[:aqs_id])).first
 
     data[:datastreams] = {}
-    datastreams_sql = <<-EOS
-      SELECT
-        data_table.aqs_id,data_table.date, data_table.time,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
-      FROM "#{ENV["aqs_data_resource"]}" data_table
-      WHERE data_table.aqs_id = '#{params[:aqs_id]}'
-      ORDER BY date desc,time desc
-      LIMIT (
-        SELECT COUNT(DISTINCT(data_table.parameter))
-        FROM "#{ENV["aqs_data_resource"]}" data_table
-        WHERE data_table.aqs_id = '#{params[:aqs_id]}'
-      )
-    EOS
+    datastreams_sql = sql_for_aqs_datastreams(params[:aqs_id])
     datastreams_data = sql_search_ckan(datastreams_sql)
     datastreams_data.each do |datastream|
       data[:datastreams][datastream["parameter"].to_sym] = datastream if datastream
@@ -178,18 +200,7 @@ class AirQualityEgg < Sinatra::Base
     @site = sql_search_ckan(sql_for_aqs_site(params[:aqs_id])).first
 
     @datastreams = {}
-    datastreams_sql = <<-EOS
-      SELECT
-        data_table.aqs_id,data_table.date, data_table.time,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
-      FROM "#{ENV["aqs_data_resource"]}" data_table
-      WHERE data_table.aqs_id = '#{params[:aqs_id]}'
-      ORDER BY date desc,time desc
-      LIMIT (
-        SELECT COUNT(DISTINCT(data_table.parameter))
-        FROM "#{ENV["aqs_data_resource"]}" data_table
-        WHERE data_table.aqs_id = '#{params[:aqs_id]}'
-      )
-    EOS
+    datastreams_sql = sql_for_aqs_datastreams(params[:aqs_id])
     datastreams_data = sql_search_ckan(datastreams_sql)
     datastreams_data.each do |datastream|
       @datastreams[datastream["parameter"].to_sym] = datastream if datastream
@@ -197,16 +208,6 @@ class AirQualityEgg < Sinatra::Base
 
     datastreams_aqi_asc = @datastreams.sort_by{|key,hash| hash["computed_aqi"].to_i}.last
     @prevailing_aqi_component = datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
-
-
-    # daily_sql = "SELECT T.id,T.date,T.parameter,T.unit,T.value,T.computed_aqi,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\".parameter, MAX (DATE) AS MaxDate FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY parameter) tm ON T.parameter = tm.parameter AND T.date = tm.MaxDate and T.aqs_id = '#{params['aqs_id']}' and T.time is NULL"
-    # @latest_daily_data = sql_search_ckan(daily_sql)
-
-    # hourly_sql = "SELECT T.id,tm.MaxTimestamp AS date,T.parameter,T.unit,T.computed_aqi,T.value,T.data_source FROM \"#{ENV["aqs_data_resource"]}\" T INNER JOIN (SELECT \"#{ENV["aqs_data_resource"]}\". PARAMETER,  MAX((\"#{ENV["aqs_data_resource"]}\".date||' '||\"#{ENV["aqs_data_resource"]}\".time)::timestamp) as MaxTimestamp FROM \"#{ENV["aqs_data_resource"]}\" GROUP BY PARAMETER) tm ON T . PARAMETER = tm. PARAMETER AND (T.date||' '||T.time)::timestamp = tm.MaxTimestamp AND T .aqs_id = '#{params['aqs_id']}'"
-    # @latest_hourly_data = sql_search_ckan(hourly_sql)
-
-    # datastreams_aqi_asc = (@latest_hourly_data + @latest_daily_data).sort_by{|hash| hash["computed_aqi"].to_i }
-    # @prevailing_aqi_component =datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
 
     @local_feed_path = "/eggs/nearby/#{@site["lat"]}/#{@site["lon"]}.json"
     erb :show_aqs
@@ -219,20 +220,7 @@ class AirQualityEgg < Sinatra::Base
     data = sql_search_ckan(sql_for_aqe_site(params[:id])).first
 
     data[:datastreams] = {}
-    datastreams_sql = <<-EOS
-      SELECT
-        data_table.feed_id,data_table.datetime,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
-      FROM
-        "#{ENV["aqe_site_resource"]}" sites_table
-      INNER JOIN "#{ENV["aqe_data_resource"]}" data_table ON sites_table.id = data_table.feed_id
-      WHERE sites_table.id = #{params[:id]}
-      order by datetime desc
-      LIMIT (
-        SELECT COUNT(DISTINCT(data_table.parameter))
-        FROM "#{ENV["aqe_data_resource"]}" data_table
-        WHERE data_table.feed_id = #{params[:id]}
-      )
-    EOS
+    datastreams_sql = sql_for_aqe_datastreams(params[:id]) 
     datastreams_data = sql_search_ckan(datastreams_sql)
     datastreams_data.each do |datastream|
       data[:datastreams][datastream["parameter"].to_sym] = datastream if datastream
@@ -268,20 +256,7 @@ class AirQualityEgg < Sinatra::Base
     redirect_with_error("Egg not found") if @feed.nil? 
 
     @datastreams = {}
-    datastreams_sql = <<-EOS
-      SELECT
-        data_table.feed_id,data_table.datetime,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
-      FROM
-        "#{ENV["aqe_site_resource"]}" sites_table
-      INNER JOIN "#{ENV["aqe_data_resource"]}" data_table ON sites_table.id = data_table.feed_id
-      WHERE sites_table.id = #{params[:id]}
-      order by datetime desc
-      LIMIT (
-        SELECT COUNT(DISTINCT(data_table.parameter))
-        FROM "#{ENV["aqe_data_resource"]}" data_table
-        WHERE data_table.feed_id = #{params[:id]}
-      )
-    EOS
+    datastreams_sql = sql_for_aqe_datastreams(params[:id]) 
     datastreams_data = sql_search_ckan(datastreams_sql)
     datastreams_data.each do |datastream|
       @datastreams[datastream["parameter"].to_sym] = datastream if datastream
