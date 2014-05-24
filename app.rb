@@ -341,13 +341,9 @@ class AirQualityEgg < Sinatra::Base
     erb :compare
   end
 
-
-
   get '/data-explorer' do
     erb :data_explorer
   end
-
-
 
   get '/eggs/nearby/:lat/:lon.json' do
     content_type :json
