@@ -3,18 +3,18 @@
   <div class="col-lg-12">
 
     <h1>Comparing Sensor Sites</h1>
-
+    <br /><br />
     <div class="table-responsive">
       <table class="table">
         <tr>
-          <td><h2>Sensor Site</h2></td>
-          <td><h2>Latest Data</h2></td>
+          <th>Sensor Site</th>
+          <th>Latest Data</th>
         </tr>
         <% @sensors.each do |sensor| %>
           <tr data-sensor-id="<%= sensor["id"] %>" data-sensor-type="<%= sensor["type"] %>">
             <td>
-              <h3><%= sensor["title"] or sensor["site_name"] %></h3>
-              <p><strong><a href='/<%= sensor["type"] %>/<%= sensor["id"] %>'>Go to this sensor's page for more details</a></strong></p>
+              <p><strong><%= sensor["title"] or sensor["site_name"] %></strong> (<%= sensor["type"].upcase %> #<%= sensor["id"] %>)</p>
+              <p><a href='/<%= sensor["type"] %>/<%= sensor["id"] %>'>Go to this sensor's page for more details</a></p>
             </td>
             <td>Loading...</td>
           </tr>
