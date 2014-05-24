@@ -94,9 +94,9 @@ class AirQualityEgg < Sinatra::Base
 
     def sql_for_average_over_days(table, id,n_days)
       if table == "aqe"
-        "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{ENV["#{table}_data_resource"]}\" WHERE feed_id=#{id} AND datetime > current_date - #{n_days} GROUP BY parameter"
+        "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{ENV["#{table}_data_resource"]}\" WHERE feed_id=#{id} AND datetime >= current_date - #{n_days} GROUP BY parameter"
       else #aqs
-        "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{ENV["#{table}_data_resource"]}\" WHERE aqs_id='#{id}' AND date > current_date - #{n_days} GROUP BY parameter"      
+        "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{ENV["#{table}_data_resource"]}\" WHERE aqs_id='#{id}' AND date >= current_date - #{n_days} GROUP BY parameter"      
       end
     end
 
@@ -186,6 +186,17 @@ class AirQualityEgg < Sinatra::Base
 
     datastreams_aqi_asc = data[:datastreams].sort_by{|key,hash| hash["computed_aqi"].to_i}.last
     data[:prevailing_aqi] = datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
+
+    if params[:include_averages]
+      data[:averages] = {}
+      [0, 3, 7, 28].each do |days|
+        data[:averages][days] = {}
+        results = sql_search_ckan(sql_for_average_over_days("aqs",params[:id], days))
+        results.each do |result|
+          data[:averages][days][result["parameter"].to_sym] = result
+        end
+      end
+    end
 
     if params[:include_recent_history]
       series = []
