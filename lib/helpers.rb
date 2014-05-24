@@ -53,8 +53,10 @@ module AppHelpers
       row["more_info_url"] = "http://www.epa.gov/asthma/dustmites.html"
     end
 
+    row["value"] = nil if row["value"].to_i < -1
+    row["avg_value"] = nil if row["avg_value"].to_i < -1
+    row["avg_aqi"] = nil if row["avg_aqi"].to_i < -1
 
-    row["value"] = nil if row["value"].to_i == -2147483648
 
     return row
   end

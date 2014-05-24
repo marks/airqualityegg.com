@@ -264,9 +264,17 @@ class AirQualityEgg < Sinatra::Base
       @datastreams[datastream["parameter"].to_sym] = datastream if datastream
     end
 
-
     datastreams_aqi_asc = @datastreams.sort_by{|key,hash| hash["computed_aqi"].to_i}.last
     @prevailing_aqi_component =datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
+
+    @averages = {}
+    [0, 3, 7, 28].each do |days|
+      @averages[days] = {}
+      results = sql_search_ckan("SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{ENV["aqe_data_resource"]}\" WHERE feed_id=#{params[:id]} AND datetime > current_date - #{days} GROUP BY parameter")
+      results.each do |result|
+        @averages[days][result["parameter"].to_sym] = result
+      end
+    end
 
     @local_feed_path = "/eggs/nearby/#{@feed["location_lat"]}/#{@feed["location_lon"]}.json"
     erb :show_aqe
@@ -293,6 +301,14 @@ class AirQualityEgg < Sinatra::Base
     end
     erb :compare
   end
+
+
+
+  get '/data-explorer' do
+    erb :data_explorer
+  end
+
+
 
   get '/eggs/nearby/:lat/:lon.json' do
     content_type :json
