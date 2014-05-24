@@ -82,13 +82,13 @@
 //
 
 .current {
-  float: left;
+  // float: left;
   width: 45%;
 }
 
 .current-left + .current-left,
 .current-right + .current-right {
-  float: right;
+  // float: right;
 }
 
 .current-id {

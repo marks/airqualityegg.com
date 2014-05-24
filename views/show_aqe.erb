@@ -14,6 +14,69 @@
       </div>
     <% end %>
 
+    <table border=1>
+    <tr>
+      <th>Sensor</th>
+      <th>Latest Values</th>
+      <th>Averages</th>
+    </tr>
+
+    <% @datastreams.each do |ds,data| %>
+      <tr>
+        <td>
+          <p><%= ds %></p>
+            <p><%= data["name"] %><br /><a class="current-external-link" href="<%= data["more_info_url"] %>" target="blank"><%= data["more_info_text"] %></a></p>
+        </td>
+        <td>
+                  <div class="current-value" style="">
+          <p class="current-value-measure" style="border-top:none; text-align:left;">
+            <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @datastreams[ds]["value"] && @datastreams[ds]["value"] ? "#{@datastreams[ds]["value"]} #{@datastreams[ds]["unit"]}" : "" %></span>
+            <% if @datastreams[ds] %><div class="current-value-gauge" data-aqi-value="<%= @datastreams[ds]["computed_aqi"] %>" id="current-gauge_CO"></div><% end %>
+          </p>
+        </div>
+        <p class="current-value-updated-at"><%= @datastreams[ds] ? "Updated <span class='momentify'>#{@datastreams[ds]["datetime"]}Z</span>": ''%></p>    
+
+        </td>
+        <td>
+            <ul>
+              <li>Today: </li>
+              <li>Yesterday: </li>
+              <li>Last 7 days: </li>
+              <li>All time: </li>
+            </ul>
+        </td>
+      </tr>
+    <% end %>
+
+    </table>
+
+<!--     <% @datastreams.each do |ds,data| %>
+      <div class="current current-right">
+        <h2 class="current-id heading-narrow"><%= ds %></h2>
+        <h3 class="current-id-full"><%= data["name"] %><br /><a class="current-external-link" href="<%= data["more_info_url"] %>" target="blank"><%= data["more_info_text"] %></a></h3>
+        <div class="current-value" style="">
+          <p class="current-value-measure" style="border-top:none; text-align:left;">
+            <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @datastreams[ds]["value"] && @datastreams[ds]["value"] ? "#{@datastreams[ds]["value"]} #{@datastreams[ds]["unit"]}" : "" %></span>
+            <% if @datastreams[ds] %><div class="current-value-gauge" data-aqi-value="<%= @datastreams[ds]["computed_aqi"] %>" id="current-gauge_CO"></div><% end %>
+          </p>
+        </div>
+        <p class="current-value-updated-at"><%= @datastreams[ds] ? "Updated <span class='momentify'>#{@datastreams[ds]["datetime"]}Z</span>": ''%></p>    
+        <p>
+          <h4>Averages</h4>
+          <ul>
+            <li>Today: </li>
+            <li>Yesterday: </li>
+            <li>Last 7 days: </li>
+            <li>All time: </li>
+          </ul>
+        </p>  
+      </div>
+    <% end %> -->
+
+
+
+<!-- 
+
     <div class="current current-right">
       <h2 class="current-id heading-narrow">NO2</h2>
       <h3 class="current-id-full">Nitrogen Dioxide<br /><a class="current-external-link" href="http://www.epa.gov/air/nitrogenoxides/" target="blank">More info at EPA.gov</a></h3>
@@ -29,13 +92,22 @@
     <div class="current current-right">
       <h2 class="current-id heading-narrow">CO</h2>
       <h3 class="current-id-full">Carbon Monoxide<br /><a class="current-external-link" href="http://www.epa.gov/airquality/carbonmonoxide/" target="blank">More info at EPA.gov</a></h3>
-      <div class="current-value" style="margin-top:0px;height:20px;">
+      <div class="current-value" style="">
         <p class="current-value-measure" style="border-top:none; text-align:left;">
           <span class="current-value-measure-wrap" style="padding-left:0px;"><%= @datastreams[:CO] ? "#{@datastreams[:CO]["value"]} #{@datastreams[:CO]["unit"]}" : "" %></span>
           <% if @datastreams[:CO] %><div class="current-value-gauge" data-aqi-value="<%= @datastreams[:CO]["computed_aqi"] %>" id="current-gauge_CO"></div><% end %>
         </p>
       </div>
-      <p class="current-value-updated-at"><%= @datastreams[:CO] ? "Updated <span class='momentify'>#{@datastreams[:CO]["datetime"]}Z</span>": ''%></p>      
+      <p class="current-value-updated-at"><%= @datastreams[:CO] ? "Updated <span class='momentify'>#{@datastreams[:CO]["datetime"]}Z</span>": ''%></p>    
+      <p>
+        <h4>Averages</h4>
+        <ul>
+          <li>Today: </li>
+          <li>Yesterday: </li>
+          <li>Last 7 days: </li>
+          <li>All time: </li>
+        </ul>
+      </p>  
     </div>
 
     <div class="current current-right">
@@ -73,7 +145,7 @@
         </p>
       </div>
       <p class="current-value-updated-at"><%= @datastreams[:Humidity] ? "Updated <span class='momentify'>#{@datastreams[:Humidity]["datetime"]}Z</span>": ''%></p>      
-    </div>
+    </div> -->
 
   </div>
 

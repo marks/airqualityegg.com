@@ -29,7 +29,7 @@
 .current {
   position: relative;
   margin-bottom: em(35);
-  height: em(220);
+  // height: em(220);
 }
 
 .current-id {
@@ -64,18 +64,18 @@
 }
 
 .current-value {
-  position: absolute;
-  top: 0;
-  right: 0;
+  // position: absolute;
+  // top: 0;
+  // right: 0;
   display: block;
   width: 47.5%;
-  height: em(90);
+  // height: em(90);
 }
 
 .current-value-updated-at{
-  position:absolute;
-  bottom:0;
-  margin:0;
+  // position:absolute;
+  // bottom:0;
+  // margin:0;
 }
 
 .current-value-gauge{
@@ -88,7 +88,7 @@
 // GAUGES
 
 .current-value-measure {
-  position: absolute;
+  // position: absolute;
   top: 50%;
   width: 100%;
   display: block;
@@ -107,6 +107,7 @@
 .current-value-measure-wrap {
   display: block;
   padding-left: em(25,24);
+  height: 28px;
 }
 
 .current-gauge,
