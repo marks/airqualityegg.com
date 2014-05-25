@@ -13,7 +13,7 @@
         <% @sensors.each do |sensor| %>
           <tr data-sensor-id="<%= sensor["id"] %>" data-sensor-type="<%= sensor["type"] %>">
             <td>
-              <p><strong><%= sensor["title"] or sensor["site_name"] %></strong> (<%= sensor["type"].upcase %> #<%= sensor["id"] %>)</p>
+              <p><strong class="sensor-title"></strong> (<%= sensor["type"].upcase %> #<%= sensor["id"] %>)</p>
               <p><a href='/<%= sensor["type"] %>/<%= sensor["id"] %>'>Go to this sensor's page for more details</a></p>
             </td>
             <td>Loading...</td>

@@ -324,19 +324,9 @@ class AirQualityEgg < Sinatra::Base
     @sensors = []
     params.each do |type,ids|
       ids.split(",").each do |sensor_id|
-        begin
-        @sensors << case type.downcase
-        when "aqe"
-          sql_search_ckan(sql_for_aqe_site(sensor_id)).first.merge("type" => type, "id" => sensor_id)
-        when "aqs"
-          sql_search_ckan(sql_for_aqs_site(sensor_id)).first.merge("type" => type, "id" => sensor_id)
-        else
-          nil
-        end
-        rescue
-        end
+        @sensors << {"type" => type, "id" => sensor_id}
       end
-      @sensors.compact!
+      @sensors.uniq.compact!
     end
     erb :compare
   end
