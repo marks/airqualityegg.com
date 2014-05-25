@@ -28,3 +28,5 @@
 .sensor-reading{
   line-height: 23px;
 }
+
+.leaflet-popup-content .table td, .leaflet-popup-content .table th {padding: 5px 2px;}

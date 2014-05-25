@@ -217,24 +217,40 @@ var AQE = (function ( $ ) {
   function formatSensorDetails(data){
     var html = ""
     if(data.prevailing_aqi){
-      // html += "<div style='padding: 0 2px; border:2px solid "+data.prevailing_aqi.aqi_cat.color+"; background-color: "+data.prevailing_aqi.aqi_cat.color+"; color: "+data.prevailing_aqi.aqi_cat.font+" '><strong> This location's air is "+data.prevailing_aqi.aqi_cat.name+"</strong></div> " 
       html += " <div class='alert' style='padding: 5px; background-color:"+data.prevailing_aqi.aqi_cat.color+"; color:"+data.prevailing_aqi.aqi_cat.font+"'>This location's air is "+data.prevailing_aqi.aqi_cat.name+"</div> "
     }
+    var sensor_table = "<table class='table table-striped'><tr><th>Sensor</th><th>Latest Reading</th></tr></tr>"
+    html += sensor_table
     $.each(data.datastreams, function(name,item){
       if(item){
-        html += "<span class='sensor-reading'>"
-        html += name+": "+item.value + " " + item.unit
+        // html += "<span class='sensor-reading'>"
+        // html += name+": "+item.value + " " + item.unit
+        // if(item.computed_aqi > 0){
+        //   html += " <span class='alert' style='padding: 2px; background-color:"+item.aqi_cat.color+"; color:"+item.aqi_cat.font+"'>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</span> "
+        // }
+        // if(item.datetime){ html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  }
+        // else if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
+        // else {html += " (" + moment(item.date ).fromNow() +  ")" }
+        // html += "<br />"
+        // html += "</span>"
+
+        html += "<tr>"
+        html += "<td>"+name+"</td>"
+        html += "<td>"
         if(item.computed_aqi > 0){
           html += " <span class='alert' style='padding: 2px; background-color:"+item.aqi_cat.color+"; color:"+item.aqi_cat.font+"'>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</span> "
         }
+        html += " " + item.value + " " + item.unit
         if(item.datetime){ html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  }
         else if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
         else {html += " (" + moment(item.date ).fromNow() +  ")" }
-        html += "<br />"
-        html += "</span>"
+          html += "</td>"
+        html += "</tr>"
+
       }        
     })
-    if(html == ""){html += "<br /><em>No recent data available</em>"}
+    html += "</table>"
+    if(html == sensor_table+"</table>"){html = "<em>No recent data available</em>"}
     return html
   }
 
@@ -244,15 +260,15 @@ var AQE = (function ( $ ) {
 
   function addEggMapMarker(egg) {
     var marker = L.marker([egg.location_lat, egg.location_lon],  {icon: eggIcon})
-    var html = "<div><strong>Air Quality Egg Details</strong><table class='popup_metadata' data-feed_id='"+egg.id+"'>"
+    var html = "<div><h4>Air Quality Egg Details</h4><table class='table table-striped' data-feed_id='"+egg.id+"'>"
     html += "<tr><td>Name </td><td> <a href='/egg/"+egg.id+"'><strong>"+egg.title+"<strong></a></td></tr>"
     html += "<tr><td>Description </td><td> "+egg.description+"</td></tr>"
     html += "<tr><td>Position </td><td> "+egg.location_exposure+" @ "+egg.location_ele+" elevation</td></tr>"
     html += "<tr><td>Status </td><td> "+egg.status+"</td></tr>"
     html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
     html += "<tr><td>Created </td><td> "+moment(egg.created).fromNow()+"</td></tr>"
-    html += "</table><hr />"
-    html += "<div id='egg_"+egg.id+"'><strong>Latest Data</strong></div>"
+    html += "</table>"
+    html += "<div id='egg_"+egg.id+"'></div>"
     html += "<p style='text-align: right'><a href='/egg/"+egg.id+"'>More about this egg site including historical graphs →</a></p>"
     html += "</div>"
     marker.bindPopup(html)
@@ -266,7 +282,7 @@ var AQE = (function ( $ ) {
   }
 
   function onEggMapMarkerClick(e){
-    var feed_id = $(".popup_metadata").data("feed_id")
+    var feed_id = $(".table").data("feed_id")
     if(typeof(ga)!="undefined"){ ga('send', 'event', 'egg_'+feed_id, 'click', 'egg_on_map', 1); }
     $.getJSON("/egg/"+feed_id+".json", function(data){
       var html = ""
@@ -277,16 +293,16 @@ var AQE = (function ( $ ) {
 
   function addAQSSiteMapMarker(aqs) {
     var marker = L.marker([aqs.lat, aqs.lon],  {icon: aqsIcon})
-    var html = "<div><strong>AirNow AQS Site Details</strong><table class='popup_metadata' data-aqs_id='"+aqs.aqs_id+"'>"
-    html += "<tr><td>Site Name / ID </td><td> <a href='/aqs/"+aqs.aqs_id+"'><strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></a></td></tr>"
-    html += "<tr><td>Agency </td><td>"+aqs.agency_name+"</td></tr>"
-    html += "<tr><td>Position </td><td> "+aqs.elevation+" elevation</td></tr>"
-    if(aqs.msa_name){html += "<tr><td>MSA </td><td> "+aqs.msa_name+"</td></tr>"}
-    if(aqs.cmsa_name){html += "<tr><td>CMSA </td><td> "+aqs.cmsa_name+"</td></tr>"}
-    html += "<tr><td>County </td><td> "+aqs.county_name+"</td></tr>"
-    html += "<tr><td>Status </td><td> "+aqs.status+"</td></tr>"
-    html += "</table><hr />"
-    html += "<div id='aqs_"+aqs.aqs_id+"'><strong>Latest Data</strong></div>"
+    var html = "<div><h4>AirNow AQS Site Details</h4><table class='table table-striped' data-aqs_id='"+aqs.aqs_id+"'>"
+    html += "<tr><td>Site</td><td> <a href='/aqs/"+aqs.aqs_id+"'><strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></a></td></tr>"
+    html += "<tr><td>Agency</td><td>"+aqs.agency_name+"</td></tr>"
+    html += "<tr><td>Position</td><td> "+aqs.elevation+" elevation</td></tr>"
+    if(aqs.msa_name){html += "<tr><td>MSA</td><td> "+aqs.msa_name+"</td></tr>"}
+    if(aqs.cmsa_name){html += "<tr><td>CMSA</td><td> "+aqs.cmsa_name+"</td></tr>"}
+    html += "<tr><td>County</td><td>"+aqs.county_name+"</td></tr>"
+    html += "<tr><td>Status</td><td>"+aqs.status+"</td></tr>"
+    html += "</table>"
+    html += "<div id='aqs_"+aqs.aqs_id+"'></div>"
     html += "<p style='text-align: right'><a href='/aqs/"+aqs.aqs_id+"'>More about this AQS site including historical graphs →</a></p>"
     html += "</div>"
     marker.bindPopup(html)
@@ -296,7 +312,7 @@ var AQE = (function ( $ ) {
   }
 
   function onAQSSiteMapMarkerClick(e){
-    var aqs_id = $(".popup_metadata").data("aqs_id")
+    var aqs_id = $(".table").data("aqs_id")
     if(typeof(ga)!="undefined"){ ga('send', 'event', 'aqs_'+aqs_id, 'click', 'aqs_on_map', 1); }
     
     $.getJSON("/aqs/"+aqs_id+".json", function(data){
@@ -307,7 +323,8 @@ var AQE = (function ( $ ) {
 
   function addSchoolSiteMapMarker(school) {
     var marker = L.marker([school.geocoded_location.latitude, school.geocoded_location.longitude],  {icon: schoolIcon})
-    var html = "<div><strong>School Details </strong><table class='popup_metadata' data-school_id='"+school.nces_school_id+"'>"
+    var html = "<div><h4>School Details</h4>"
+    html += "<table class='table table-striped' data-school_id='"+school.nces_school_id+"'>"
     html += "<tr><td>School Name </td><td>"+school.school_name+" </td></tr>"
     html += "<tr><td>Grades </td><td>"+school.low_grade+" through "+school.high_grade+" </td></tr>"
     html += "<tr><td>Phone Number </td><td>"+school.phone+" </td></tr>"
