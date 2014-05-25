@@ -182,7 +182,7 @@ class AirQualityEgg < Sinatra::Base
     datastreams_data = sql_search_ckan(datastreams_sql)
     datastreams_data.each do |datastream|
       data[:datastreams][datastream["parameter"].to_sym] = datastream if datastream
-    end    
+    end
 
     datastreams_aqi_asc = data[:datastreams].sort_by{|key,hash| hash["computed_aqi"].to_i}.last
     data[:prevailing_aqi] = datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
@@ -225,7 +225,7 @@ class AirQualityEgg < Sinatra::Base
     datastreams_data = sql_search_ckan(datastreams_sql)
     datastreams_data.each do |datastream|
       @datastreams[datastream["parameter"].to_sym] = datastream if datastream
-    end    
+    end
 
     @averages = {}
     [0, 3, 7, 28].each do |days|
@@ -302,6 +302,7 @@ class AirQualityEgg < Sinatra::Base
     datastreams_data.each do |datastream|
       @datastreams[datastream["parameter"].to_sym] = datastream if datastream
     end
+
 
     datastreams_aqi_asc = @datastreams.sort_by{|key,hash| hash["computed_aqi"].to_i}.last
     @prevailing_aqi_component =datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?

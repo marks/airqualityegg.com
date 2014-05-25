@@ -103,7 +103,7 @@ module AppHelpers
 
     end
 
-    row["value"] = nil if row["value"].to_i < -1
+    # row["value"] = nil if row["value"].to_i < -1
     row["avg_value"] = nil if row["avg_value"].to_i < -1
     row["avg_aqi"] = nil if row["avg_aqi"].to_i < -1
 

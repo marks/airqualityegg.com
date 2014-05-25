@@ -223,17 +223,6 @@ var AQE = (function ( $ ) {
     html += sensor_table
     $.each(data.datastreams, function(name,item){
       if(item){
-        // html += "<span class='sensor-reading'>"
-        // html += name+": "+item.value + " " + item.unit
-        // if(item.computed_aqi > 0){
-        //   html += " <span class='alert' style='padding: 2px; background-color:"+item.aqi_cat.color+"; color:"+item.aqi_cat.font+"'>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</span> "
-        // }
-        // if(item.datetime){ html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  }
-        // else if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
-        // else {html += " (" + moment(item.date ).fromNow() +  ")" }
-        // html += "<br />"
-        // html += "</span>"
-
         html += "<tr>"
         html += "<td>"+name+"</td>"
         html += "<td>"
@@ -246,7 +235,6 @@ var AQE = (function ( $ ) {
         else {html += " (" + moment(item.date ).fromNow() +  ")" }
           html += "</td>"
         html += "</tr>"
-
       }        
     })
     html += "</table>"
@@ -282,7 +270,7 @@ var AQE = (function ( $ ) {
   }
 
   function onEggMapMarkerClick(e){
-    var feed_id = $(".table").data("feed_id")
+    var feed_id = $(".leaflet-popup-content .table").first().data("feed_id")
     if(typeof(ga)!="undefined"){ ga('send', 'event', 'egg_'+feed_id, 'click', 'egg_on_map', 1); }
     $.getJSON("/egg/"+feed_id+".json", function(data){
       var html = ""
@@ -312,7 +300,7 @@ var AQE = (function ( $ ) {
   }
 
   function onAQSSiteMapMarkerClick(e){
-    var aqs_id = $(".table").data("aqs_id")
+    var aqs_id = $(".leaflet-popup-content .table").first().data("aqs_id")
     if(typeof(ga)!="undefined"){ ga('send', 'event', 'aqs_'+aqs_id, 'click', 'aqs_on_map', 1); }
     
     $.getJSON("/aqs/"+aqs_id+".json", function(data){
