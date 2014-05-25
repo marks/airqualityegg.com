@@ -196,20 +196,7 @@ var AQE = (function ( $ ) {
       var type = $(row).data("sensor-type")
       var id = $(row).data("sensor-id")
       $.getJSON("/"+type+"/"+id+".json", function(data){
-        var html = ""
-        if(data.prevailing_aqi){
-          html += "<div style='padding: 0 2px; border:2px solid "+data.prevailing_aqi.aqi_cat.color+"; background-color: "+data.prevailing_aqi.aqi_cat.color+"; color: "+data.prevailing_aqi.aqi_cat.font+" '><strong> This location's air is "+data.prevailing_aqi.aqi_cat.name+"</strong></div> " 
-        }
-        $.each(data.datastreams, function(name,item){
-          if(item){
-            html += "<br />"+name+": "+item.value + " " + item.unit
-            if(item.computed_aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+item.aqi_cat.color+"; background-color: "+item.aqi_cat.color+"; color: "+item.aqi_cat.font+" '><strong>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</strong></span> " }
-            if(item.datetime){ html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  }
-            else if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
-            else {html += " (" + moment(item.date ).fromNow() +  ")" }
-          }        
-        })
-        if(html == ""){html += "<br /><em>No recent data available</em>"}
+        var html = formatSensorDetails(data)
         $(row).children('td').eq(1).html(html)
       })
     })
@@ -221,6 +208,24 @@ var AQE = (function ( $ ) {
     })
 
 
+  }
+
+  function formatSensorDetails(data){
+    var html = ""
+    if(data.prevailing_aqi){
+      html += "<div style='padding: 0 2px; border:2px solid "+data.prevailing_aqi.aqi_cat.color+"; background-color: "+data.prevailing_aqi.aqi_cat.color+"; color: "+data.prevailing_aqi.aqi_cat.font+" '><strong> This location's air is "+data.prevailing_aqi.aqi_cat.name+"</strong></div> " 
+    }
+    $.each(data.datastreams, function(name,item){
+      if(item){
+        html += "<br />"+name+": "+item.value + " " + item.unit
+        if(item.computed_aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+item.aqi_cat.color+"; background-color: "+item.aqi_cat.color+"; color: "+item.aqi_cat.font+" '><strong>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</strong></span> " }
+        if(item.datetime){ html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  }
+        else if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
+        else {html += " (" + moment(item.date ).fromNow() +  ")" }
+      }        
+    })
+    if(html == ""){html += "<br /><em>No recent data available</em>"}
+    return html
   }
 
   function handleNoGeolocation() {
@@ -255,17 +260,18 @@ var AQE = (function ( $ ) {
     if(typeof(ga)!="undefined"){ ga('send', 'event', 'egg_'+feed_id, 'click', 'egg_on_map', 1); }
     $.getJSON("/egg/"+feed_id+".json", function(data){
       var html = ""
-      if(data.prevailing_aqi){
-        html += "<div style='padding: 0 2px; border:2px solid "+data.prevailing_aqi.aqi_cat.color+"; background-color: "+data.prevailing_aqi.aqi_cat.color+"; color: "+data.prevailing_aqi.aqi_cat.font+" '><strong> This location's air is "+data.prevailing_aqi.aqi_cat.name+"</strong></div> " 
-      }
-      $.each(data.datastreams, function(name,item){
-        if(item){
-          html += "<br />"+name+": "+item.value + " " + item.unit
-          if(item.computed_aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+item.aqi_cat.color+"; background-color: "+item.aqi_cat.color+"; color: "+item.aqi_cat.font+" '><strong>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</strong></span> " }
-          html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  
-        }        
-      })
-      if(html == ""){html += "<br /><em>No recent data available</em>"}
+      // if(data.prevailing_aqi){
+      //   html += "<div style='padding: 0 2px; border:2px solid "+data.prevailing_aqi.aqi_cat.color+"; background-color: "+data.prevailing_aqi.aqi_cat.color+"; color: "+data.prevailing_aqi.aqi_cat.font+" '><strong> This location's air is "+data.prevailing_aqi.aqi_cat.name+"</strong></div> " 
+      // }
+      // $.each(data.datastreams, function(name,item){
+      //   if(item){
+      //     html += "<br />"+name+": "+item.value + " " + item.unit
+      //     if(item.computed_aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+item.aqi_cat.color+"; background-color: "+item.aqi_cat.color+"; color: "+item.aqi_cat.font+" '><strong>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</strong></span> " }
+      //     html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  
+      //   }        
+      // })
+      // if(html == ""){html += "<br /><em>No recent data available</em>"}
+      var html = formatSensorDetails(data)
       $("#egg_"+feed_id).append(html)
     })
   }
@@ -295,19 +301,20 @@ var AQE = (function ( $ ) {
     if(typeof(ga)!="undefined"){ ga('send', 'event', 'aqs_'+aqs_id, 'click', 'aqs_on_map', 1); }
     
     $.getJSON("/aqs/"+aqs_id+".json", function(data){
-      var html = ""
-      if(data.prevailing_aqi){
-        html += "<div style='padding: 0 2px; border:2px solid "+data.prevailing_aqi.aqi_cat.color+"; background-color: "+data.prevailing_aqi.aqi_cat.color+"; color: "+data.prevailing_aqi.aqi_cat.font+" '><strong> This location's air is "+data.prevailing_aqi.aqi_cat.name+"</strong></div> " 
-      }
-      $.each(data.datastreams, function(name,item){
-        if(item){
-          html += "<br />"+name+": "+item.value + " " + item.unit
-          if(item.computed_aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+item.aqi_cat.color+"; background-color: "+item.aqi_cat.color+"; color: "+item.aqi_cat.font+" '><strong>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</strong></span> " }
-          if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
-          else {html += " (" + moment(item.date ).fromNow() +  ")" }
-        }        
-      })
-      if(html == ""){html += "<br /><em>No recent data available</em>"}      
+      // var html = ""
+      // if(data.prevailing_aqi){
+      //   html += "<div style='padding: 0 2px; border:2px solid "+data.prevailing_aqi.aqi_cat.color+"; background-color: "+data.prevailing_aqi.aqi_cat.color+"; color: "+data.prevailing_aqi.aqi_cat.font+" '><strong> This location's air is "+data.prevailing_aqi.aqi_cat.name+"</strong></div> " 
+      // }
+      // $.each(data.datastreams, function(name,item){
+      //   if(item){
+      //     html += "<br />"+name+": "+item.value + " " + item.unit
+      //     if(item.computed_aqi > 0){ html += " <span style='padding: 0 2px; border:2px solid "+item.aqi_cat.color+"; background-color: "+item.aqi_cat.color+"; color: "+item.aqi_cat.font+" '><strong>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</strong></span> " }
+      //     if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
+      //     else {html += " (" + moment(item.date ).fromNow() +  ")" }
+      //   }        
+      // })
+      // if(html == ""){html += "<br /><em>No recent data available</em>"}      
+      var html = formatSensorDetails(data)
       $("#aqs_"+aqs_id).append(html)
     })
   }
