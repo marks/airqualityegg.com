@@ -14,15 +14,17 @@
   padding-left: .5em;
 }
 
-
-.highcharts-container{
-  padding-top:25px;
-}
-
 .leaflet-control-legend{
   margin-right: 0px !important;
+}
+.leaflet-control-layers-group label{
+  font-weight:normal;
 }
 
 .egg-icon {
   z-index: 1000 !important;
+}
+
+.sensor-reading{
+  line-height: 23px;
 }

@@ -5,18 +5,17 @@
     <h1>Comparing Sensor Sites</h1>
     <br /><br />
     <div class="table-responsive">
-      <table class="table">
+      <table class="dataTableify table table-striped table-bordered table-hover">
         <tr>
-          <th>Sensor Site</th>
+          <th>Sensor ID</th>
+          <th>Sensor Name/Description</th>
           <th>Latest Data</th>
         </tr>
         <% @sensors.each do |sensor| %>
           <tr data-sensor-id="<%= sensor["id"] %>" data-sensor-type="<%= sensor["type"] %>">
-            <td>
-              <p><strong class="sensor-title"></strong> (<%= sensor["type"].upcase %> #<%= sensor["id"] %>)</p>
-              <p><a href='/<%= sensor["type"] %>/<%= sensor["id"] %>'>Go to this sensor's page for more details</a></p>
-            </td>
-            <td>Loading...</td>
+            <td><a href='/<%= sensor["type"] %>/<%= sensor["id"] %>'><%= sensor["type"].upcase %> #<%= sensor["id"] %><i class="fa fa-external-link fa-fw"></i></a></td>
+            <td><strong class="sensor-title"></strong><br /><span class="sensor-description"></span></td>
+            <td>Loading data for this sensor</td>
           </tr>
         <% end %>
       </table>
