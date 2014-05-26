@@ -129,6 +129,18 @@ class AirQualityEgg < Sinatra::Base
       EOS
     end
 
+    def sql_for_all_aqe_sites
+      <<-EOS
+        SELECT site_table.id,site_table.created,site_table.description,site_table.feed,site_table.location_domain,site_table.location_ele,site_table.location_exposure,site_table.location_lat,site_table.location_lon,site_table.status,title,
+        (SELECT data_table.datetime FROM \"#{ENV["aqe_data_resource"]}\" data_table WHERE data_table.feed_id = site_table.id and data_table.datetime > current_date - 2 order by datetime desc LIMIT 1) AS last_datapoint
+        from \"#{ENV["aqe_site_resource"]}\" site_table
+      EOS
+    end
+
+    def sql_for_all_aqs_sites
+      "SELECT aqs_id,site_name,agency_name,elevation,msa_name,cmsa_name,county_name,status,lat,lon from \"#{ENV["aqs_site_resource"]}\" WHERE status = 'Active'"
+    end
+
   end
 
 
@@ -139,7 +151,7 @@ class AirQualityEgg < Sinatra::Base
 
   # Home page
   get '/' do
-    @local_feed_path = '/all_eggs.json'
+    @local_feed_path = '/all_eggs.geojson'
     @error = session.delete(:error)
     erb :home
   end
@@ -157,36 +169,79 @@ class AirQualityEgg < Sinatra::Base
   end
 
 
-  get '/all_eggs.json' do
+  # get '/all_eggs.json' do
+  #   content_type :json
+  #   cache_key = "all_eggs"
+  #   cached_data = settings.cache.fetch(cache_key) do
+  #     all_aqe_sites = sql_search_ckan(sql_for_all_aqe_sites)
+  #     all_aqe_sites = all_aqe_sites.to_json
+  #     # store in cache and return
+  #     settings.cache.set(cache_key, all_aqe_sites, settings.cache_time)
+  #     all_aqe_sites
+  #   end
+  #   return cached_data
+  # end
+
+
+  get '/all_aqe.geojson' do
     content_type :json
-    cache_key = "all_eggs"
+    cache_key = "all_eggs.geojson"
     cached_data = settings.cache.fetch(cache_key) do
-      # all_aqe_sql = "SELECT id,created,description,feed,location_domain,location_ele,location_exposure,location_lat,location_lon,status,title,updated from \"#{ENV["aqe_site_resource"]}\""
-      all_aqe_sql = <<-EOS
-        SELECT site_table.id,site_table.created,site_table.description,site_table.feed,site_table.location_domain,site_table.location_ele,site_table.location_exposure,site_table.location_lat,site_table.location_lon,site_table.status,title,
-        (SELECT data_table.datetime FROM \"#{ENV["aqe_data_resource"]}\" data_table WHERE data_table.feed_id = site_table.id and data_table.datetime > current_date - 2 order by datetime desc LIMIT 1) AS last_datapoint
-        from \"#{ENV["aqe_site_resource"]}\" site_table
-      EOS
-      all_aqe_sites = sql_search_ckan(all_aqe_sql)
-      all_aqe_sites = all_aqe_sites.to_json
+      all_aqe_sites = sql_search_ckan(sql_for_all_aqe_sites)
+      geojson = []
+      all_aqe_sites.each do |feature|
+        geojson << {
+            :"type" => "Feature",
+            :"properties" => feature.merge("type" => "aqe"),
+            :"geometry" => {
+                "type" =>  "Point",
+                "coordinates" => [feature["location_lon"], feature["location_lat"]]
+            }
+        }
+      end
+      geojson = geojson.to_json
       # store in cache and return
-      settings.cache.set(cache_key, all_aqe_sites, settings.cache_time)
-      all_aqe_sites
+      settings.cache.set(cache_key, geojson, settings.cache_time)
+      geojson
     end
     return cached_data
   end
 
-  get '/all_aqs_sites.json' do
+  # get '/all_aqs_sites.json' do
+  #   content_type :json
+  #   cache_key = "all_aqs_sites"
+  #   cached_data = settings.cache.fetch(cache_key) do
+  #     all_aqs_sites = sql_search_ckan(sql_for_all_aqs_sites)
+  #     settings.cache.set(cache_key, all_aqs_sites, settings.cache_time)
+  #     all_aqs_sites
+  #   end
+  #   return cached_data.to_json
+  # end
+
+  get '/all_aqs.geojson' do
     content_type :json
-    cache_key = "all_aqs_sites"
+    cache_key = "all_aqs.geojson"
     cached_data = settings.cache.fetch(cache_key) do
-      all_aqs_sql = "SELECT aqs_id,site_name,agency_name,elevation,msa_name,cmsa_name,county_name,status,lat,lon from \"#{ENV["aqs_site_resource"]}\" WHERE status = 'Active'"
-      all_aqs_sites = sql_search_ckan(all_aqs_sql)
-      settings.cache.set(cache_key, all_aqs_sites, settings.cache_time)
-      all_aqs_sites
+      all_aqs_sites = sql_search_ckan(sql_for_all_aqs_sites)
+      geojson = []
+      all_aqs_sites.each do |feature|
+        geojson << {
+            :"type" => "Feature",
+            :"properties" => feature.merge("type" => "aqs"),
+            :"geometry" => {
+                "type" =>  "Point",
+                "coordinates" => [feature["lon"], feature["lat"]]
+            }
+        }
+      end
+      geojson = geojson.to_json
+      # store in cache and return
+      settings.cache.set(cache_key, geojson, settings.cache_time)
+      geojson
     end
-    return cached_data.to_json
+    return cached_data
   end
+
 
   get '/aqs/:id.json' do
     content_type :json

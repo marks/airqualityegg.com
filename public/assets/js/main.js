@@ -1,4 +1,6 @@
-var map, egg_layer, aqs_layer, school_layer, in_bounds, drawn;
+var map, egg_layer, aqs_layer, school_layer, in_bounds, drawn, filter_selections = {}, requested_data_url, loaded_at = new Date();
+var geoJsonLayers = {}, layersData = {}
+
 var AQE = (function ( $ ) {
   "use strict";
 
@@ -21,23 +23,22 @@ var AQE = (function ( $ ) {
   });
   var heatmapIconURL = '/assets/img/heatmap_legend.png'
 
-
   var today = new Date()
   var one_day_ago = new Date()
   one_day_ago = one_day_ago.setDate(today.getDate()-1)
   var six_hours_ago = new Date()
   six_hours_ago = six_hours_ago.setHours(today.getHours()-6)
 
-  // Air Quality Egg and AirNow AWS layers
-  egg_layer = L.layerGroup([]);
-  var egg_layer_inactive_24h = L.layerGroup([]);
-  var egg_layer_inactive_6h = L.layerGroup([]);
+  // // Air Quality Egg and AirNow AWS layers
+  // egg_layer = L.layerGroup([]);
+  // var egg_layer_inactive_24h = L.layerGroup([]);
+  // var egg_layer_inactive_6h = L.layerGroup([]);
 
-  // var egg_heatmap = L.heatLayer([], {radius: 35})
-  var egg_heatmap = new L.TileLayer.WebGLHeatMap({size: 5000, autoresize: true})
-  var egg_heatmap_layer = L.layerGroup([egg_heatmap])
+  // // var egg_heatmap = L.heatLayer([], {radius: 35})
+  // var egg_heatmap = new L.TileLayer.WebGLHeatMap({size: 5000, autoresize: true})
+  // var egg_heatmap_layer = L.layerGroup([egg_heatmap])
 
-  aqs_layer = L.layerGroup([]);
+  // aqs_layer = L.layerGroup([]);
   school_layer = L.layerGroup([]);
 
   // OpenWeatherMap Layers
@@ -54,7 +55,7 @@ var AQE = (function ( $ ) {
     var div = L.DomUtil.create('div', 'info legend')
     var div_html = "";
     div_html += "<div class='leaflet-control-layers leaflet-control leaflet-control-legend leaflet-control-layers-expanded'><div class='leaflet-control-layers-base'></div><div class='leaflet-control-layers-separator' style='display: none;'></div><div class='leaflet-control-layers-overlays'><div class='leaflet-control-layers-group' id='leaflet-control-layers-group-2'><span class='leaflet-control-layers-group-name'>Legend</span>";
-    div_html += "<table>"
+    div_html += "<table class=''>"
     div_html += "<tr><td align='center'><img style='width:19px; height:20px;' src='"+eggIconURL+"' alt='egg'> </td><td> Air Quality Egg</td></tr>";
     div_html += "<tr><td align='center'><img src='"+aqsIconURL+"' alt='blue dot'> </td><td> EPA Air Quality System Site</td></tr>";
     div_html += "<tr><td align='center'><img style='width:19px; height:19px;' src='"+schoolIconURL+"' alt='school'> </td><td> Schools from Dept of Education</td></tr>";
@@ -66,15 +67,15 @@ var AQE = (function ( $ ) {
 
 
   var groupedOverlays = {
-    "Air Quality Eggs": {
-      "Markers (updated in past 6 hours)": egg_layer,
-      "Markers (last updated 6 to 24 hours ago)": egg_layer_inactive_6h,
-      "Markers (last updated > 24 hours ago)": egg_layer_inactive_24h,
-      "Heatmap (of all eggs)": egg_heatmap_layer
-    },
-    "AirNow AQS Sites": {
-      "Markers": aqs_layer,
-    },
+    // "Air Quality Eggs": {
+    //   "Markers (updated in past 6 hours)": egg_layer,
+    //   "Markers (last updated 6 to 24 hours ago)": egg_layer_inactive_6h,
+    //   "Markers (last updated > 24 hours ago)": egg_layer_inactive_24h,
+    //   "Heatmap (of all eggs)": egg_heatmap_layer
+    // },
+    // "AirNow AQS Sites": {
+    //   "Markers": aqs_layer,
+    // },
     "Additional Data":{
       "Jefferson County Schools": school_layer
     },
@@ -93,9 +94,9 @@ var AQE = (function ( $ ) {
 
   function initialize() {
     // load feeds and then initialize map and add the markers
-    if(typeof(local_feed_path) != "undefined"){
+    if($(".map").length >= 1){
       // set up leaflet map
-      map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer]})
+      map = L.map('map_canvas', {scrollWheelZoom: false, layers: []})
       handleNoGeolocation();
       var hash = new L.Hash(map);
     
@@ -110,19 +111,19 @@ var AQE = (function ( $ ) {
       L.control.locate({locateOptions: {maxZoom: 9}}).addTo(map);
       legend.addTo(map)
 
-      // if on an egg's page, zoom in close to the egg
+      // if on an site's page, zoom in close to the site
       if ( $(".dashboard-map").length && feed_location) {
         map.setView(feed_location,9)
       }
 
-      $.getJSON(local_feed_path, function(mapmarkers){
+      $.getJSON("/all_aqe.geojson", function(data){
+        layersData["aqe"] = data
+        update_map("aqe")
+      })
 
-        // add eggs to map
-        for ( var x = 0, len = mapmarkers.length; x < len; x++ ) {
-          addEggMapMarker(mapmarkers[x]);
-        }
-
-        $("span#num_eggs").html(mapmarkers.length)
+      $.getJSON("/all_aqs.geojson", function(data){
+        layersData["aqs"] = data
+        update_map("aqs")
       })
 
       map.on('overlayadd', function (eventLayer) {
@@ -142,13 +143,16 @@ var AQE = (function ( $ ) {
               layer = e.layer;          
           drawn = layer
 
-          var sensor_layers = egg_layer.getLayers().concat(aqs_layer.getLayers())
-          $.each(sensor_layers, function(n,item){
-            var layer_in_bounds = drawn.getBounds().contains(item.getLatLng())
-            if(layer_in_bounds){ 
-              if(typeof(in_bounds[item.ref.type]) == "undefined"){ in_bounds[item.ref.type] = [] }
-              in_bounds[item.ref.type].push(item.ref.id)
-            }
+          // var sensor_layers = egg_layer.getLayers().concat(aqs_layer.getLayers())
+          // $.each(sensor_layers, function(n,item){
+          $.each(Object.keys(geoJsonLayers), function(n,type){
+            $.each(geoJsonLayers[type].getLayers(), function(n,item){
+              var layer_in_bounds = drawn.getBounds().contains(item.getLatLng())
+              if(layer_in_bounds){ 
+                if(typeof(in_bounds[item.ref.type]) == "undefined"){ in_bounds[item.ref.type] = [] }
+                in_bounds[item.ref.type].push(item.ref.id)
+              }
+            })
           })
 
           // open url in new window if there is anything to compare
@@ -165,13 +169,6 @@ var AQE = (function ( $ ) {
           map.addLayer(layer);
       });
 
-      //  - load active AQS stations to map
-      $.getJSON("/all_aqs_sites.json", function(aqs_mapmarkers){
-        for ( var x = 0, len = aqs_mapmarkers.length; x < len; x++ ) {
-          addAQSSiteMapMarker( aqs_mapmarkers[x] );
-        }
-      })
-
       $.getJSON("http://opendata.socrata.com/resource/w376-xd3c.json", function(school_mapmarkers){
         for ( var x = 0, len = school_mapmarkers.length; x < len; x++ ) {
           addSchoolSiteMapMarker( school_mapmarkers[x] );
@@ -181,13 +178,13 @@ var AQE = (function ( $ ) {
 
     // if on egg dashboard
     if($("#dashboard-egg-chart").length){
-      addAQIGauges()
+      // addAQIGauges()
       graphEggHistoricalData();
     }
 
     // if on AQS dashboard
     if($("#dashboard-aqs-chart").length){
-      addAQIGauges()
+      // addAQIGauges()
       graphAQSHistoricalData();
     }
 
@@ -199,8 +196,6 @@ var AQE = (function ( $ ) {
         $(row).find(".sensor-description").html(data.msa_name || data.cmsa_name || data.description)
         var html = formatSensorDetails(data)
         $(row).children('td').last().html(html)
-
-
       })
     })
 
@@ -209,6 +204,14 @@ var AQE = (function ( $ ) {
       var from_now = moment(original).fromNow()
       $(item).html("<abbr title='"+original+"'>"+from_now+"</abbr>")
     })
+
+    $( ".submit-map-filters" ).on('click',function( event ) {
+      $.each(Object.keys(geoJsonLayers), function(n,key){
+        update_map(key)
+      })
+      event.preventDefault();
+    });
+
 
 
   }
@@ -244,6 +247,109 @@ var AQE = (function ( $ ) {
   function handleNoGeolocation() {
     map.setView([38.22847167526397, -85.76099395751953], 11);
   }
+
+  function onEachFeature(feature, layer) {
+    var item = feature.properties
+    if(item.type == "aqe"){
+      layer.setIcon(eggIcon)
+      var html = "<div><h4>Air Quality Egg Details</h4><table class='table table-striped' data-feed_id='"+item.id+"'>"
+      html += "<tr><td>Name </td><td> <a href='/egg/"+item.id+"'><strong>"+item.title+"<strong></a></td></tr>"
+      html += "<tr><td>Description </td><td> "+item.description+"</td></tr>"
+      html += "<tr><td>Position </td><td> "+item.location_exposure+" @ "+item.location_ele+" elevation</td></tr>"
+      html += "<tr><td>Status </td><td> "+item.status+"</td></tr>"
+      // html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
+      html += "<tr><td>Created </td><td> "+moment(item.created+"Z").fromNow()+"</td></tr>"
+      if(item.last_datapoint){html += "<tr><td>Last data point </td><td> "+moment(item.last_datapoint+"Z").fromNow()+" ("+item.last_datapoint+")</td></tr>"}
+      html += "</table>"
+      html += "<div id='egg_"+item.id+"'></div>"
+      html += "<p style='text-align: right'><a href='/egg/"+item.id+"'>More about this egg site including historical graphs →</a></p>"
+      html += "</div>"
+      layer.bindPopup(html)
+      layer.ref = {type: "aqe", id: item.id}
+      layer.on('click', onEggMapMarkerClick); 
+    }
+
+    if(item.type == "aqs"){
+      layer.setIcon(aqsIcon)
+      layer.ref = {type: "aqs", id: item.aqs_id}
+      var html = "<div><h4>AirNow AQS Site Details</h4><table class='table table-striped' data-aqs_id='"+item.aqs_id+"'>"
+      html += "<tr><td>Site</td><td> <a href='/aqs/"+item.aqs_id+"'><strong>"+item.site_name+" / "+item.aqs_id+"</strong></a></td></tr>"
+      html += "<tr><td>Agency</td><td>"+item.agency_name+"</td></tr>"
+      html += "<tr><td>Position</td><td> "+item.elevation+" elevation</td></tr>"
+      if(item.msa_name){html += "<tr><td>MSA</td><td> "+item.msa_name+"</td></tr>"}
+      if(item.cmsa_name){html += "<tr><td>CMSA</td><td> "+item.cmsa_name+"</td></tr>"}
+      html += "<tr><td>County</td><td>"+item.county_name+"</td></tr>"
+      html += "<tr><td>Status</td><td>"+item.status+"</td></tr>"
+      html += "</table>"
+      html += "<div id='aqs_"+item.aqs_id+"'></div>"
+      html += "<p style='text-align: right'><a href='/aqs/"+item.aqs_id+"'>More about this AQS site including historical graphs →</a></p>"
+      html += "</div>"
+      layer.bindPopup(html)
+      layer.on('click', onAQSSiteMapMarkerClick); 
+    }
+
+
+  }
+
+  function filterFeatures(feature, layer) {
+    var item = feature.properties
+    var show = true
+
+    if($(".dashboard-map").length > 0){return show} // no filtering on dashboard pages
+
+    if(item.type == "aqe"){
+      // indoor/outdoor ===========
+      if(filter_selections["outdoor-eggs"] == "true" && item.location_exposure == "outdoor"){ show = true }
+      else if(filter_selections["indoor-eggs"] == "true" && item.location_exposure == "indoor"){ show = true }
+      else{ show = false }
+
+      // time basis ===============
+      if(item.last_datapoint){ var last_datapoint = new Date(item.last_datapoint+"Z") }
+      else { var last_datapoint = new Date(0,0,0) }
+
+      if(show == true && filter_selections["last-datapoint-not-within-168-hours"] == "true"){
+        var x_hours_ago = new Date().setHours(loaded_at.getHours()-168) 
+        if(last_datapoint >= x_hours_ago){ show = false }
+        else {show = true}
+      }
+      if(show == true && filter_selections["last-datapoint-within-168-hours"] == "true"){
+        var x_hours_ago = new Date().setHours(loaded_at.getHours()-168) 
+        if(last_datapoint >= x_hours_ago){ show = true }
+        else {show = false}
+      }
+      if(show == true && filter_selections["last-datapoint-within-24-hours"] == "true"){
+        var x_hours_ago = new Date().setHours(loaded_at.getHours()-24) 
+        if(last_datapoint >= x_hours_ago){ show = true }
+        else {show = false}
+      }
+      if(show == true && filter_selections["last-datapoint-within-6-hours"] == "true"){
+        var x_hours_ago = new Date().setHours(loaded_at.getHours()-6) 
+        if(last_datapoint >= x_hours_ago){ show = true }
+        else {show = false}
+      }
+    }
+
+    return show
+  }
+
+  function update_map(key){
+    if(typeof(geoJsonLayers[key]) != "undefined"){map.removeLayer(geoJsonLayers[key]);}    // clear all markers
+
+    // set filter selections to be used by filterFeatures
+    filter_selections["indoor-eggs"] = $('input.filter-indoor-eggs:checked').val()
+    filter_selections["outdoor-eggs"] = $('input.filter-outdoor-eggs:checked').val()
+    filter_selections["last-datapoint-within-6-hours"] = $('input.filter-last-datapoint-within-6-hours:checked').val()
+    filter_selections["last-datapoint-within-24-hours"] = $('input.filter-last-datapoint-within-24-hours:checked').val()
+    filter_selections["last-datapoint-within-168-hours"] = $('input.filter-last-datapoint-within-168-hours:checked').val()
+    filter_selections["last-datapoint-not-within-168-hours"] = $('input.filter-last-datapoint-not-within-168-hours:checked').val()
+    
+    geoJsonLayers[key] = L.geoJson(layersData[key], {
+      onEachFeature: onEachFeature,
+      filter: filterFeatures
+    }).addTo(map);
+
+  }
+
 
   function addEggMapMarker(egg) {
     var marker = L.marker([egg.location_lat, egg.location_lon],  {icon: eggIcon})
@@ -282,26 +388,6 @@ var AQE = (function ( $ ) {
       var html = formatSensorDetails(data)
       $("#egg_"+feed_id).append(html)
     })
-  }
-
-  function addAQSSiteMapMarker(aqs) {
-    var marker = L.marker([aqs.lat, aqs.lon],  {icon: aqsIcon})
-    var html = "<div><h4>AirNow AQS Site Details</h4><table class='table table-striped' data-aqs_id='"+aqs.aqs_id+"'>"
-    html += "<tr><td>Site</td><td> <a href='/aqs/"+aqs.aqs_id+"'><strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></a></td></tr>"
-    html += "<tr><td>Agency</td><td>"+aqs.agency_name+"</td></tr>"
-    html += "<tr><td>Position</td><td> "+aqs.elevation+" elevation</td></tr>"
-    if(aqs.msa_name){html += "<tr><td>MSA</td><td> "+aqs.msa_name+"</td></tr>"}
-    if(aqs.cmsa_name){html += "<tr><td>CMSA</td><td> "+aqs.cmsa_name+"</td></tr>"}
-    html += "<tr><td>County</td><td>"+aqs.county_name+"</td></tr>"
-    html += "<tr><td>Status</td><td>"+aqs.status+"</td></tr>"
-    html += "</table>"
-    html += "<div id='aqs_"+aqs.aqs_id+"'></div>"
-    html += "<p style='text-align: right'><a href='/aqs/"+aqs.aqs_id+"'>More about this AQS site including historical graphs →</a></p>"
-    html += "</div>"
-    marker.bindPopup(html)
-    marker.ref = {type: "aqs", id: aqs.aqs_id}
-    marker.on('click', onAQSSiteMapMarkerClick); 
-    marker.addTo(aqs_layer);
   }
 
   function onAQSSiteMapMarkerClick(e){
