@@ -72,23 +72,23 @@
                 <tbody>
                   <tr>
                     <td>Today</td>
-                    <td><%= @averages[0][ds]["avg_value"].to_f.round(1) if @averages[0][ds]["avg_value"] %></td>
-                    <td><%= @averages[0][ds]["avg_aqi"].to_f.round(1) if @averages[0][ds]["avg_aqi"] %></td>
+                    <td><%= @averages[0][ds]["avg_value"].to_f.round(1) if @averages[0][ds] && @averages[0][ds]["avg_value"] %></td>
+                    <td><%= @averages[0][ds]["avg_aqi"].to_f.round(1) if @averages[0][ds] &&  @averages[0][ds]["avg_aqi"] %></td>
                   </tr>
                   <tr>
                     <td>Past 3 days</td>
-                    <td><%= @averages[3][ds]["avg_value"].to_f.round(1) if @averages[3][ds]["avg_value"] %></td>
-                    <td><%= @averages[3][ds]["avg_aqi"].to_f.round(1) if @averages[3][ds]["avg_aqi"] %></td>
+                    <td><%= @averages[3][ds]["avg_value"].to_f.round(1) if @averages[3][ds] &&  @averages[3][ds]["avg_value"] %></td>
+                    <td><%= @averages[3][ds]["avg_aqi"].to_f.round(1) if @averages[3][ds] &&  @averages[3][ds]["avg_aqi"] %></td>
                   </tr>
                   <tr>
                     <td>Past 7 days</td>
-                    <td><%= @averages[7][ds]["avg_value"].to_f.round(1) if @averages[7][ds]["avg_value"] %></td>
-                    <td><%= @averages[7][ds]["avg_aqi"].to_f.round(1) if @averages[7][ds]["avg_aqi"] %></td>
+                    <td><%= @averages[7][ds]["avg_value"].to_f.round(1) if @averages[7][ds] &&  @averages[7][ds]["avg_value"] %></td>
+                    <td><%= @averages[7][ds]["avg_aqi"].to_f.round(1) if @averages[7][ds] &&  @averages[7][ds]["avg_aqi"] %></td>
                   </tr>
                   <tr>
                     <td>Past 28 days</td>
-                    <td><%= @averages[28][ds]["avg_value"].to_f.round(1) if @averages[28][ds]["avg_value"] %></td>
-                    <td><%= @averages[28][ds]["avg_aqi"].to_f.round(1) if @averages[28][ds]["avg_aqi"] %></td>
+                    <td><%= @averages[28][ds]["avg_value"].to_f.round(1) if @averages[28][ds] &&  @averages[28][ds]["avg_value"] %></td>
+                    <td><%= @averages[28][ds]["avg_aqi"].to_f.round(1) if @averages[28][ds] &&  @averages[28][ds]["avg_aqi"] %></td>
                   </tr>
                 </tbody>
               </table>

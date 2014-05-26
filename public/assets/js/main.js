@@ -23,12 +23,16 @@ var AQE = (function ( $ ) {
 
 
   var today = new Date()
-  var thirty_days_ago = new Date()
-  thirty_days_ago = thirty_days_ago.setDate(today.getDate()-30)
+  var one_day_ago = new Date()
+  one_day_ago = one_day_ago.setDate(today.getDate()-1)
+  var six_hours_ago = new Date()
+  six_hours_ago = six_hours_ago.setHours(today.getHours()-6)
 
   // Air Quality Egg and AirNow AWS layers
   egg_layer = L.layerGroup([]);
-  var egg_layer_inactive = L.layerGroup([]);
+  var egg_layer_inactive_24h = L.layerGroup([]);
+  var egg_layer_inactive_6h = L.layerGroup([]);
+
   // var egg_heatmap = L.heatLayer([], {radius: 35})
   var egg_heatmap = new L.TileLayer.WebGLHeatMap({size: 5000, autoresize: true})
   var egg_heatmap_layer = L.layerGroup([egg_heatmap])
@@ -69,8 +73,9 @@ var AQE = (function ( $ ) {
 
   var groupedOverlays = {
     "Air Quality Eggs": {
-      "Markers (updated in past 30 days)": egg_layer,
-      "Markers (not recently updated)": egg_layer_inactive,
+      "Markers (updated in past 6 hours)": egg_layer,
+      "Markers (last updated 6 to 24 hours ago)": egg_layer_inactive_6h,
+      "Markers (last updated > 24 hours ago)": egg_layer_inactive_24h,
       "Heatmap (of all eggs)": egg_heatmap_layer
     },
     "AirNow AQS Sites": {
@@ -130,8 +135,9 @@ var AQE = (function ( $ ) {
       map.on('overlayadd', function (eventLayer) {
         if(eventLayer.name == "Heatmap (of all eggs)" && eventLayer.group.name == "Air Quality Eggs"){
           var active_eggs = egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 5]})
-          var inactive_eggs = egg_layer_inactive.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 1]})
-          egg_heatmap.setData(Array().concat(active_eggs,inactive_eggs))
+          var inactive_eggs_24h = egg_layer_inactive_24h.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 1]})
+          var inactive_eggs_6h = egg_layer_inactive_6h.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 1]})
+          egg_heatmap.setData(Array().concat(active_eggs,inactive_eggs_24h,inactive_eggs_6h))
         }
       })
 
@@ -253,8 +259,9 @@ var AQE = (function ( $ ) {
     html += "<tr><td>Description </td><td> "+egg.description+"</td></tr>"
     html += "<tr><td>Position </td><td> "+egg.location_exposure+" @ "+egg.location_ele+" elevation</td></tr>"
     html += "<tr><td>Status </td><td> "+egg.status+"</td></tr>"
-    html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
-    html += "<tr><td>Created </td><td> "+moment(egg.created).fromNow()+"</td></tr>"
+    // html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
+    html += "<tr><td>Created </td><td> "+moment(egg.created+"Z").fromNow()+"</td></tr>"
+    if(egg.last_datapoint){html += "<tr><td>Last data point </td><td> "+moment(egg.last_datapoint+"Z").fromNow()+" ("+egg.last_datapoint+")</td></tr>"}
     html += "</table>"
     html += "<div id='egg_"+egg.id+"'></div>"
     html += "<p style='text-align: right'><a href='/egg/"+egg.id+"'>More about this egg site including historical graphs →</a></p>"
@@ -262,10 +269,15 @@ var AQE = (function ( $ ) {
     marker.bindPopup(html)
     marker.ref = {type: "aqe", id: egg.id}
     marker.on('click', onEggMapMarkerClick); 
-    if(new Date(egg.updated) < thirty_days_ago){
-      marker.addTo(egg_layer_inactive);
-    } else {
+    var last_datapoint = new Date(egg.last_datapoint+"Z") 
+    if(last_datapoint >= six_hours_ago){
       marker.addTo(egg_layer);
+    }
+    else if(last_datapoint <= six_hours_ago && last_datapoint >= one_day_ago){
+      marker.addTo(egg_layer_inactive_6h);
+    }
+    else {
+      marker.addTo(egg_layer_inactive_24h);
     }
   }
 
