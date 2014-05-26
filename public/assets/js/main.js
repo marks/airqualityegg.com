@@ -40,11 +40,6 @@ var AQE = (function ( $ ) {
   aqs_layer = L.layerGroup([]);
   school_layer = L.layerGroup([]);
 
-  // Propeller Health image overlay and layer 
-  // var propellerhealth_layer_url = 'http://s3.amazonaws.com/healthyaws/propeller_health/propeller_health_heatmap_nov13_shared.png';
-  // var propellerhealth_layer_bounds = [[37.8419378866983038, -86.0292621133016979], [38.5821425225734487, -85.1883896469475275]]
-  // var propellerhealth_layer = L.layerGroup([L.imageOverlay(propellerhealth_layer_url, propellerhealth_layer_bounds, {opacity: 0.8, attribution: "Asthma hotspot heatmap from <a href='http://propellerhealth.com' target=blank>Propeller Health</a>"})])
-
   // OpenWeatherMap Layers
   var clouds_layer = L.OWM.clouds({opacity: 0.8, legendImagePath: 'files/NT2.png'});
   var precipitation_layer = L.OWM.precipitation( {opacity: 0.5} );
@@ -63,7 +58,6 @@ var AQE = (function ( $ ) {
     div_html += "<tr><td align='center'><img style='width:19px; height:20px;' src='"+eggIconURL+"' alt='egg'> </td><td> Air Quality Egg</td></tr>";
     div_html += "<tr><td align='center'><img src='"+aqsIconURL+"' alt='blue dot'> </td><td> EPA Air Quality System Site</td></tr>";
     div_html += "<tr><td align='center'><img style='width:19px; height:19px;' src='"+schoolIconURL+"' alt='school'> </td><td> Schools from Dept of Education</td></tr>";
-    // div_html += "<tr><td align='center'><img style='width:19px; height:19px;' src='"+heatmapIconURL+"' alt='heatmap'> </td><td> Propeller Health Asthma Hotspots</td></tr>";
     div_html += "</table>"
     div_html += "</div></div></div>"
     div.innerHTML = div_html
@@ -82,7 +76,6 @@ var AQE = (function ( $ ) {
       "Markers": aqs_layer,
     },
     "Additional Data":{
-      // "Louisville Asthma Hotspots": propellerhealth_layer,
       "Jefferson County Schools": school_layer
     },
     "OpenWeatherMap": {
