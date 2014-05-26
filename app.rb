@@ -42,7 +42,7 @@ class AirQualityEgg < Sinatra::Base
 
   configure :production do
     require 'newrelic_rpm'
-    set :cache_time, 3600*12 # 12 hours
+    set :cache_time, 3600*3 # 3 hours
   end
 
   configure :development do
@@ -115,8 +115,18 @@ class AirQualityEgg < Sinatra::Base
           WHERE data_table.feed_id = #{id}
         )
       EOS
-
     end
+
+    def sql_for_aqe_latest_datapoint(id)
+      <<-EOS
+        SELECT
+          data_table.datetime
+        FROM
+          "#{ENV["aqe_data_resource"]}" data_table
+        WHERE data_table.feed_id = #{id}
+        order by datetime desc
+        LIMIT 1
+      EOS
 
   end
 
