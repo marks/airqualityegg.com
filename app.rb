@@ -127,6 +127,7 @@ class AirQualityEgg < Sinatra::Base
         order by datetime desc
         LIMIT 1
       EOS
+    end
 
   end
 
