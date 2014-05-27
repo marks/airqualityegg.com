@@ -367,6 +367,10 @@ class AirQualityEgg < Sinatra::Base
     META.to_json
   end
 
+  get '/wizard' do
+    erb :wizard
+  end
+
   get '/cache/flush' do
     return settings.cache.flush.to_s
   end
