@@ -368,21 +368,24 @@ class AirQualityEgg < Sinatra::Base
   end
 
   get '/wizard' do
+    @custom_css = [
+      "/vendor/recline/vendor/slickgrid/2.0.1/slick.grid.css",
+      "/vendor/recline/vendor/leaflet.markercluster/MarkerCluster.css",
+      "/vendor/recline/vendor/leaflet.markercluster/MarkerCluster.Default.css",
+      "/vendor/recline/dist/recline.css",
+    ]
     @custom_js = [
-      "http://marks.github.io/ckan-explorer/vendor/recline/vendor/underscore/1.4.4/underscore.js",
-      "http://marks.github.io/ckan-explorer/vendor/recline/vendor/backbone/1.0.0/backbone.js",
-      "http://marks.github.io/ckan-explorer/vendor/recline/vendor/mustache/0.5.0-dev/mustache.js",
-      "http://marks.github.io/ckan-explorer/vendor/recline/vendor/slickgrid/2.0.1/jquery-ui-1.8.16.custom.min.js",
-      "http://marks.github.io/ckan-explorer/vendor/recline/vendor/slickgrid/2.0.1/jquery.event.drag-2.0.min.js",
-      "http://marks.github.io/ckan-explorer/vendor/recline/vendor/slickgrid/2.0.1/slick.grid.min.js",
-      "http://marks.github.io/ckan-explorer/vendor/recline/vendor/flot/jquery.flot.js",
-      "http://marks.github.io/ckan-explorer/vendor/recline/vendor/flot/jquery.flot.time.js",
-      "http://marks.github.io/ckan-explorer/vendor/recline/vendor/moment/2.0.0/moment.js",
-      "http://marks.github.io/ckan-explorer/vendor/recline/vendor/leaflet/0.4.4/leaflet.js",
-      "http://marks.github.io/ckan-explorer/vendor/recline/vendor/leaflet.markercluster/leaflet.markercluster.js",
-      "http://marks.github.io/ckan-explorer/vendor/recline/dist/recline.js",
-      "http://marks.github.io/ckan-explorer/vendor/ckan.js/ckan.js",
-      # "http://code.jquery.com/jquery-migrate-1.2.1.js",
+      "/vendor/recline/vendor/underscore/1.4.4/underscore.js",
+      "/vendor/recline/vendor/backbone/1.0.0/backbone.js",
+      "/vendor/recline/vendor/mustache/0.5.0-dev/mustache.js",
+      "/vendor/recline/vendor/slickgrid/2.0.1/jquery-ui-1.8.16.custom.min.js",
+      "/vendor/recline/vendor/slickgrid/2.0.1/jquery.event.drag-2.0.min.js",
+      "/vendor/recline/vendor/leaflet.markercluster/leaflet.markercluster.js",
+      "/vendor/recline/vendor/slickgrid/2.0.1/slick.grid.min.js",
+      "/vendor/recline/vendor/flot/jquery.flot.js",
+      "/vendor/recline/vendor/flot/jquery.flot.time.js",
+      "/vendor/recline/dist/recline.js",
+      "/vendor/ckan.js/ckan.js",
       "/assets/js/wizard.js",
     ]
     erb :wizard
