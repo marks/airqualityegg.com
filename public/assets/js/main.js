@@ -134,15 +134,30 @@ var AQE = (function ( $ ) {
           })
 
           // open url in new window if there is anything to compare
-          var in_bounds_compare_url = "/compare?"
+
+
+
+
+          var form = document.createElement("form");
+          form.action = "/compare";
+          form.method = "post"
+          // var in_bounds_compare_url = "/compare?"
           $.each(in_bounds, function(type,ids){
-            in_bounds_compare_url += "&"+type+"="+ids.join(",")
+            console.log(ids)
+            var input = document.createElement("input");
+            input.name = type;
+            input.value = ids.join(",");
+            form.appendChild(input);
+            // in_bounds_compare_url += "&"+type+"="+ids.join(",")
           })
-          if(in_bounds_compare_url != "/compare?"){
-            window.open(location.origin+in_bounds_compare_url)
-          } else {
-            alert("Draw a shape over some markers to compare them side-by-side in a new window.")
-          }
+          // if(in_bounds_compare_url != "/compare?"){
+            document.body.appendChild(form);
+            // console.log(form)
+            form.submit();
+            // window.open(location.origin+in_bounds_compare_url)
+          // } else {
+          //   alert("Draw a shape over some markers to compare them side-by-side in a new window.")
+          // }
 
           map.addLayer(layer);
       });

@@ -347,6 +347,7 @@ class AirQualityEgg < Sinatra::Base
   end
 
   get '/compare' do
+    logger.debug(params.inspect)
     @sensors = []
     params.each do |type,ids|
       ids.split(",").each do |sensor_id|
