@@ -31,7 +31,7 @@ var DataView = Backbone.View.extend({
     var gridView = {
         id: 'grid',
         label: 'Grid',
-        view: new recline.View.Grid({
+        view: new recline.View.SlickGrid({
           model: dataset,
         })
       };
@@ -42,16 +42,16 @@ var DataView = Backbone.View.extend({
         model: dataset
       })
     };
-    // var mapView = {
-    //   id: 'map',
-    //   label: 'Map',
-    //   view: new recline.View.Map({
-    //     model: dataset
-    //   })
-    // };
+    var mapView = {
+      id: 'map',
+      label: 'Map',
+      view: new recline.View.Map({
+        model: dataset
+      })
+    };
     view = new recline.View.MultiView({
       model: dataset,
-      views: [gridView, graphView],
+      views: [gridView, graphView, mapView],
       sidebarViews: [],
       el: $el
     });
@@ -122,26 +122,18 @@ var DataView = Backbone.View.extend({
             return false;
           }
 
+        }
+        if(index==2) {
           var view = new DataView({
             resourceId: $(".resource-choose:checked").data("resource-id"),
             el: $(".data-view")
           });
-          $(".recline-pager ul").addClass("pagination")
-
         }
-        if(index==2) {
-          // Make sure we entered the name
-          // if(!$('#name').val()) {
-          //   alert('You must enter your name');
-          //   $('#name').focus();
-          //   return false;
-          // }
-        }
-        var debug = ""
-        $("input").each(function(x,y){
-          debug += $(y).attr("name") + " = <pre>" + $(y).val() + "</pre>"
-        })
-        $("#wizard-data").html(debug)          
+        // var debug = ""
+        // $("input").each(function(x,y){
+        //   debug += $(y).attr("name") + " = <pre>" + $(y).val() + "</pre>"
+        // })
+        // $("#wizard-data").html(debug)          
       }
     });
 

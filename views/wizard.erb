@@ -17,10 +17,6 @@
             <li><a href="#tab1" data-toggle="tab"><span class="label">1</span> First</a></li>
             <li><a href="#tab2" data-toggle="tab"><span class="label">2</span> Second</a></li>
             <li><a href="#tab3" data-toggle="tab"><span class="label">3</span> Third</a></li>
-            <li><a href="#tab4" data-toggle="tab"><span class="label">4</span> Forth</a></li>
-            <li><a href="#tab5" data-toggle="tab"><span class="label">5</span> Fifth</a></li>
-            <li><a href="#tab6" data-toggle="tab"><span class="label">6</span> Sixth</a></li>
-            <li><a href="#tab7" data-toggle="tab"><span class="label">7</span> Seventh</a></li>
           </ul>
           <div class="tab-content">
             <hr />
@@ -39,7 +35,7 @@
             <div class="tab-pane" id="tab2">
               <div class="form-group">
                 <label>Now choose a visualization type</label>
-                <% [{"name" => "Grid", "value" => "grid"}].each do |view_type| %>
+                <% [{"name" => "Recline", "value" => "recline"}].each do |view_type| %>
                   <div class="radio">
                     <label><input type="radio" name="view_type-choose" value="<%= view_type["value"] %>"><%= view_type["name"] %></label>
                   </div>
@@ -47,19 +43,7 @@
               </div>
             </div>
             <div class="tab-pane" id="tab3">
-              3
-            </div>
-            <div class="tab-pane" id="tab4">
-              4
-            </div>
-            <div class="tab-pane" id="tab5">
-              5
-            </div>
-            <div class="tab-pane" id="tab6">
-              6
-            </div>
-            <div class="tab-pane" id="tab7">
-              7
+              <div class="data-view"></div>
             </div>
             <hr />
             <ul class="pager wizard">
@@ -82,10 +66,9 @@
 </div>
 
 
-<div class="row">
+<!-- <div class="row">
   <div class="col-lg-12">
     <div class="panel panel-default">
-      <div class="data-view"></div>
     </div>
   </div>
-</div>
+</div> -->
