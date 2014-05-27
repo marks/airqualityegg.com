@@ -153,13 +153,19 @@ var AQE = (function ( $ ) {
       $('.wizardify').bootstrapWizard({
         tabClass: 'bwizard-steps',
         onNext: function(tab, navigation, index) {
-          if(index==2) {
-            // Make sure we entered the name
-            if(!$('#name').val()) {
-              alert('You must enter your name');
-              $('#name').focus();
+          if(index==1) {
+            if($("#tab1 .checkbox input:checked").length != 1){
+              alert("Please select exactly one dataset to build a visualization off of.")
               return false;
             }
+          }
+          if(index==2) {
+            // Make sure we entered the name
+            // if(!$('#name').val()) {
+            //   alert('You must enter your name');
+            //   $('#name').focus();
+            //   return false;
+            // }
           }
           var debug = ""
           $("input").each(function(x,y){
@@ -194,8 +200,6 @@ var AQE = (function ( $ ) {
       })
       event.preventDefault();
     });
-
-
 
   }
 

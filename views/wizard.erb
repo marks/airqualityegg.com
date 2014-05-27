@@ -25,11 +25,24 @@
           <div class="tab-content">
             <hr />
             <div class="tab-pane" id="tab1">
-              <p>First, let's choose datasets to visualize:</p>
+              <div class="form-group">
+                <label>First, let's choose datasets to visualize:</label>
+                <% META.each do |key,hash| %>
+                  <div class="checkbox">
+                      <label><input name='dataset-choose dataset-choose-<%= key %>' type="checkbox" value="<%= hash["id"] %>"><%= hash["title"] %></label>
+                  </div>
+                <% end %>
+              </div>
             </div>
             <div class="tab-pane" id="tab2">
-              <input type='text' name='name' id='name' placeholder='Enter Your Name'>
-              <input type='text' name='x' id='x' placeholder='Enter Your Name'>
+              <div class="form-group">
+                <label>Now choose a visualization type</label>
+                <% [{"name" => "Grid", "value" => "grid"}].each do |view_type| %>
+                  <div class="radio">
+                    <label><input type="radio" name="view_type-choose" value="<%= view_type["value"] %>"><%= view_type["name"] %></label>
+                  </div>
+                <% end %>
+              </div>
             </div>
             <div class="tab-pane" id="tab3">
               3
