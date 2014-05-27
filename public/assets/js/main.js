@@ -1,4 +1,4 @@
-var map, egg_layer, aqs_layer, school_layer, in_bounds, drawn, filter_selections = {}, requested_data_url, loaded_at = new Date();
+var map, in_bounds, drawn, filter_selections = {}, loaded_at = new Date();
 var geoJsonLayers = {}, layersData = {}
 
 var AQE = (function ( $ ) {
@@ -22,14 +22,6 @@ var AQE = (function ( $ ) {
       iconSize: [17, 17], // size of the icon
   });
   var heatmapIconURL = '/assets/img/heatmap_legend.png'
-
-  var today = new Date()
-  var one_day_ago = new Date()
-  one_day_ago = one_day_ago.setDate(today.getDate()-1)
-  var six_hours_ago = new Date()
-  six_hours_ago = six_hours_ago.setHours(today.getHours()-6)
-
-  school_layer = L.layerGroup([]);
 
   // OpenWeatherMap Layers
   var clouds_layer = L.OWM.clouds({opacity: 0.8, legendImagePath: 'files/NT2.png'});
@@ -55,11 +47,7 @@ var AQE = (function ( $ ) {
     return div;
   };
 
-
   var groupedOverlays = {
-    // "Additional Data":{
-    //   "Jefferson County Schools": school_layer
-    // },
     "OpenWeatherMap": {
       "Clouds": clouds_layer,
       "Precipiration": precipitation_layer,
@@ -78,7 +66,7 @@ var AQE = (function ( $ ) {
     if($(".map").length >= 1){
       // set up leaflet map
       map = L.map('map_canvas', {scrollWheelZoom: false, layers: []})
-      handleNoGeolocation();
+      map.setView([38.22847167526397, -85.76099395751953], 11); // louisville
       var hash = new L.Hash(map);
     
       var drawControl = new L.Control.Draw({ draw: { polyline: false, marker: false }});
@@ -104,14 +92,14 @@ var AQE = (function ( $ ) {
         })        
       })
 
-      map.on('overlayadd', function (eventLayer) {
-        if(eventLayer.name == "Heatmap (of all eggs)" && eventLayer.group.name == "Air Quality Eggs"){
-          var active_eggs = egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 5]})
-          var inactive_eggs_24h = egg_layer_inactive_24h.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 1]})
-          var inactive_eggs_6h = egg_layer_inactive_6h.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 1]})
-          egg_heatmap.setData(Array().concat(active_eggs,inactive_eggs_24h,inactive_eggs_6h))
-        }
-      })
+      // map.on('overlayadd', function (eventLayer) {
+      //   if(eventLayer.name == "Heatmap (of all eggs)" && eventLayer.group.name == "Air Quality Eggs"){
+      //     var active_eggs = egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 5]})
+      //     var inactive_eggs_24h = egg_layer_inactive_24h.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 1]})
+      //     var inactive_eggs_6h = egg_layer_inactive_6h.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 1]})
+      //     egg_heatmap.setData(Array().concat(active_eggs,inactive_eggs_24h,inactive_eggs_6h))
+      //   }
+      // })
 
       map.on('draw:created', function (e) {
           if(typeof(drawn) != "undefined"){map.removeLayer(drawn)} // remove previously drawn item
@@ -121,8 +109,6 @@ var AQE = (function ( $ ) {
               layer = e.layer;          
           drawn = layer
 
-          // var sensor_layers = egg_layer.getLayers().concat(aqs_layer.getLayers())
-          // $.each(sensor_layers, function(n,item){
           $.each(Object.keys(geoJsonLayers), function(n,type){
             $.each(geoJsonLayers[type].getLayers(), function(n,item){
               var layer_in_bounds = drawn.getBounds().contains(item.getLatLng())
@@ -153,13 +139,11 @@ var AQE = (function ( $ ) {
 
     // if on egg dashboard
     if($("#dashboard-egg-chart").length){
-      // addAQIGauges()
       graphEggHistoricalData();
     }
 
     // if on AQS dashboard
     if($("#dashboard-aqs-chart").length){
-      // addAQIGauges()
       graphAQSHistoricalData();
     }
 
@@ -217,10 +201,6 @@ var AQE = (function ( $ ) {
     html += "</table>"
     if(html == sensor_table+"</table>"){html = "<em>No recent data available</em>"}
     return html
-  }
-
-  function handleNoGeolocation() {
-    map.setView([38.22847167526397, -85.76099395751953], 11);
   }
 
   function onEachFeature(feature, layer) {
@@ -374,123 +354,6 @@ var AQE = (function ( $ ) {
     })
   }
 
-  //
-  // LOCATION PICKER
-  //
-
-  // var locpic = new GMapsLatLonPicker(),
-  //     locpicker = $(".gllpLatlonPicker").first(),
-  //     locsearch = $(".gllpSearchField").first(),
-  //     locsaved = parseInt($(".location-saved").first().val()),
-  //     geolocate = function () {
-  //       navigator.geolocation.getCurrentPosition(function(position) {
-  //         $(".gllpLatitude").val(position.coords.latitude);
-  //         $(".gllpLongitude").val(position.coords.longitude);
-  //         $(".gllpZoom").val(13);
-  //         locpic.custom_redraw();
-  //       });
-  //     };
-
-  // if ( locpicker.length ) {
-
-  //   locpic.init( locpicker );
-
-  //   // search
-  //   $(".gllpSearchField").keydown(function(event){
-  //     if(event.keyCode == 13){
-  //       locpic.performSearch( $(this).val(), false );
-  //       event.preventDefault();
-  //     }
-  //   });
-
-  //   // HTML5 geolocation
-  //   if(!locsaved && navigator.geolocation) {
-  //     geolocate();
-  //   }
-  //   if (navigator.geolocation) {
-  //     $(".find-me").removeClass("hidden").on("click", function(event) {
-  //       event.preventDefault();
-  //       geolocate();
-  //     });
-  //   }
-
-  // }
-
-  //
-  // CLAIMING FIELD
-  //
-
-  // $(".claiming-form").on( "submit" , function (event) {
-  //   var $this   = $(this),
-  //       $input  = $this.find(".claiming-input"),
-  //       $error  = $(".claiming-error");
-
-  //   if ( $input.val() === "" ) {
-  //     event.preventDefault();
-  //     $error.html("Please enter a serial number").removeClass("hidden");
-  //   }
-  //   else {
-  //     $(".claiming-button").val("Adding ...").addClass("button-green button-loading");
-  //   }
-  // });
-
-  // $(".claiming-input").blur( function (event) {
-  //   $(".claiming-error").addClass("hidden");
-  // });
-
-  //
-  // FORM VALIDATION
-  //
-
-  // $('.form-validation').on( "submit" , function (event) {
-  //   var $this       = $(this),
-  //       $required   = $this.find(".field-required [data-validate]"),
-  //       $submit     = $this.find('.button[type="submit"]'),
-  //       error       = false;
-
-  //   if ( $required.length ) {
-  //     var errorify = function ( $bro, msg ) {
-  //           var $other = $bro.siblings(".bubble-error");
-
-  //           if ( $bro.val() === "" ) {
-  //             error = true;
-
-  //             if ( !$other.length ) {
-  //               $("<span></span>", { "class" : "bubble bubble-error", html : msg }).hide().insertAfter( $bro ).slideDown(150);
-  //             }
-  //             else if ( $other.html() === msg ) {
-  //               $other.slideDown(150);
-  //             }
-  //           }
-  //           else {
-  //             if ( $other.length || $other.html() === msg ) {
-  //               $other.slideUp(150);
-  //             }
-  //           }
-  //         };
-
-  //     $required.each( function () {
-  //       var $el   = $(this);
-
-  //       if ( $el.get(0).tagName.toLowerCase() === "input" ) {
-  //         errorify( $el, "This field cannot be blank" );
-  //       }
-  //       else if ( $el.get(0).tagName.toLowerCase() === "select" ) {
-  //         errorify( $el, "Please select one of the options" );
-  //       }
-  //     });
-  //   }
-
-  //   if ( error ) {
-  //     event.preventDefault();
-  //     $(".bubble-error").first().prev().focus();
-  //   }
-  //   else {
-  //     // success
-  //     $submit.val("Saving ...").addClass("button-green button-loading");
-  //   }
-  // });
-
   function graphEggHistoricalData(){
     // create skeleton chart
 
@@ -571,98 +434,97 @@ var AQE = (function ( $ ) {
 
   }
 
-  function addAQIGauges(){
-    $(".current-value-gauge").each(function(n,span){
-      var value = $(span).data("aqi-value")
-      var gauge_id = $(span).attr("id")
-      if(value > 0){
-        $('#'+gauge_id).highcharts({
-                chart: {
-                    type: 'gauge',
-                    plotBorderWidth: 0,
-                    plotShadow: false,
-                    backgroundColor:'rgba(255, 255, 255, 0.002)',
-                    marginLeft:-55
-                },
-                credits: { enabled: false },
-                exporting: { enabled: false },
-                title: { text: ''},
-                subtitle: { text: 'AQI:', align: 'left', floating: true, x:-10, y:5},
-                pane: {
-                    startAngle: -90,
-                    endAngle: 90,
-                    background: null
-                },
-                plotOptions: {
-                    gauge: {
-                        dataLabels: { enabled: false },
-                        dial: { radius: '80%' }
-                    }
-                },
-                yAxis: {
-                    min: 0,
-                    max: 500,
-                    minorTickInterval: 'auto',
-                    minorTickWidth: 0,
-                    minorTickLength: 10,
-                    minorTickPosition: 'inside',
-                    minorTickColor: '#666',
+  // function addAQIGauges(){
+  //   $(".current-value-gauge").each(function(n,span){
+  //     var value = $(span).data("aqi-value")
+  //     var gauge_id = $(span).attr("id")
+  //     if(value > 0){
+  //       $('#'+gauge_id).highcharts({
+  //               chart: {
+  //                   type: 'gauge',
+  //                   plotBorderWidth: 0,
+  //                   plotShadow: false,
+  //                   backgroundColor:'rgba(255, 255, 255, 0.002)',
+  //                   marginLeft:-55
+  //               },
+  //               credits: { enabled: false },
+  //               exporting: { enabled: false },
+  //               title: { text: ''},
+  //               subtitle: { text: 'AQI:', align: 'left', floating: true, x:-10, y:5},
+  //               pane: {
+  //                   startAngle: -90,
+  //                   endAngle: 90,
+  //                   background: null
+  //               },
+  //               plotOptions: {
+  //                   gauge: {
+  //                       dataLabels: { enabled: false },
+  //                       dial: { radius: '80%' }
+  //                   }
+  //               },
+  //               yAxis: {
+  //                   min: 0,
+  //                   max: 500,
+  //                   minorTickInterval: 'auto',
+  //                   minorTickWidth: 0,
+  //                   minorTickLength: 10,
+  //                   minorTickPosition: 'inside',
+  //                   minorTickColor: '#666',
 
-                    tickPixelInterval: 30,
-                    tickWidth: 2,
-                    tickPosition: 'inside',
-                    tickLength: 10,
-                    tickColor: '#666',
-                    labels: {
-                        step: 5,
-                        rotation: 'auto'
-                    },
-                    title: { text: '' },
-                    plotBands: [{
-                        from: 0,
-                        to: 50,
-                        color: '#00E000'
-                    }, {
-                        from: 51,
-                        to: 100,
-                        color: '#FFFF00'
-                    }, {
-                        from: 101,
-                        to: 150,
-                        color: '#FF7E00'
-                    }, {
-                        from: 151,
-                        to: 200,
-                        color: '#FF0000'
-                    }, {
-                        from: 201,
-                        to: 300,
-                        color: '#99004C'
-                    }, {
-                        from: 301,
-                        to: 500,
-                        color: '#4C0026'
-                    }]
-                },
-                tooltip: {
-                  formatter: function(){
-                    return 'AQI = '+this.point.y;
-                  }
-                },
+  //                   tickPixelInterval: 30,
+  //                   tickWidth: 2,
+  //                   tickPosition: 'inside',
+  //                   tickLength: 10,
+  //                   tickColor: '#666',
+  //                   labels: {
+  //                       step: 5,
+  //                       rotation: 'auto'
+  //                   },
+  //                   title: { text: '' },
+  //                   plotBands: [{
+  //                       from: 0,
+  //                       to: 50,
+  //                       color: '#00E000'
+  //                   }, {
+  //                       from: 51,
+  //                       to: 100,
+  //                       color: '#FFFF00'
+  //                   }, {
+  //                       from: 101,
+  //                       to: 150,
+  //                       color: '#FF7E00'
+  //                   }, {
+  //                       from: 151,
+  //                       to: 200,
+  //                       color: '#FF0000'
+  //                   }, {
+  //                       from: 201,
+  //                       to: 300,
+  //                       color: '#99004C'
+  //                   }, {
+  //                       from: 301,
+  //                       to: 500,
+  //                       color: '#4C0026'
+  //                   }]
+  //               },
+  //               tooltip: {
+  //                 formatter: function(){
+  //                   return 'AQI = '+this.point.y;
+  //                 }
+  //               },
 
-                series: [{
-                    name: 'AQI',
-                    data: [{y: value}],
-                }]
+  //               series: [{
+  //                   name: 'AQI',
+  //                   data: [{y: value}],
+  //               }]
 
-            },
-            function () {}
-        );
+  //           },
+  //           function () {}
+  //       );
 
-      }
-    })
-  }
-
+  //     }
+  //   })
+  // }
 
   function celsiusToFahrenheit(value){
     return parseFloat(value) * 9 / 5 + 32
