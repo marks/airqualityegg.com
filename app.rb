@@ -123,18 +123,6 @@ class AirQualityEgg < Sinatra::Base
       EOS
     end
 
-    def sql_for_aqe_latest_datapoint(id)
-      <<-EOS
-        SELECT
-          data_table.datetime
-        FROM
-          "#{META["aqe"]["data_resource_id"]}" data_table
-        WHERE data_table.feed_id = #{id}
-        order by datetime desc
-        LIMIT 1
-      EOS
-    end
-
     def sql_for_all_sites_by_key(key)
       if key == "aqe"
         <<-EOS
@@ -372,6 +360,11 @@ class AirQualityEgg < Sinatra::Base
     # @feeds = @feeds.first(params[:limit].to_i) if params[:limit].to_i != 0
     # @map_markers = collect_map_markers(@feeds)
     # return @map_markers
+  end
+
+  get '/meta.?:format?' do
+    content_type :json
+    META.to_json
   end
 
   get '/cache/flush' do
