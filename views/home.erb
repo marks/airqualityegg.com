@@ -14,42 +14,51 @@
     </div>
 
     <div class="col-lg-3">
-      <form role="form">
-          <div class="form-group">
-              <label><i class="fa fa-bars"></i> Air Quality Eggs</label>
-              <div class="checkbox">
-                  <label><input class='filter-indoor-eggs' type="checkbox" value="true" checked>Indoor Eggs</label>
-              </div>
-              <div class="checkbox">
-                  <label><input class='filter-outdoor-eggs' type="checkbox" value="true" checked>Outdoor Eggs</label>
-              </div>
-              <div class="checkbox">
-                  <label><input class='filter-last-datapoint-within-6-hours' type="checkbox" value="true" checked>Last updated w/i 6 hours</label>
-              </div>
-              <div class="checkbox">
-                  <label><input class='filter-last-datapoint-within-24-hours' type="checkbox" value="true">Last updated w/i 24 hours</label>
-              </div>
-              <div class="checkbox">
-                  <label><input class='filter-last-datapoint-within-168-hours' type="checkbox" value="true">Last updated w/i 7 days</label>
-              </div>
-              <div class="checkbox">
-                  <label><input class='filter-last-datapoint-not-within-168-hours' type="checkbox" value="true">Last updated > 7 days ago</label>
-              </div>
-          </div>
-          <div class="form-group">
-              <label><i class="fa fa-bars"></i> EPA Air Quality System Sites</label>
-              <div class="checkbox">
-                  <label><input class='filter-active-sites' type="checkbox" value="true" checked>Active sites</label>
-              </div>
-          </div>
-          <div class="form-group">
-              <label><i class="fa fa-bars"></i> Schools</label>
-              <div class="checkbox">
-                  <label><input class='filter-jeffschools' type="checkbox" value="true">Jefferson County, KY</label>
-              </div>
-          </div>
-          <button class="btn btn-default submit-map-filters">Apply Filters to Map</button>
-      </form>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">Map Feature Filters</div>
+        <div class="panel-body">
+
+          <form role="form">
+            <div class="form-group">
+                <label class="header"><i class="fa fa-bars"></i> Air Quality Eggs</label>
+                <div class="checkbox">
+                    <label><input class='filter-indoor-eggs' type="checkbox" value="true" checked>Indoor Eggs</label>
+                </div>
+                <div class="checkbox">
+                    <label><input class='filter-outdoor-eggs' type="checkbox" value="true" checked>Outdoor Eggs</label>
+                </div>
+                <div class="checkbox">
+                    <label><input class='filter-last-datapoint-within-6-hours' type="checkbox" value="true" checked>Last updated w/i 6 hours</label>
+                </div>
+                <div class="checkbox">
+                    <label><input class='filter-last-datapoint-within-24-hours' type="checkbox" value="true">Last updated w/i 24 hours</label>
+                </div>
+                <div class="checkbox">
+                    <label><input class='filter-last-datapoint-within-168-hours' type="checkbox" value="true">Last updated w/i 7 days</label>
+                </div>
+                <div class="checkbox">
+                    <label><input class='filter-last-datapoint-not-within-168-hours' type="checkbox" value="true">Last updated > 7 days ago</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="header"><i class="fa fa-bars"></i> Air Quality System Sites</label>
+                <div class="checkbox">
+                    <label><input class='filter-active-sites' type="checkbox" value="true" checked>Active sites</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="header"><i class="fa fa-bars"></i> Schools</label>
+                <div class="checkbox">
+                    <label><input class='filter-jeffschools' type="checkbox" value="true">Jefferson County, KY</label>
+                </div>
+            </div>
+            <button style="width:100%;" class="btn btn-default submit-map-filters">Apply Filters to Map</button>
+        </form>
+
+
+        </div>
+      </div>
     </div>
 
 </div>
