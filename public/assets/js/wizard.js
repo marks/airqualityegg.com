@@ -31,11 +31,8 @@ var DataView = Backbone.View.extend({
     var gridView = {
         id: 'grid',
         label: 'Grid',
-        view: new recline.View.SlickGrid({
+        view: new recline.View.Grid({
           model: dataset,
-          state: {
-            fitColumns: true
-          }
         })
       };
     var graphView = {
@@ -45,16 +42,16 @@ var DataView = Backbone.View.extend({
         model: dataset
       })
     };
-    var mapView = {
-      id: 'map',
-      label: 'Map',
-      view: new recline.View.Map({
-        model: dataset
-      })
-    };
+    // var mapView = {
+    //   id: 'map',
+    //   label: 'Map',
+    //   view: new recline.View.Map({
+    //     model: dataset
+    //   })
+    // };
     view = new recline.View.MultiView({
       model: dataset,
-      views: [gridView, graphView, mapView],
+      views: [gridView, graphView],
       sidebarViews: [],
       el: $el
     });
@@ -114,19 +111,6 @@ var DataView = Backbone.View.extend({
   }
 });
 
-
-
-
-  var $el = $(".data-view")
-  var view = new DataView({
-    resourceId: "5f8c870d-1266-415e-af4c-aeb2dbfea071",
-    el: $el
-  });
-
-
-
-
-
   if($(".wizardify").length){
     // $(".wizardify").bootstrapWizard({'tabClass': 'bwizard-steps'});
     $('.wizardify').bootstrapWizard({
@@ -137,6 +121,13 @@ var DataView = Backbone.View.extend({
             alert("Please select exactly one dataset to build a visualization off of.")
             return false;
           }
+
+          var view = new DataView({
+            resourceId: $(".resource-choose:checked").data("resource-id"),
+            el: $(".data-view")
+          });
+          $(".recline-pager ul").addClass("pagination")
+
         }
         if(index==2) {
           // Make sure we entered the name

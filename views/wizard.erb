@@ -26,11 +26,13 @@
             <hr />
             <div class="tab-pane" id="tab1">
               <div class="form-group">
-                <label>First, let's choose datasets to visualize:</label>
+                <label>First, let's choose dataset resource(s) to visualize:</label>
                 <% META.each do |key,hash| %>
-                  <div class="checkbox">
-                      <label><input name='dataset-choose dataset-choose-<%= key %>' type="checkbox" value="<%= hash["id"] %>"><%= hash["title"] %></label>
-                  </div>
+                  <% hash["resources"].select{|x| x["datastore_active"]}.each do |resource| %>
+                    <div class="checkbox">
+                      <label><input data-resource-id='<%= resource["id"] %>' name='resource-choose-<%= key %>' type="checkbox" value="<%= hash["id"] %>" class='resource-choose'><%= hash["title"] %>: <%= resource["name"] %></label>
+                    </div>
+                  <% end %>
                 <% end %>
               </div>
             </div>
