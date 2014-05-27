@@ -57,9 +57,9 @@ var AQE = (function ( $ ) {
 
 
   var groupedOverlays = {
-    "Additional Data":{
-      "Jefferson County Schools": school_layer
-    },
+    // "Additional Data":{
+    //   "Jefferson County Schools": school_layer
+    // },
     "OpenWeatherMap": {
       "Clouds": clouds_layer,
       "Precipiration": precipitation_layer,
@@ -146,12 +146,6 @@ var AQE = (function ( $ ) {
 
           map.addLayer(layer);
       });
-
-      $.getJSON("http://opendata.socrata.com/resource/w376-xd3c.json", function(school_mapmarkers){
-        for ( var x = 0, len = school_mapmarkers.length; x < len; x++ ) {
-          addSchoolSiteMapMarker( school_mapmarkers[x] );
-        }
-      })
     }
 
     // if on egg dashboard
@@ -228,6 +222,7 @@ var AQE = (function ( $ ) {
 
   function onEachFeature(feature, layer) {
     var item = feature.properties
+    layer.ref = {type: item.type, id: item.id}
     if(item.type == "aqe"){
       layer.setIcon(eggIcon)
       var html = "<div><h4>Air Quality Egg Details</h4><table class='table table-striped' data-feed_id='"+item.id+"'>"
@@ -243,13 +238,10 @@ var AQE = (function ( $ ) {
       html += "<p style='text-align: right'><a href='/egg/"+item.id+"'>More about this egg site including historical graphs →</a></p>"
       html += "</div>"
       layer.bindPopup(html)
-      layer.ref = {type: "aqe", id: item.id}
       layer.on('click', onEggMapMarkerClick); 
     }
-
-    if(item.type == "aqs"){
+    else if(item.type == "aqs"){
       layer.setIcon(aqsIcon)
-      layer.ref = {type: "aqs", id: item.aqs_id}
       var html = "<div><h4>AirNow AQS Site Details</h4><table class='table table-striped' data-aqs_id='"+item.aqs_id+"'>"
       html += "<tr><td>Site</td><td> <a href='/aqs/"+item.aqs_id+"'><strong>"+item.site_name+" / "+item.aqs_id+"</strong></a></td></tr>"
       html += "<tr><td>Agency</td><td>"+item.agency_name+"</td></tr>"
@@ -264,6 +256,25 @@ var AQE = (function ( $ ) {
       html += "</div>"
       layer.bindPopup(html)
       layer.on('click', onAQSSiteMapMarkerClick); 
+    }
+    else if(item.type == "jeffschools"){
+      layer.setIcon(schoolIcon)
+      var html = "<div><h4>School Details</h4>"
+      html += "<table class='table table-striped' data-school_id='"+item.NCESSchoolID+"'>"
+      html += "<tr><td>School Name </td><td>"+item.SchoolName+" </td></tr>"
+      html += "<tr><td>Grades </td><td>"+item.LowGrade+" through "+item.HighGrade+" </td></tr>"
+      html += "<tr><td>Phone Number </td><td>"+item.Phone+" </td></tr>"
+      html += "<tr><td># Students </td><td>"+item["Students*"]+" </td></tr>"
+      html += "<tr><td>Student-Teacher Ratio </td><td>"+item["StudentTeacherRatio*"]+" </td></tr>"
+      html += "<tr><td>Title I School (Wide)? </td><td>"+item["TitleISchool*"]+" ("+item["Title1SchoolWide*"]+") </td></tr>"
+      html += "<tr><td>Magnet School? </td><td>"+item["Magnet*"]+" </td></tr>"
+      html += "<tr><td>School District </td><td>"+item.District+" </td></tr>"
+      html += "<tr><td>NCES School ID </td><td>"+item.NCESDistrictID+" </td></tr>"
+      html += "<tr><td>State School ID </td><td>"+item.StateSchoolID+" </td></tr>"
+      html += "</table>" // <hr />"
+      html += "<p style='font-size:80%'>From CCD public school data 2011-2012, 2011-2012 school years. To download full CCD datasets, please go to <a href='http://nces.ed.gov/ccd' target='blank'>the CCD home page</a>."
+      html += "</div>"
+      layer.bindPopup(html)
     }
 
 
@@ -310,8 +321,9 @@ var AQE = (function ( $ ) {
       if(filter_selections["active-sites"] == "true" && item.status == "Active"){ show = true }
       else{ show = false }
     }
-    else {
-      // no default filters
+    else if(item.type == "jeffschools"){
+      if(filter_selections["jeffschools"] == "true" && item.District == "JEFFERSONCOUNTY"){ show = true }
+      else{ show = false }
     }
 
     return show
@@ -330,42 +342,14 @@ var AQE = (function ( $ ) {
     filter_selections["last-datapoint-not-within-168-hours"] = $('input.filter-last-datapoint-not-within-168-hours:checked').val()
     // aqs specific
     filter_selections["active-sites"] = $('input.filter-active-sites:checked').val()
-    
+    // jeffschools specific
+    filter_selections["jeffschools"] = $('input.filter-jeffschools:checked').val()
+
     geoJsonLayers[key] = L.geoJson(layersData[key], {
       onEachFeature: onEachFeature,
       filter: filterFeatures
     }).addTo(map);
 
-  }
-
-
-  function addEggMapMarker(egg) {
-    var marker = L.marker([egg.location_lat, egg.location_lon],  {icon: eggIcon})
-    var html = "<div><h4>Air Quality Egg Details</h4><table class='table table-striped' data-feed_id='"+egg.id+"'>"
-    html += "<tr><td>Name </td><td> <a href='/egg/"+egg.id+"'><strong>"+egg.title+"<strong></a></td></tr>"
-    html += "<tr><td>Description </td><td> "+egg.description+"</td></tr>"
-    html += "<tr><td>Position </td><td> "+egg.location_exposure+" @ "+egg.location_ele+" elevation</td></tr>"
-    html += "<tr><td>Status </td><td> "+egg.status+"</td></tr>"
-    // html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
-    html += "<tr><td>Created </td><td> "+moment(egg.created+"Z").fromNow()+"</td></tr>"
-    if(egg.last_datapoint){html += "<tr><td>Last data point </td><td> "+moment(egg.last_datapoint+"Z").fromNow()+" ("+egg.last_datapoint+")</td></tr>"}
-    html += "</table>"
-    html += "<div id='egg_"+egg.id+"'></div>"
-    html += "<p style='text-align: right'><a href='/egg/"+egg.id+"'>More about this egg site including historical graphs →</a></p>"
-    html += "</div>"
-    marker.bindPopup(html)
-    marker.ref = {type: "aqe", id: egg.id}
-    marker.on('click', onEggMapMarkerClick); 
-    var last_datapoint = new Date(egg.last_datapoint+"Z") 
-    if(last_datapoint >= six_hours_ago){
-      marker.addTo(egg_layer);
-    }
-    else if(last_datapoint <= six_hours_ago && last_datapoint >= one_day_ago){
-      marker.addTo(egg_layer_inactive_6h);
-    }
-    else {
-      marker.addTo(egg_layer_inactive_24h);
-    }
   }
 
   function onEggMapMarkerClick(e){
@@ -387,28 +371,6 @@ var AQE = (function ( $ ) {
       $("#aqs_"+aqs_id).append(html)
     })
   }
-
-  function addSchoolSiteMapMarker(school) {
-    var marker = L.marker([school.geocoded_location.latitude, school.geocoded_location.longitude],  {icon: schoolIcon})
-    var html = "<div><h4>School Details</h4>"
-    html += "<table class='table table-striped' data-school_id='"+school.nces_school_id+"'>"
-    html += "<tr><td>School Name </td><td>"+school.school_name+" </td></tr>"
-    html += "<tr><td>Grades </td><td>"+school.low_grade+" through "+school.high_grade+" </td></tr>"
-    html += "<tr><td>Phone Number </td><td>"+school.phone+" </td></tr>"
-    html += "<tr><td># Students </td><td>"+school.students+" </td></tr>"
-    html += "<tr><td>Student-Teacher Ratio </td><td>"+school.student_teacher_ratio+" </td></tr>"
-    html += "<tr><td>Title I School (Wide)? </td><td>"+school.title_i_school+" ("+school.title_1_school_wide+") </td></tr>"
-    html += "<tr><td>Magnet School? </td><td>"+school.magnet+" </td></tr>"
-    html += "<tr><td>School District </td><td>"+school.district+" </td></tr>"
-    html += "<tr><td>NCES School ID </td><td>"+school.nces_school_id+" </td></tr>"
-    html += "<tr><td>State School ID </td><td>"+school.state_school_id+" </td></tr>"
-    html += "</table>" // <hr />"
-    html += "<p style='font-size:80%'>From CCD public school data 2011-2012, 2011-2012 school years. To download full CCD datasets, please go to <a href='http://nces.ed.gov/ccd' target='blank'>the CCD home page</a>."
-    html += "</div>"
-    marker.bindPopup(html)
-    marker.addTo(school_layer);
-  }
-
 
   //
   // LOCATION PICKER
