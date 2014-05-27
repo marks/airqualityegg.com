@@ -153,6 +153,7 @@
     <% if @custom_js %>
       <script src="/assets/js/<%= @custom_js %>.js"></script>
     <% else %>
+      <script>var dataset_keys = <%= META.keys.to_json %></script>
       <script src="/assets/js/main.js"></script>
     <% end %>
     <!-- google universal analytics -->

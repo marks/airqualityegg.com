@@ -17,11 +17,14 @@ include AppHelpers
 require "sinatra/activerecord"
 ActiveRecord::Base.logger = Logger.new(STDOUT)
 
-# TODO - clean up
-ENV["aqs_site_resource"] = get_ckan_resource_by_name(ENV['CKAN_AQS_SITE_RESOURCE_NAME'])["id"]
-ENV["aqs_data_resource"] = get_ckan_resource_by_name(ENV['CKAN_AQS_DATA_RESOURCE_NAME'])["id"]
-ENV["aqe_site_resource"] = get_ckan_resource_by_name(ENV['CKAN_AQE_SITE_RESOURCE_NAME'])["id"]
-ENV["aqe_data_resource"] = get_ckan_resource_by_name(ENV['CKAN_AQE_DATA_RESOURCE_NAME'])["id"]
+
+META = {}
+# set some metadata # todo - cleanup
+["aqs","aqe"].each do |key|
+  META[key] = get_ckan_package_by_slug(ENV["CKAN_#{key.upcase}_DATASET_ID"])
+  META[key]["site_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"])["id"]
+  META[key]["data_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"])["id"]
+end
 
 class AirQualityEgg < Sinatra::Base
 
@@ -70,23 +73,23 @@ class AirQualityEgg < Sinatra::Base
     end
 
     def sql_for_aqe_site(id)
-      "SELECT id,feed,status,updated,location_domain,description,location_lon,location_lat,created,location_exposure,location_ele,title from \"#{ENV["aqe_site_resource"]}\" WHERE id = '#{id}'"
+      "SELECT id,feed,status,updated,location_domain,description,location_lon,location_lat,created,location_exposure,location_ele,title from \"#{META["aqe"]["site_resource_id"]}\" WHERE id = '#{id}'"
     end
 
     def sql_for_aqs_site(id)
-      "SELECT status,msa_name,elevation,aqs_id,county_name,lat,lon,gmt_offset,agency_name,cmsa_name,site_name,state_name,epa_region,country_code from \"#{ENV["aqs_site_resource"]}\" WHERE aqs_id = '#{id}'"
+      "SELECT status,msa_name,elevation,aqs_id,county_name,lat,lon,gmt_offset,agency_name,cmsa_name,site_name,state_name,epa_region,country_code from \"#{META["aqs"]["site_resource_id"]}\" WHERE aqs_id = '#{id}'"
     end
 
     def sql_for_aqs_datastreams(id)
       <<-EOS
         SELECT
           data_table.aqs_id,data_table.date, data_table.time,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
-        FROM "#{ENV["aqs_data_resource"]}" data_table
+        FROM "#{META["aqs"]["data_resource_id"]}" data_table
         WHERE data_table.aqs_id = '#{id}'
         ORDER BY date desc,time desc
         LIMIT (
           SELECT COUNT(DISTINCT(data_table.parameter))
-          FROM "#{ENV["aqs_data_resource"]}" data_table
+          FROM "#{META["aqs"]["data_resource_id"]}" data_table
           WHERE data_table.aqs_id = '#{id}'
         )
       EOS
@@ -94,9 +97,9 @@ class AirQualityEgg < Sinatra::Base
 
     def sql_for_average_over_days(table, id,n_days)
       if table == "aqe"
-        "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{ENV["#{table}_data_resource"]}\" WHERE feed_id=#{id} AND datetime >= current_date - #{n_days} GROUP BY parameter"
+        "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{META["#{table}"]["data_resource_id"]}\" WHERE feed_id=#{id} AND datetime >= current_date - #{n_days} GROUP BY parameter"
       else #aqs
-        "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{ENV["#{table}_data_resource"]}\" WHERE aqs_id='#{id}' AND date >= current_date - #{n_days} GROUP BY parameter"      
+        "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{META["#{table}"]["data_resource_id"]}\" WHERE aqs_id='#{id}' AND date >= current_date - #{n_days} GROUP BY parameter"      
       end
     end
 
@@ -105,13 +108,13 @@ class AirQualityEgg < Sinatra::Base
         SELECT
           data_table.feed_id,data_table.datetime,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
         FROM
-          "#{ENV["aqe_site_resource"]}" sites_table
-        INNER JOIN "#{ENV["aqe_data_resource"]}" data_table ON sites_table.id = data_table.feed_id
+          "#{META["aqe"]["site_resource_id"]}" sites_table
+        INNER JOIN "#{META["aqe"]["data_resource_id"]}" data_table ON sites_table.id = data_table.feed_id
         WHERE sites_table.id = #{id}
         order by datetime desc
         LIMIT (
           SELECT COUNT(DISTINCT(data_table.parameter))
-          FROM "#{ENV["aqe_data_resource"]}" data_table
+          FROM "#{META["aqe"]["data_resource_id"]}" data_table
           WHERE data_table.feed_id = #{id}
         )
       EOS
@@ -122,23 +125,23 @@ class AirQualityEgg < Sinatra::Base
         SELECT
           data_table.datetime
         FROM
-          "#{ENV["aqe_data_resource"]}" data_table
+          "#{META["aqe"]["data_resource_id"]}" data_table
         WHERE data_table.feed_id = #{id}
         order by datetime desc
         LIMIT 1
       EOS
     end
 
-    def sql_for_all_aqe_sites
-      <<-EOS
-        SELECT site_table.id,site_table.created,site_table.description,site_table.feed,site_table.location_domain,site_table.location_ele,site_table.location_exposure,site_table.location_lat,site_table.location_lon,site_table.status,title,
-        (SELECT data_table.datetime FROM \"#{ENV["aqe_data_resource"]}\" data_table WHERE data_table.feed_id = site_table.id and data_table.datetime > current_date - 2 order by datetime desc LIMIT 1) AS last_datapoint
-        from \"#{ENV["aqe_site_resource"]}\" site_table
-      EOS
-    end
-
-    def sql_for_all_aqs_sites
-      "SELECT aqs_id,site_name,agency_name,elevation,msa_name,cmsa_name,county_name,status,lat,lon from \"#{ENV["aqs_site_resource"]}\" WHERE status = 'Active'"
+    def sql_for_all_sites_by_key(key)
+      if key == "aqe"
+        <<-EOS
+          SELECT site_table.id,site_table.created,site_table.description,site_table.feed,site_table.location_domain,site_table.location_ele,site_table.location_exposure,site_table.location_lat,site_table.location_lon,site_table.status,title,
+          (SELECT data_table.datetime FROM \"#{META["aqe"]["data_resource_id"]}\" data_table WHERE data_table.feed_id = site_table.id and data_table.datetime > current_date - 2 order by datetime desc LIMIT 1) AS last_datapoint
+          from \"#{META["aqe"]["site_resource_id"]}\" site_table
+        EOS
+      else
+        "SELECT * from \"#{META[key]["site_resource_id"]}\" #{META[key]["extras_hash"]["default_conditions"]}"
+      end
     end
 
   end
@@ -168,34 +171,21 @@ class AirQualityEgg < Sinatra::Base
     redirect '/#12/42.3593/-71.1315'
   end
 
-
-  # get '/all_eggs.json' do
-  #   content_type :json
-  #   cache_key = "all_eggs"
-  #   cached_data = settings.cache.fetch(cache_key) do
-  #     all_aqe_sites = sql_search_ckan(sql_for_all_aqe_sites)
-  #     all_aqe_sites = all_aqe_sites.to_json
-  #     # store in cache and return
-  #     settings.cache.set(cache_key, all_aqe_sites, settings.cache_time)
-  #     all_aqe_sites
-  #   end
-  #   return cached_data
-  # end
-
-
-  get '/all_aqe.geojson' do
+  get '/ckan_proxy/:key.geojson' do
+    key = params[:key]
     content_type :json
-    cache_key = "all_eggs.geojson"
+    cache_key = "ckan_proxy/#{key}.geojson"
     cached_data = settings.cache.fetch(cache_key) do
-      all_aqe_sites = sql_search_ckan(sql_for_all_aqe_sites)
+      puts 
+      all_aqe_sites = sql_search_ckan(sql_for_all_sites_by_key(key))
       geojson = []
       all_aqe_sites.each do |feature|
         geojson << {
             :"type" => "Feature",
-            :"properties" => feature.merge("type" => "aqe"),
+            :"properties" => feature.merge("type" => key, "id" => feature[META[key]["extras_hash"]["field_containing_site_id"]]),
             :"geometry" => {
                 "type" =>  "Point",
-                "coordinates" => [feature["location_lon"], feature["location_lat"]]
+                "coordinates" => [feature[META[key]["extras_hash"]["field_containing_longitude"]], feature[META[key]["extras_hash"]["field_containing_latitude"]]]
             }
         }
       end
@@ -206,42 +196,6 @@ class AirQualityEgg < Sinatra::Base
     end
     return cached_data
   end
-
-  # get '/all_aqs_sites.json' do
-  #   content_type :json
-  #   cache_key = "all_aqs_sites"
-  #   cached_data = settings.cache.fetch(cache_key) do
-  #     all_aqs_sites = sql_search_ckan(sql_for_all_aqs_sites)
-  #     settings.cache.set(cache_key, all_aqs_sites, settings.cache_time)
-  #     all_aqs_sites
-  #   end
-  #   return cached_data.to_json
-  # end
-
-  get '/all_aqs.geojson' do
-    content_type :json
-    cache_key = "all_aqs.geojson"
-    cached_data = settings.cache.fetch(cache_key) do
-      all_aqs_sites = sql_search_ckan(sql_for_all_aqs_sites)
-      geojson = []
-      all_aqs_sites.each do |feature|
-        geojson << {
-            :"type" => "Feature",
-            :"properties" => feature.merge("type" => "aqs"),
-            :"geometry" => {
-                "type" =>  "Point",
-                "coordinates" => [feature["lon"], feature["lat"]]
-            }
-        }
-      end
-      geojson = geojson.to_json
-      # store in cache and return
-      settings.cache.set(cache_key, geojson, settings.cache_time)
-      geojson
-    end
-    return cached_data
-  end
-
 
   get '/aqs/:id.json' do
     content_type :json
@@ -271,7 +225,7 @@ class AirQualityEgg < Sinatra::Base
 
     if params[:include_recent_history]
       series = []
-      recent_history_sql = "SELECT * from \"#{ENV["aqs_data_resource"]}\" WHERE aqs_id = '#{params[:id]}' and date > current_date - 45 order by date, time "
+      recent_history_sql = "SELECT * from \"#{META["aqs"]["data_resource_id"]}\" WHERE aqs_id = '#{params[:id]}' and date > current_date - 45 order by date, time "
       recent_history = sql_search_ckan(recent_history_sql)
       series_names = recent_history.map{|x| x["parameter"]}.uniq
       series_names.each do |series_name|
@@ -332,7 +286,7 @@ class AirQualityEgg < Sinatra::Base
 
     if params[:include_recent_history]
       series = []
-      recent_history_sql = "SELECT feed_id,parameter,datetime,value,unit from \"#{ENV["aqe_data_resource"]}\" WHERE feed_id = #{params[:id]} and datetime > current_date - 45 order by datetime "
+      recent_history_sql = "SELECT feed_id,parameter,datetime,value,unit from \"#{META["aqe"]["data_resource"]}\" WHERE feed_id = #{params[:id]} and datetime > current_date - 45 order by datetime "
       recent_history = sql_search_ckan(recent_history_sql).compact
       series_names = recent_history.map{|x| x["parameter"]}.uniq
       series_names.each do |series_name|

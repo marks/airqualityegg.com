@@ -357,7 +357,6 @@ namespace :ckan do
         resource = search_results["result"]["results"].first
         create_resource_data = {
           :primary_key => 'id',
-          :indexes => 'id,feed_id,datetime,parameter,unit',
           :fields => [
             {:id => "id", :type => "text"},
             {:id => "feed_id", :type => "int"},
@@ -372,6 +371,7 @@ namespace :ckan do
           :records => []
         }
         if resource.nil? # if there is no resource, create it inside the right package
+          create_resource_data[:indexes] = 'id,feed_id,datetime,parameter,unit'
           create_resource_data[:resource] = {:package_id => ENV['CKAN_AQE_DATASET_ID'], :name => ENV['CKAN_AQE_DATA_RESOURCE_NAME'] }
         else # update existing resource
           create_resource_data[:resource_id] = resource["id"]

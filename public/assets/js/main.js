@@ -29,16 +29,6 @@ var AQE = (function ( $ ) {
   var six_hours_ago = new Date()
   six_hours_ago = six_hours_ago.setHours(today.getHours()-6)
 
-  // // Air Quality Egg and AirNow AWS layers
-  // egg_layer = L.layerGroup([]);
-  // var egg_layer_inactive_24h = L.layerGroup([]);
-  // var egg_layer_inactive_6h = L.layerGroup([]);
-
-  // // var egg_heatmap = L.heatLayer([], {radius: 35})
-  // var egg_heatmap = new L.TileLayer.WebGLHeatMap({size: 5000, autoresize: true})
-  // var egg_heatmap_layer = L.layerGroup([egg_heatmap])
-
-  // aqs_layer = L.layerGroup([]);
   school_layer = L.layerGroup([]);
 
   // OpenWeatherMap Layers
@@ -67,15 +57,6 @@ var AQE = (function ( $ ) {
 
 
   var groupedOverlays = {
-    // "Air Quality Eggs": {
-    //   "Markers (updated in past 6 hours)": egg_layer,
-    //   "Markers (last updated 6 to 24 hours ago)": egg_layer_inactive_6h,
-    //   "Markers (last updated > 24 hours ago)": egg_layer_inactive_24h,
-    //   "Heatmap (of all eggs)": egg_heatmap_layer
-    // },
-    // "AirNow AQS Sites": {
-    //   "Markers": aqs_layer,
-    // },
     "Additional Data":{
       "Jefferson County Schools": school_layer
     },
@@ -116,14 +97,11 @@ var AQE = (function ( $ ) {
         map.setView(feed_location,9)
       }
 
-      $.getJSON("/all_aqe.geojson", function(data){
-        layersData["aqe"] = data
-        update_map("aqe")
-      })
-
-      $.getJSON("/all_aqs.geojson", function(data){
-        layersData["aqs"] = data
-        update_map("aqs")
+      $.each(dataset_keys, function(n,key){
+        $.getJSON("/ckan_proxy/"+key+".geojson", function(data){
+          layersData[key] = data
+          update_map(key)
+        })        
       })
 
       map.on('overlayadd', function (eventLayer) {
@@ -328,6 +306,13 @@ var AQE = (function ( $ ) {
         else {show = false}
       }
     }
+    else if(item.type == "aqs"){
+      if(filter_selections["active-sites"] == "true" && item.status == "Active"){ show = true }
+      else{ show = false }
+    }
+    else {
+      // no default filters
+    }
 
     return show
   }
@@ -336,12 +321,15 @@ var AQE = (function ( $ ) {
     if(typeof(geoJsonLayers[key]) != "undefined"){map.removeLayer(geoJsonLayers[key]);}    // clear all markers
 
     // set filter selections to be used by filterFeatures
+    // aqe specific
     filter_selections["indoor-eggs"] = $('input.filter-indoor-eggs:checked').val()
     filter_selections["outdoor-eggs"] = $('input.filter-outdoor-eggs:checked').val()
     filter_selections["last-datapoint-within-6-hours"] = $('input.filter-last-datapoint-within-6-hours:checked').val()
     filter_selections["last-datapoint-within-24-hours"] = $('input.filter-last-datapoint-within-24-hours:checked').val()
     filter_selections["last-datapoint-within-168-hours"] = $('input.filter-last-datapoint-within-168-hours:checked').val()
     filter_selections["last-datapoint-not-within-168-hours"] = $('input.filter-last-datapoint-not-within-168-hours:checked').val()
+    // aqs specific
+    filter_selections["active-sites"] = $('input.filter-active-sites:checked').val()
     
     geoJsonLayers[key] = L.geoJson(layersData[key], {
       onEachFeature: onEachFeature,

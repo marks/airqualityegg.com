@@ -10,6 +10,18 @@ module AppHelpers
     end
   end
 
+  def get_ckan_package_by_slug(slug)
+    search_raw = RestClient.get("#{ENV['CKAN_HOST']}/api/3/action/package_show?id=#{URI.encode(slug)}",{"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+    search_results = JSON.parse(search_raw)
+    if search_results["success"] == true
+      search_results["result"]["extras_hash"] = {}
+      search_results["result"]["extras"].each {|hash| search_results["result"]["extras_hash"][hash["key"]] = hash["value"] }
+      return search_results["result"]
+    else
+      return {}
+    end
+  end
+
   def sql_search_ckan(sql_query)
     results = []
     uri = "#{ENV['CKAN_HOST']}/api/3/action/datastore_search_sql?sql=#{URI.escape(sql_query)}"
