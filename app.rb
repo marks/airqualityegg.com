@@ -2,6 +2,7 @@ require 'rubygems'
 require 'bundler/setup'
 require 'sinatra/base'
 require 'sinatra/reloader' if Sinatra::Base.development?
+require "sinatra/multi_route"
 require 'sass'
 require 'xively-rb'
 require 'dalli'
@@ -27,6 +28,7 @@ META = {}
 end
 
 class AirQualityEgg < Sinatra::Base
+  register Sinatra::MultiRoute
 
   configure do
     enable :sessions
@@ -346,8 +348,8 @@ class AirQualityEgg < Sinatra::Base
   end
   end
 
-  get '/compare' do
-    logger.debug(params.inspect)
+
+  route :get, :post, '/compare' do
     @sensors = []
     params.each do |type,ids|
       ids.split(",").each do |sensor_id|

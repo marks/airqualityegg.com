@@ -26,9 +26,9 @@ gem 'rspec'
 gem 'rack-test'
 
 group :development, :test do
-  gem 'sinatra-contrib'
   gem 'capybara'
   gem 'webmock'
 end
 
 gem 'andand'
+gem 'sinatra-contrib'
