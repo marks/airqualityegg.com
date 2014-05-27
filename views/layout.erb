@@ -125,7 +125,7 @@
     <!-- /#wrapper -->
 
 
-    <script src="/sb-admin-v2/js/jquery-1.10.2.js"></script>
+    <script src="http://marks.github.io/ckan-explorer/vendor/recline/vendor/jquery/1.7.1/jquery.js"></script>
     <script src="/sb-admin-v2/js/bootstrap.min.js"></script>
     <script src="/sb-admin-v2/js/plugins/metisMenu/jquery.metisMenu.js"></script>
     <script src="/sb-admin-v2/js/sb-admin.js"></script>
@@ -152,7 +152,9 @@
     <script src="/assets/js/vendor/highcharts-export_csv.js"></script>
 
     <% if @custom_js %>
-      <script src="/assets/js/<%= @custom_js %>.js"></script>
+      <% @custom_js.to_a.each do |custom_js| %>
+        <script src="<%= custom_js %>"></script>
+      <% end %>
     <% else %>
       <script>var dataset_keys = <%= META.keys.to_json %></script>
       <script src="/assets/js/main.js"></script>

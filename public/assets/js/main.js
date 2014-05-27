@@ -147,36 +147,6 @@ var AQE = (function ( $ ) {
       graphAQSHistoricalData();
     }
 
-    // if on wizard
-    if($(".wizardify").length){
-      // $(".wizardify").bootstrapWizard({'tabClass': 'bwizard-steps'});
-      $('.wizardify').bootstrapWizard({
-        tabClass: 'bwizard-steps',
-        onNext: function(tab, navigation, index) {
-          if(index==1) {
-            if($("#tab1 .checkbox input:checked").length != 1){
-              alert("Please select exactly one dataset to build a visualization off of.")
-              return false;
-            }
-          }
-          if(index==2) {
-            // Make sure we entered the name
-            // if(!$('#name').val()) {
-            //   alert('You must enter your name');
-            //   $('#name').focus();
-            //   return false;
-            // }
-          }
-          var debug = ""
-          $("input").each(function(x,y){
-            debug += $(y).attr("name") + " = <pre>" + $(y).val() + "</pre>"
-          })
-          $("#wizard-data").html(debug)          
-        }
-      });
-
-    }
-
     $("tr[data-sensor-id]").each(function(n,row){
       var type = $(row).data("sensor-type")
       var id = $(row).data("sensor-id")
