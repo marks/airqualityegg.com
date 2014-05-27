@@ -139,7 +139,7 @@ class AirQualityEgg < Sinatra::Base
       if key == "aqe"
         <<-EOS
           SELECT site_table.id,site_table.created,site_table.description,site_table.location_domain,site_table.location_ele,site_table.location_exposure,site_table.location_lat,site_table.location_lon,site_table.title,site_table.status,
-          (SELECT data_table.datetime FROM \"#{META["aqe"]["data_resource_id"]}\" data_table WHERE data_table.feed_id = site_table.id and data_table.datetime > current_date - 2 order by datetime desc LIMIT 1) AS last_datapoint
+          (SELECT data_table.datetime FROM \"#{META["aqe"]["data_resource_id"]}\" data_table WHERE data_table.feed_id = site_table.id order by datetime desc LIMIT 1) AS last_datapoint
           from \"#{META["aqe"]["site_resource_id"]}\" site_table
         EOS
       else
