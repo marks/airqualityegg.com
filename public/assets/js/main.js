@@ -233,7 +233,6 @@ var AQE = (function ( $ ) {
       html += "<tr><td>Description </td><td> "+item.description+"</td></tr>"
       html += "<tr><td>Position </td><td> "+item.location_exposure+" @ "+item.location_ele+" elevation</td></tr>"
       html += "<tr><td>Status </td><td> "+item.status+"</td></tr>"
-      // html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
       html += "<tr><td>Created </td><td> "+moment(item.created+"Z").fromNow()+"</td></tr>"
       if(item.last_datapoint){html += "<tr><td>Last data point </td><td> "+moment(item.last_datapoint+"Z").fromNow()+" ("+item.last_datapoint+")</td></tr>"}
       html += "</table>"
