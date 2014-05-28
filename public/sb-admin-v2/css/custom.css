@@ -126,7 +126,7 @@ padding-right: 7px;}
 
 
 /* for recline.js */
-
+/* slick grid fix */ .recline-slickgrid div { box-sizing: content-box; }
 /********************************************************************
   * Form
   *******************************************************************/

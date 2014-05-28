@@ -1,5 +1,5 @@
-$(function() {
-  
+var rules;
+$(function() { 
 var endpoint = "http://54.204.10.90:5000/api"
 var ckan = new CKAN.Client(endpoint)
 
@@ -53,7 +53,9 @@ var DataView = Backbone.View.extend({
       model: dataset,
       views: [gridView, graphView, mapView],
       sidebarViews: [],
-      el: $el
+      el: $el,
+      disablePager: true,
+      disableQueryEditor: true
     });
     return view;
   },
@@ -64,13 +66,17 @@ var DataView = Backbone.View.extend({
   },
 
   template: ' \
-    <form class="form query-sql"> \
-      <h3>SQL Query</h3> \
+    <form class="form query-sql" role="form"> \
+      <label>SQL Query</label> \
       <p class="help-block">Query this table using SQL via the <a href="http://docs.ckan.org/en/latest/maintaining/datastore.html#ckanext.datastore.logic.action.datastore_search_sql">DataStore SQL API</a></p> \
-      <textarea style="width: 100%;">SELECT * FROM "{{resource.id}}"</textarea> \
-      <div class="sql-error alert alert-error" style="display: none;"></div> \
-      <button type="submit" class="btn btn-primary">Query</button> \
+      <div class="form-group"> \
+      <textarea class="form-control" style="width: 100%;">SELECT * FROM "{{resource.id}}"</textarea> \
+      </div> \
+      <div class="sql-error alert alert-error alert-danger" style="display: none;"></div> \
+      <button type="submit" class="btn btn-primary btn-default">Query</button> \
+      </div> \
     </form> \
+    <hr /> \
     <div class="sql-results"></div> \
     <div class="multiview"></div> \
     ',
@@ -105,6 +111,8 @@ var DataView = Backbone.View.extend({
         self.sqlResultsView.remove();
       }
 
+      $(".multiview").hide()
+
       self.sqlResultsView = self._makeMultiView(dataset, $el);
       dataset.query({size: dataset.recordCount});
     });
@@ -138,6 +146,38 @@ var DataView = Backbone.View.extend({
     });
 
   }
+
+
+  // $('#query-builder').queryBuilder({
+  //   filters: [{
+  //     id: 'name',
+  //     label: 'Name',
+  //     type: 'string',
+  //     operators: ['equal', 'not_equal', 'is_null', 'is_not_null']
+  //   }, {
+  //     id: 'category',
+  //     label: 'Category',
+  //     type: 'integer',
+  //     input: 'select',
+  //     multiple: true,
+  //     values: {
+  //       1: 'Books',
+  //       2: 'Movies',
+  //       3: 'Music',
+  //       4: 'Tools',
+  //       5: 'Goodies',
+  //       6: 'Clothes'
+  //     },
+  //     operators: ['equal', 'not_equal', 'is_null', 'is_not_null']
+  //   }]
+  // })
+
+  // $('#query-builder-submit').on('click', function() {
+  //   rules = $('#query-builder').queryBuilder('getRules')
+  //   $('#query-result')
+  //     .find('pre').html(JSON.stringify(rules, undefined, 2));
+  //   console.log(rules)
+  // });
 
 
 });

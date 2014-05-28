@@ -373,6 +373,7 @@ class AirQualityEgg < Sinatra::Base
       "/vendor/recline/vendor/leaflet.markercluster/MarkerCluster.css",
       "/vendor/recline/vendor/leaflet.markercluster/MarkerCluster.Default.css",
       "/vendor/recline/dist/recline.css",
+      "/vendor/jQuery-QueryBuilder/query-builder.css"
     ]
     @custom_js = [
       "/vendor/recline/vendor/underscore/1.4.4/underscore.js",
@@ -384,6 +385,7 @@ class AirQualityEgg < Sinatra::Base
       "/vendor/recline/vendor/slickgrid/2.0.1/slick.grid.min.js",
       "/vendor/recline/vendor/flot/jquery.flot.js",
       "/vendor/recline/vendor/flot/jquery.flot.time.js",
+      "/vendor/jQuery-QueryBuilder/query-builder.js",
       "/vendor/recline/dist/recline.js",
       "/vendor/ckan.js/ckan.js",
       "/assets/js/wizard.js",
