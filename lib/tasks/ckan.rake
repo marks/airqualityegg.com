@@ -56,7 +56,6 @@ namespace :ckan do
                 {:id => "county_code", :type => "text"},
                 {:id => "county_name", :type => "text"},
                 {:id => "city_code", :type => "text"},
-                {:id => "geojson", :type => "json"},
               ],
               :records => []
             }.to_json,
@@ -111,7 +110,6 @@ namespace :ckan do
             :county_code => row[19],
             :county_name => row[20],
             :city_code => row[21],
-            :geojson => {:type => 'Point', :coordinates => [row[9], row[8]] }
           }
           post_data = {:resource_id => args[:resource_id], :records => [site_data], :method => 'upsert'}.to_json
           upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
@@ -282,7 +280,6 @@ namespace :ckan do
         {:id => "title", :type => "text"},
         {:id => "updated", :type => "timestamp"},
         {:id => "created", :type => "timestamp"},
-        {:id => "geojson", :type => "json"},
       ]
 
       desc "Create CKAN resource for Air Quality Eggs (if it doesn't exist) and then upsert CKAN"
@@ -332,7 +329,6 @@ namespace :ckan do
           egg.delete_if{|k,v| !allowed_fields.include?(k)} # delete rare metadata fields we don't want to store
           egg[:title] = fix_encoding(egg["title"])
           egg[:description] = fix_encoding(egg["description"])
-          egg[:geojson] = {:type => 'Point', :coordinates => [egg["location_lon"], egg["location_lat"]] }
           post_data = {:resource_id => args[:resource_id], :records => [egg], :method => 'upsert'}.to_json
           upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
           upsert_result = JSON.parse(upsert_raw)
