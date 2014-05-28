@@ -132,10 +132,8 @@ namespace :ckan do
         # resource we want to use is the first match
         resource = search_results["result"]["results"].first
 
-
         create_resource_data = {
           :primary_key => 'id',
-          :indexes => 'id,aqs_id,date,time,parameter',
           :fields => [
             {:id => "id", :type => "text"},
             {:id => "aqs_id", :type => "text"},
@@ -146,22 +144,23 @@ namespace :ckan do
             {:id => "value", :type => "float"},
             {:id => "data_source", :type => "text"},                
             {:id => "computed_aqi", :type => "int"},                
+            {:id => "datetime", :type => "timestamp"},
           ],
           :records => []
         }
 
         if resource.nil? # if there is no resource, create it inside the right package
+          # modify indexes here because we have added custom ones through pgsql 
+          create_resource_data[:indexes] = 'id,aqs_id,date,time,parameter,datetime',
           create_resource_data[:resource] = {:package_id => ENV['CKAN_AQS_DATASET_ID'], :name => ENV['CKAN_AQS_DATA_RESOURCE_NAME'] }
-          create_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_create", create_resource_data.to_json,
-            {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
-          create_results = JSON.parse(create_raw)
-          resource_id = create_results["result"]["resource_id"]
-          puts "Created or updated a new resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
         else # update existing resource
           create_resource_data[:resource_id] = resource["id"]
-          resource_id = resource["id"]
         end
-
+        create_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_create", create_resource_data.to_json,
+          {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+        create_results = JSON.parse(create_raw)
+        resource_id = create_results["result"]["resource_id"]
+        puts "Created/updated a new resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
 
         # invoke upsert rake tasks
         Rake.application.invoke_task("ckan:airnow:data:upsert_daily[#{resource_id}]")
@@ -194,7 +193,8 @@ namespace :ckan do
               :computed_aqi => determine_aqi(row[3], row[5].to_f, row[4]),
               :data_source => fix_encoding(row[7]),
             }
-            monitoring_data[:id] = "#{monitoring_data[:aqs_id]}|#{monitoring_data[:date]}|#{monitoring_data[:time]}|#{monitoring_data[:parameter]}"
+            monitoring_data[:datetime] = monitoring_data[:date]
+            monitoring_data[:id] = "#{monitoring_data[:aqs_id]}|#{monitoring_data[:date]}|#{monitoring_data[:time]}|#{monitoring_data[:datetime]}|#{monitoring_data[:parameter]}"
             post_data = {:resource_id => args[:resource_id], :records => [monitoring_data], :method => 'upsert'}.to_json
             upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
             upsert_result = JSON.parse(upsert_raw)
@@ -234,6 +234,7 @@ namespace :ckan do
                     :value => row[7].to_f,
                     :data_source => fix_encoding(row[8]),
                   }
+                  monitoring_data[:datetime] = monitoring_data[:date] + " " + monitoring_data[:time]
                   monitoring_data[:id] = "#{monitoring_data[:aqs_id]}|#{monitoring_data[:date]}|#{monitoring_data[:time]}|#{monitoring_data[:parameter]}"
                   post_data = {:resource_id => args[:resource_id], :records => [monitoring_data], :method => 'upsert'}.to_json
                   upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
