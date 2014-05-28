@@ -1,4 +1,4 @@
-var map;
+var map, egg_layer, aqs_layer, school_layer, in_bounds, drawn;
 var AQE = (function ( $ ) {
   "use strict";
 
@@ -23,20 +23,22 @@ var AQE = (function ( $ ) {
 
 
   var today = new Date()
-  var thirty_days_ago = new Date()
-  thirty_days_ago = thirty_days_ago.setDate(today.getDate()-30)
+  var one_day_ago = new Date()
+  one_day_ago = one_day_ago.setDate(today.getDate()-1)
+  var six_hours_ago = new Date()
+  six_hours_ago = six_hours_ago.setHours(today.getHours()-6)
 
   // Air Quality Egg and AirNow AWS layers
-  var egg_layer = L.layerGroup([]);
-  var egg_layer_inactive = L.layerGroup([]);
-  var egg_heatmap = L.heatLayer([], {radius: 35})
+  egg_layer = L.layerGroup([]);
+  var egg_layer_inactive_24h = L.layerGroup([]);
+  var egg_layer_inactive_6h = L.layerGroup([]);
+
+  // var egg_heatmap = L.heatLayer([], {radius: 35})
+  var egg_heatmap = new L.TileLayer.WebGLHeatMap({size: 5000, autoresize: true})
   var egg_heatmap_layer = L.layerGroup([egg_heatmap])
 
-  var aqs_layer = L.layerGroup([]);
-  var aqs_heatmap = L.heatLayer([], {radius: 35})
-  var aqs_heatmap_layer = L.layerGroup([aqs_heatmap])
-
-  var school_layer = L.layerGroup([]);
+  aqs_layer = L.layerGroup([]);
+  school_layer = L.layerGroup([]);
 
   // Propeller Health image overlay and layer 
   var propellerhealth_layer_url = 'http://s3.amazonaws.com/healthyaws/propeller_health/propeller_health_heatmap_nov13_shared.png';
@@ -71,13 +73,13 @@ var AQE = (function ( $ ) {
 
   var groupedOverlays = {
     "Air Quality Eggs": {
-      "Markers (updated in past 30 days)": egg_layer,
-      "Markers (not recently updated)": egg_layer_inactive,
+      "Markers (updated in past 6 hours)": egg_layer,
+      "Markers (last updated 6 to 24 hours ago)": egg_layer_inactive_6h,
+      "Markers (last updated > 24 hours ago)": egg_layer_inactive_24h,
       "Heatmap (of all eggs)": egg_heatmap_layer
     },
     "AirNow AQS Sites": {
       "Markers": aqs_layer,
-      "Heatmap": aqs_heatmap_layer
     },
     "Additional Data":{
       "Louisville Asthma Hotspots": propellerhealth_layer,
@@ -94,16 +96,19 @@ var AQE = (function ( $ ) {
     }
   };
 
-  xively.setKey( "1bgDuzNfCI94eDrcSN0DJ2Kho7zGmXRsCwGTYTA1ugVuLqDa" ); // (READ ONLY) TODO refactor
-
   initialize()
 
   function initialize() {
     // load feeds and then initialize map and add the markers
     if(typeof(local_feed_path) != "undefined"){
       // set up leaflet map
-      map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer, school_layer, propellerhealth_layer]})
+      map = L.map('map_canvas', {scrollWheelZoom: false, layers: [egg_layer, aqs_layer, propellerhealth_layer]})
       handleNoGeolocation();
+      var hash = new L.Hash(map);
+    
+      var drawControl = new L.Control.Draw({ draw: { polyline: false, marker: false }});
+      map.addControl(drawControl);
+
       L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
           maxZoom: 18
@@ -112,11 +117,12 @@ var AQE = (function ( $ ) {
       L.control.locate({locateOptions: {maxZoom: 9}}).addTo(map);
       legend.addTo(map)
 
+      // if on an egg's page, zoom in close to the egg
+      if ( $(".dashboard-map").length && feed_location) {
+        map.setView(feed_location,9)
+      }
+
       $.getJSON(local_feed_path, function(mapmarkers){
-        // if on an egg's page, zoom in close to the egg
-        if ( $(".dashboard-map").length && mapmarkers && mapmarkers.length ) {
-          map.setView([mapmarkers[0].location_lat,mapmarkers[0].location_lon],9)
-        }
 
         // add eggs to map
         for ( var x = 0, len = mapmarkers.length; x < len; x++ ) {
@@ -128,14 +134,43 @@ var AQE = (function ( $ ) {
 
       map.on('overlayadd', function (eventLayer) {
         if(eventLayer.name == "Heatmap (of all eggs)" && eventLayer.group.name == "Air Quality Eggs"){
-          var active_eggs = egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]})
-          var inactive_eggs = egg_layer_inactive.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]})
-          egg_heatmap.setLatLngs(Array().concat(active_eggs,inactive_eggs))
-        }
-        if(eventLayer.name == "Heatmap" && eventLayer.group.name == "AirNow AQS Sites"){
-          aqs_heatmap.setLatLngs(aqs_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, "5"]}))
+          var active_eggs = egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 5]})
+          var inactive_eggs_24h = egg_layer_inactive_24h.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 1]})
+          var inactive_eggs_6h = egg_layer_inactive_6h.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 1]})
+          egg_heatmap.setData(Array().concat(active_eggs,inactive_eggs_24h,inactive_eggs_6h))
         }
       })
+
+      map.on('draw:created', function (e) {
+          if(typeof(drawn) != "undefined"){map.removeLayer(drawn)} // remove previously drawn item
+          in_bounds = {} // reset in_bounds away
+
+          var type = e.layerType,
+              layer = e.layer;          
+          drawn = layer
+
+          var sensor_layers = egg_layer.getLayers().concat(aqs_layer.getLayers())
+          $.each(sensor_layers, function(n,item){
+            var layer_in_bounds = drawn.getBounds().contains(item.getLatLng())
+            if(layer_in_bounds){ 
+              if(typeof(in_bounds[item.ref.type]) == "undefined"){ in_bounds[item.ref.type] = [] }
+              in_bounds[item.ref.type].push(item.ref.id)
+            }
+          })
+
+          // open url in new window if there is anything to compare
+          var in_bounds_compare_url = "/compare?"
+          $.each(in_bounds, function(type,ids){
+            in_bounds_compare_url += "&"+type+"="+ids.join(",")
+          })
+          if(in_bounds_compare_url != "/compare?"){
+            window.open(location.origin+in_bounds_compare_url)
+          } else {
+            alert("Draw a shape over some markers to compare them side-by-side in a new window.")
+          }
+
+          map.addLayer(layer);
+      });
 
       //  - load active AQS stations to map
       $.getJSON("/all_aqs_sites.json", function(aqs_mapmarkers){
@@ -149,25 +184,10 @@ var AQE = (function ( $ ) {
           addSchoolSiteMapMarker( school_mapmarkers[x] );
         }
       })
-
-
-
-    }
-
-    // if on home page:
-    if($(".home-map").length == 1){
-      //  - load recently created and updated eggs
-      $.each(["recently_created_at","recently_retrieved_at"],function(i,order){
-        $.getJSON("/"+order+".json", function(data){
-          $.each(data, function(i,egg){
-            $("#"+order).append("<li><a href='/egg/"+egg.id+"'>"+egg.title+"</a> is a "+egg.status+" "+egg.location_exposure+" egg that was created "+moment(egg.created).fromNow()+" and last updated "+moment(egg.updated).fromNow()+" </li>")
-          })
-        })
-      })
     }
 
     // if on egg dashboard
-    if($("#dashboard-xively-chart").length){
+    if($("#dashboard-egg-chart").length){
       addAQIGauges()
       graphEggHistoricalData();
     }
@@ -178,7 +198,54 @@ var AQE = (function ( $ ) {
       graphAQSHistoricalData();
     }
 
+    $("tr[data-sensor-id]").each(function(n,row){
+      var type = $(row).data("sensor-type")
+      var id = $(row).data("sensor-id")
+      $.getJSON("/"+type+"/"+id+".json", function(data){
+        $(row).find(".sensor-title").html(data.site_name || data.title)
+        $(row).find(".sensor-description").html(data.msa_name || data.cmsa_name || data.description)
+        var html = formatSensorDetails(data)
+        $(row).children('td').last().html(html)
 
+
+      })
+    })
+
+    $(".momentify").each(function(n,item){
+      var original = $(item).html()
+      var from_now = moment(original).fromNow()
+      $(item).html("<abbr title='"+original+"'>"+from_now+"</abbr>")
+    })
+
+
+  }
+
+  function formatSensorDetails(data){
+    var html = ""
+    if(data.prevailing_aqi){
+      html += " <div class='alert' style='padding: 5px; background-color:"+data.prevailing_aqi.aqi_cat.color+"; color:"+data.prevailing_aqi.aqi_cat.font+"'>This location's air is "+data.prevailing_aqi.aqi_cat.name+"</div> "
+    }
+    var sensor_table = "<table class='table table-striped'><tr><th>Sensor</th><th>Latest Reading</th></tr></tr>"
+    html += sensor_table
+    $.each(data.datastreams, function(name,item){
+      if(item){
+        html += "<tr>"
+        html += "<td>"+name+"</td>"
+        html += "<td>"
+        if(item.computed_aqi > 0){
+          html += " <span class='alert' style='padding: 2px; background-color:"+item.aqi_cat.color+"; color:"+item.aqi_cat.font+"'>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</span> "
+        }
+        html += " " + item.value + " " + item.unit
+        if(item.datetime){ html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  }
+        else if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
+        else {html += " (" + moment(item.date ).fromNow() +  ")" }
+          html += "</td>"
+        html += "</tr>"
+      }        
+    })
+    html += "</table>"
+    if(html == sensor_table+"</table>"){html = "<em>No recent data available</em>"}
+    return html
   }
 
   function handleNoGeolocation() {
@@ -187,99 +254,77 @@ var AQE = (function ( $ ) {
 
   function addEggMapMarker(egg) {
     var marker = L.marker([egg.location_lat, egg.location_lon],  {icon: eggIcon})
-    var html = "<div><strong>Air Quality Egg Details</strong><table class='popup_metadata' data-feed_id='"+egg.id+"'>"
+    var html = "<div><h4>Air Quality Egg Details</h4><table class='table table-striped' data-feed_id='"+egg.id+"'>"
     html += "<tr><td>Name </td><td> <a href='/egg/"+egg.id+"'><strong>"+egg.title+"<strong></a></td></tr>"
     html += "<tr><td>Description </td><td> "+egg.description+"</td></tr>"
     html += "<tr><td>Position </td><td> "+egg.location_exposure+" @ "+egg.location_ele+" elevation</td></tr>"
     html += "<tr><td>Status </td><td> "+egg.status+"</td></tr>"
-    html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
-    html += "<tr><td>Created </td><td> "+moment(egg.created).fromNow()+"</td></tr>"
-    html += "</table><hr />"
-    html += "<div id='egg_"+egg.id+"'><strong>Latest Readings</strong></div>"
+    // html += "<tr><td>Last Updated </td><td> "+moment(egg.updated).fromNow()+"</td></tr>"
+    html += "<tr><td>Created </td><td> "+moment(egg.created+"Z").fromNow()+"</td></tr>"
+    if(egg.last_datapoint){html += "<tr><td>Last data point </td><td> "+moment(egg.last_datapoint+"Z").fromNow()+" ("+egg.last_datapoint+")</td></tr>"}
+    html += "</table>"
+    html += "<div id='egg_"+egg.id+"'></div>"
     html += "<p style='text-align: right'><a href='/egg/"+egg.id+"'>More about this egg site including historical graphs →</a></p>"
     html += "</div>"
     marker.bindPopup(html)
+    marker.ref = {type: "aqe", id: egg.id}
     marker.on('click', onEggMapMarkerClick); 
-    if(new Date(egg.updated) < thirty_days_ago){
-      marker.addTo(egg_layer_inactive);
-    } else {
+    var last_datapoint = new Date(egg.last_datapoint+"Z") 
+    if(last_datapoint >= six_hours_ago){
       marker.addTo(egg_layer);
+    }
+    else if(last_datapoint <= six_hours_ago && last_datapoint >= one_day_ago){
+      marker.addTo(egg_layer_inactive_6h);
+    }
+    else {
+      marker.addTo(egg_layer_inactive_24h);
     }
   }
 
   function onEggMapMarkerClick(e){
-    var feed_id = $(".popup_metadata").data("feed_id")
+    var feed_id = $(".leaflet-popup-content .table").first().data("feed_id")
     if(typeof(ga)!="undefined"){ ga('send', 'event', 'egg_'+feed_id, 'click', 'egg_on_map', 1); }
     $.getJSON("/egg/"+feed_id+".json", function(data){
       var html = ""
-      $.each(data.datastreams, function(name,item){
-        if(item){
-          html += "<br />"+name+": "+item.current_value + " " + item.unit_label
-          if(item.aqi_range){ html += " <span style='padding: 0 2px; border:2px solid "+aqiRangeToColor(item.aqi_range)+"'>AQI range: "+item.aqi_range[0]+"-"+item.aqi_range[1]+"</span> " }
-          html += " (" + moment(item.at).fromNow() +  ")"  
-        }        
-      })
-      if(html == ""){html += "<em>No recent data available</em>"}
+      var html = formatSensorDetails(data)
       $("#egg_"+feed_id).append(html)
     })
   }
 
   function addAQSSiteMapMarker(aqs) {
     var marker = L.marker([aqs.lat, aqs.lon],  {icon: aqsIcon})
-    var html = "<div><strong>AirNow AQS Site Details</strong><table class='popup_metadata' data-aqs_id='"+aqs.aqs_id+"'>"
-    html += "<tr><td>Name / Code </td><td> <a href='/aqs/"+aqs.aqs_id+"'><strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></a></td></tr>"
-    html += "<tr><td>Agency </td><td>"+aqs.agency_name+"</td></tr>"
-    html += "<tr><td>Collects </td><td> "+aqs.parameter.split(",").join(", ")+"</td></tr>"
-    html += "<tr><td>Position </td><td> "+aqs.elevation+" elevation</td></tr>"
-    if(aqs.msa_name){html += "<tr><td>MSA </td><td> "+aqs.msa_name+"</td></tr>"}
-    if(aqs.cmsa_name){html += "<tr><td>CMSA </td><td> "+aqs.cmsa_name+"</td></tr>"}
-    html += "<tr><td>County </td><td> "+aqs.county_name+"</td></tr>"
-    html += "<tr><td>Status </td><td> "+aqs.status+"</td></tr>"
-    html += "</table><hr />"
-    html += "<div id='aqs_"+aqs.aqs_id+"'><em>Loading most recent readings..</em></div>"
+    var html = "<div><h4>AirNow AQS Site Details</h4><table class='table table-striped' data-aqs_id='"+aqs.aqs_id+"'>"
+    html += "<tr><td>Site</td><td> <a href='/aqs/"+aqs.aqs_id+"'><strong>"+aqs.site_name+" / "+aqs.aqs_id+"</strong></a></td></tr>"
+    html += "<tr><td>Agency</td><td>"+aqs.agency_name+"</td></tr>"
+    html += "<tr><td>Position</td><td> "+aqs.elevation+" elevation</td></tr>"
+    if(aqs.msa_name){html += "<tr><td>MSA</td><td> "+aqs.msa_name+"</td></tr>"}
+    if(aqs.cmsa_name){html += "<tr><td>CMSA</td><td> "+aqs.cmsa_name+"</td></tr>"}
+    html += "<tr><td>County</td><td>"+aqs.county_name+"</td></tr>"
+    html += "<tr><td>Status</td><td>"+aqs.status+"</td></tr>"
+    html += "</table>"
+    html += "<div id='aqs_"+aqs.aqs_id+"'></div>"
     html += "<p style='text-align: right'><a href='/aqs/"+aqs.aqs_id+"'>More about this AQS site including historical graphs →</a></p>"
     html += "</div>"
     marker.bindPopup(html)
+    marker.ref = {type: "aqs", id: aqs.aqs_id}
     marker.on('click', onAQSSiteMapMarkerClick); 
     marker.addTo(aqs_layer);
   }
 
   function onAQSSiteMapMarkerClick(e){
-    var aqs_id = $(".popup_metadata").data("aqs_id")
+    var aqs_id = $(".leaflet-popup-content .table").first().data("aqs_id")
     if(typeof(ga)!="undefined"){ ga('send', 'event', 'aqs_'+aqs_id, 'click', 'aqs_on_map', 1); }
+    
     $.getJSON("/aqs/"+aqs_id+".json", function(data){
-
-      var daily_html = "<strong>Latest Daily Readings</strong><br />"
-      var daily_data = $.map(data.latest_daily, function(i){
-        var item_html = ""
-        item_html += i.parameter+": "+i.value+" "+i.unit
-        if(i.aqi_range){ item_html += " <span style='padding: 0 2px; border:2px solid "+aqiRangeToColor(i.aqi_range)+"'>AQI range: "+i.aqi_range[0]+"-"+i.aqi_range[1]+"</span> " }
-        item_html += " ("+moment(i.date).format("MM/DD/YYYY")+")"
-        return item_html
-      })     
-      if(daily_data.length == 0){
-        daily_html += "<em>No daily data available</em>"
-      } else {
-        daily_html += daily_data.join("<br />")
-      }
-
-      var hourly_html = "<br /><br /><strong>Latest Hourly Readings</strong><br />"
-      var hourly_data = $.map(data.latest_hourly, function(i){
-        return i.parameter+": "+i.value+" "+i.unit+" ("+moment(i.date).format("MM/DD/YYYY h:mm a")+" GMT "+data.gmt_offset+")"
-      })     
-      if(hourly_data.length == 0){
-        hourly_html += "<em>No hourly data available</em>"
-      } else {
-        hourly_html += hourly_data.join("<br />")
-      }
-      
-      $("#aqs_"+aqs_id).html(daily_html+hourly_html)
+      var html = formatSensorDetails(data)
+      $("#aqs_"+aqs_id).append(html)
     })
   }
 
   function addSchoolSiteMapMarker(school) {
     var marker = L.marker([school.geocoded_location.latitude, school.geocoded_location.longitude],  {icon: schoolIcon})
-    var html = "<div><strong>School Details </strong><table class='popup_metadata' data-school_id='"+school.nces_school_id+"'>"
+    var html = "<div><h4>School Details</h4>"
+    html += "<table class='table table-striped' data-school_id='"+school.nces_school_id+"'>"
     html += "<tr><td>School Name </td><td>"+school.school_name+" </td></tr>"
     html += "<tr><td>Grades </td><td>"+school.low_grade+" through "+school.high_grade+" </td></tr>"
     html += "<tr><td>Phone Number </td><td>"+school.phone+" </td></tr>"
@@ -417,91 +462,56 @@ var AQE = (function ( $ ) {
 
   function graphEggHistoricalData(){
     // create skeleton chart
-    $('#dashboard-xively-chart').highcharts({
-        chart: {
-            type: 'spline',
-            zoomType: 'xy',
-        },
-        credits: { enabled: false }, 
-        title: { text: "This Egg's Datastreams" },
-        xAxis: { type: 'datetime' },
-        yAxis: [
-          { title: { text: 'ppb (parts per billion)'}, min: 0},
-          { title: {text: ''}, min: 0, opposite: true }
-        ],
-        tooltip: {
-          formatter: function(){
-            var time = moment(this.x)
-            var series_label = this.series.name.replace(/ \(.+\)/g,"")
-            var series_unit = this.series.name.replace(/.+\ \((.+)\)/,"$1")
-            return ''+time.format("MMM D, YYYY [at] h:mm a ([GMT] Z)")+' ('+time.fromNow()+')<br />'+'<b>'+ series_label +':</b> '+this.y+' '+series_unit;
-          }
-        },
-        series: []
-    });
 
-    $(datastreams).each(function(n,i){
-      xively.datastream.history(feed_id,i, {duration:"14days",interval:7200,limit:1000}, graphEggDatastream)
+    $.getJSON(location.pathname+".json?include_recent_history=1", function(data){
+
+      $.each(data.recent_history, function(i,series){
+        if(series.name.match(/ppb/gi)){
+          series.yAxis = 0
+        } else {
+          series.yAxis = 1
+        }
+      })
+
+      $('#dashboard-egg-chart').highcharts({
+          chart: {
+              type: 'spline',
+              zoomType: 'xy',
+          },
+          credits: { enabled: false }, 
+          title: { text: "This Egg's Datastreams" },
+          xAxis: { type: 'datetime' },
+          yAxis: [
+            { title: { text: 'ppb (parts per billion)'}, min: 0},
+            { title: {text: ''}, min: 0, opposite: true }
+          ],
+          tooltip: {
+            formatter: function(){
+              var time = moment(this.x)
+              var series_label = this.series.name.replace(/ \(.+\)/g,"")
+              var series_unit = this.series.name.replace(/.+\ \((.+)\)/,"$1")
+              return ''+time.format("MMM D, YYYY [at] h:mm a ([GMT] Z)")+' ('+time.fromNow()+')<br />'+'<b>'+ series_label +':</b> '+this.y+' '+series_unit;
+            }
+          },
+          series: data.recent_history
+      });
+
     })
 
   }
-
-  function graphEggDatastream(data){
-    var new_series = {id: data.id, name: data.id.split("_")[0]}
-
-    new_series.data = $(data.datapoints).map(function(n,i){
-      var date = new Date(i.at)
-      var x_value = date.getTime()
-      var y_value = parseFloat(i.value)
-      if(new_series.name == "Temperature"){ y_value = celsiusToFahrenheit(y_value) }
-
-      return {x: x_value,y: y_value}
-    })
-
-    // put CO and NO2 on yAxisY=0, all others on the second (right) y-axis
-    if(new_series.name == "CO" || new_series.name == "NO2"){
-    } else {
-      new_series.yAxis = 1;
-    }
-
-    // change namem and define order and axis of series
-    switch (new_series.name) {
-      case "NO2":
-        new_series.name = "NO2 (ppb)"
-        new_series.index = 1
-        new_series.yAxis = 0
-        break;
-      case "CO":
-        new_series.name = "CO (ppb)"
-        new_series.index = 2
-        new_series.yAxis = 0
-        break;
-      case "Dust":
-        new_series.name = "Dust (pcs/283ml)"
-        new_series.index = 3
-        new_series.yAxis = 1
-        break;
-      case "Humidity":
-        new_series.name = "Humidity (%)"
-        new_series.index = 4
-        new_series.yAxis = 1
-        break;
-      case "Temperature":
-        new_series.name = "Temperature (°F)" // we converted it from Celsius above
-        new_series.index = 5
-        new_series.yAxis = 1
-        break;
-    }
-
-    $('#dashboard-xively-chart').highcharts().addSeries(new_series)
-  }
-
 
   function graphAQSHistoricalData(){
     // create skeleton chart
 
     $.getJSON(location.pathname+".json?include_recent_history=1", function(data){
 
+      $.each(data.recent_history, function(i,series){
+        if(series.name.match(/ppb/gi)){
+          series.yAxis = 0
+        } else {
+          series.yAxis = 1
+        }
+      })
 
       $('#dashboard-aqs-chart').highcharts({
           chart: {
@@ -532,10 +542,9 @@ var AQE = (function ( $ ) {
 
   function addAQIGauges(){
     $(".current-value-gauge").each(function(n,span){
-      var values = $(span).data("value")
+      var value = $(span).data("aqi-value")
       var gauge_id = $(span).attr("id")
-      if(values){
-        var value = parseFloat(values[0]+values[1])/2
+      if(value > 0){
         $('#'+gauge_id).highcharts({
                 chart: {
                     type: 'gauge',
@@ -581,7 +590,7 @@ var AQE = (function ( $ ) {
                     plotBands: [{
                         from: 0,
                         to: 50,
-                        color: '#00E400'
+                        color: '#00E000'
                     }, {
                         from: 51,
                         to: 100,
@@ -606,13 +615,13 @@ var AQE = (function ( $ ) {
                 },
                 tooltip: {
                   formatter: function(){
-                    return 'AQI b/w '+this.point.range[0]+'-'+this.point.range[1];
+                    return 'AQI = '+this.point.y;
                   }
                 },
 
                 series: [{
                     name: 'AQI',
-                    data: [{y: value, range:values}],
+                    data: [{y: value}],
                 }]
 
             },
@@ -628,8 +637,8 @@ var AQE = (function ( $ ) {
     return parseFloat(value) * 9 / 5 + 32
   }
 
-  function aqiRangeToColor(range){
-    var aqi = (range[0]+range[1])/2.00
+  function aqiToColor(aqi){
+    // var aqi = (range[0]+range[1])/2.00
     var color;
     if (aqi <= 50) { color = "#00E400" }
     else if(aqi > 51 && aqi <= 100) { color = "#FFFF00"}

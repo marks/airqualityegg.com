@@ -17,12 +17,23 @@ The Air Quality Egg dashboard is a [Ruby](http://www.ruby-lang.org/),
 
 ```bash
 # Sample .env file
-PRODUCT_ID=xxxxxx # get this by logging into Xively.com and creating a product batch (Manage > Add Product Batch)
-API_KEY=xxxxxxx # get this by logging into Xively.com and creating a master key (Settings > Master Keys > Add Master Key
-AIRNOW_USER=xxxxxx # get this from airnowapi.org - required for fetching EPA air quality data
-AIRNOW_PASS=xxxxxx # same as AIRNOW_USER
-GOOGLE_ANALYTICS_TRACKING_ID=xxxxxx # get from analytics.google.com or don't include and google analytics wont be used
-GOOGLE_ANALYTICS_DOMAIN=xxxxxx # same as GOOGLE_ANALYTICS_TRACKING_ID
+XIVELY_PRODUCT_ID:            # get this by logging into Xively.com and creating a product batch (Manage > Add Product Batch)
+XIVELY_API_KEY:               # get this by logging into Xively.com and creating a master key (Settings > Master Keys > Add Master Key
+AIRNOW_USER:                  # get this from airnowapi.org - required for fetching EPA air quality data
+AIRNOW_PASS:                  # same as AIRNOW_USER
+GOOGLE_ANALYTICS_TRACKING_ID: # get from analytics.google.com or don't include and google analytics wont be used
+GOOGLE_ANALYTICS_DOMAIN:      # same as GOOGLE_ANALYTICS_TRACKING_ID
+HTTP_BASIC_USER:              # username to protect some pages with
+HTTP_BASIC_PASS:              # password to protect some pages with
+CKAN_HOST:                    # http://url-to-ckan.tld:port
+CKAN_API_KEY:                 # CKAN API key for a user with the appropriate rights to data sets named below
+CKAN_AQS_DATASET_ID:          # URL slug of your CKAN data set (created through CKAN web GUI) for AQS data
+CKAN_AQS_SITE_RESOURCE_NAME:  AirNow AQS Monitoring Sites
+CKAN_AQS_DATA_RESOURCE_NAME:  AirNow AQS Monitoring Data
+CKAN_AQE_DATASET_ID:          # URL slug of your CKAN data set (created through CKAN web GUI) for AQE data
+CKAN_AQE_SITE_RESOURCE_NAME:  Air Quality Egg Sites
+CKAN_AQE_DATA_RESOURCE_NAME:  Air Quality Egg Data
+
 ```
 
 The values in this file are required to interact with Xively, but some value
@@ -43,27 +54,45 @@ AQE site running locally.
 
 `bundle exec foreman start`
 
-Visit http://localhost:5000, and you should see a version of the AQE 
+Visit http://localhost:4567, and you should see a version of the AQE 
 website running locally on your machine.
 
 ### Running the tests
 
 `bundle exec rake`
 
-### Importing AirNow monitoring sites and daily data
-`foreman run bundle exec rake db:migrate` 
-`foreman run bundle exec rake airnow:sites:import` - Using Heroku Scheduler, we run this once a day
-`foreman run bundle exec rake airnow:daily_data:import` - Using Heroku Scheduler, we run this once an hour
+### Importing AirNow and AirQualityEgg sites and sensor data to CKAN
+```bash
+foreman run bundle exec rake ckan:airnow:update # takes about 45 minutes
+foreman run bundle exec rake ckan:airqualityeggs:update # takes about 10 minutes for 1,000 eggs
+```
 
 ### To upload local database to Heroku
-
-~~This must be done because Heroku does not have a writeable filesystem which is required for downloading the FTP files from AirNow~~ This is optional.
-
-`heroku pg:reset DATABASE_URL`
-`heroku pg:push postgres://localhost/airquality DATABASE_URL`
-
+```bash
+heroku pg:reset DATABASE_URL
+heroku pg:push postgres://localhost/airquality DATABASE_URL
+```
 Be sure to restart heroku after this as the database socket connection will need to be re-initialized
 
+#### Sample crontab entries
+```bash
+# run airnow on even hours and airqualityeggs updates on odd hours
+30   */2     *   *  * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake ckan:airnow:update
+30    1-23/2    * * * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake ckan:airqualityeggs:update
+```
+
+## Sample CKAN (Datastore) SQL
+
+### Join AQE sensor readings (from data_table) with their lat/lon values (from sites_table)
+```sql
+SELECT
+  data_table.feed_id,data_table.datetime,data_table.parameter,data_table.value,data_table.unit,
+  sites_table.location_lat, sites_table.location_lon
+FROM
+  "c0d9ab3c-91a3-4fe8-8f54-5d3009e4f01d" sites_table
+INNER JOIN "d8482637-477b-4e45-a7f5-6b2ceb98c7e5" data_table ON sites_table.id = data_table.feed_id
+LIMIT 10000
+```
 ## Contributing
 
 Please see our [Contributing guidelines](https://github.com/xively/airqualityegg.com/blob/master/CONTRIBUTING.md).

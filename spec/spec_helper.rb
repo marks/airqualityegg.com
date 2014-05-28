@@ -1,8 +1,8 @@
-ENV['PRODUCT_ID'] = "airqualityegg"
-ENV['API_KEY'] = "apikey"
-ENV['API_URL'] = "http://api.xively.com"
+ENV['XIVELY_PRODUCT_ID'] = "airqualityegg"
+ENV['XIVELY_API_KEY'] = "apikey"
+ENV['XIVELY_API_URL'] = "http://api.xively.com"
 
-require File.dirname(__FILE__) + '/../airqualityegg'
+require File.dirname(__FILE__) + '/../app'
 
 require 'rspec'
 require 'capybara/rspec'

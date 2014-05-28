@@ -158,8 +158,8 @@ $site-gutter: $site-gutter * 2;
 }
 
 .current {
-  float: left;
-  width: 15.9%;
+  // float: left;
+  // width: 15.9%;
   margin-bottom: 0;
 
   &.current-right {
@@ -181,7 +181,7 @@ $site-gutter: $site-gutter * 2;
 
 .current-left + .current-left,
 .current-right + .current-right {
-  float: left;
+  // float: left;
 }
 
 .current-id {
@@ -192,10 +192,10 @@ $site-gutter: $site-gutter * 2;
 }
 
 .current-value {
-  margin-top: em(45);
+  // margin-top: em(45);
 
   .current-right & {
-    margin-top: em(61);
+    // margin-top: em(61);
   }
 }
 
