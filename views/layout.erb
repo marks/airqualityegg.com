@@ -150,12 +150,17 @@
     <script src="http://code.highcharts.com/3.0.10/modules/exporting.js"></script>
     <script src="/assets/js/vendor/highcharts-export_csv.js"></script>
 
+
+    <script>
+        var dataset_keys = <%= META.keys.to_json %>
+        var datasets = <%= META.to_json %>
+    </script>
+
     <% if @custom_js %>
       <% @custom_js.to_a.each do |custom_js| %>
         <script src="<%= custom_js %>"></script>
       <% end %>
     <% else %>
-      <script>var dataset_keys = <%= META.keys.to_json %></script>
       <script src="/assets/js/main.js"></script>
     <% end %>
     <!-- google universal analytics -->

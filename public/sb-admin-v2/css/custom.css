@@ -21,6 +21,62 @@
   font-weight:normal;
 }
 
+.leaflet-div-icon{
+  border-radius: 7px;
+  width: 7px !important;
+  height: 7px !important;
+}
+
+.aqi-bg-FFFF00{
+  background-color: #00E400 !important;
+  box-shadow: 0px 0px 20px 8px #00E400;
+  -webkit-box-shadow: 0px 0px 20px 8px #00E400;
+  -moz-box-shadow: 0px 0px 20px 8px #00E400;
+}
+.aqi-bg-FFFF00{
+  background-color: #FFFF00 !important;
+  box-shadow: 0px 0px 20px 8px #FFFF00;
+  -webkit-box-shadow: 0px 0px 20px 8px #FFFF00;
+  -moz-box-shadow: 0px 0px 20px 8px #FFFF00;
+}
+.aqi-bg-FF7E00{
+  background-color: #FF7E00 !important;
+  box-shadow: 0px 0px 20px 8px #FF7E00;
+  -webkit-box-shadow: 0px 0px 20px 8px #FF7E00;
+  -moz-box-shadow: 0px 0px 20px 8px #FF7E00;
+}
+.aqi-bg-FF0000{
+  background-color: #FF0000 !important;
+    box-shadow: 0px 0px 20px 8px #FF0000;
+  -webkit-box-shadow: 0px 0px 20px 8px #FF0000;
+  -moz-box-shadow: 0px 0px 20px 8px #FF0000;
+}
+
+.aqi-bg-99004C{
+  background-color: #99004C !important;
+    box-shadow: 0px 0px 20px 8px #99004C;
+  -webkit-box-shadow: 0px 0px 20px 8px #99004C;
+  -moz-box-shadow: 0px 0px 20px 8px #99004C;
+}
+
+.aqi-bg-4C0026{
+  background-color: #4C0026 !important;
+  box-shadow: 0px 0px 20px 8px #4C0026;
+  -webkit-box-shadow: 0px 0px 20px 8px #4C0026;
+  -moz-box-shadow: 0px 0px 20px 8px #4C0026;
+}
+
+
+.aqi-bg-000000{
+  background-color: #CCC !important;
+  box-shadow: 0px 0px 20px 8px #CCC;
+  -webkit-box-shadow: 0px 0px 20px 8px #CCC;
+  -moz-box-shadow: 0px 0px 20px 8px #CCC;
+}
+
+
+
+
 .egg-icon {
   z-index: 1000 !important;
 }

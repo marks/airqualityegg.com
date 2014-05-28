@@ -30,12 +30,10 @@
             <div class="tab-pane" id="tab1">
               <div class="form-group">
                 <label>First, let's choose dataset resource(s) to visualize:</label>
-                <% META.each do |key,hash| %>
-                  <% hash["resources"].select{|x| x["datastore_active"]}.each do |resource| %>
-                    <div class="checkbox">
-                      <label><input data-resource-id='<%= resource["id"] %>' name='resource-choose-<%= key %>' type="checkbox" value="<%= hash["id"] %>" class='resource-choose'><%= hash["title"] %>: <%= resource["name"] %></label>
-                    </div>
-                  <% end %>
+                <% META.each do |key,dataset| %>
+                  <div class="checkbox">
+                    <label><input data-resource-id='<%= dataset["extras_hash"]["default_resource_id"] or dataset["resources"].first["id"] %>' name='resource-choose-<%= key %>' type="checkbox" data-dataset-key="<%= key %>" class='resource-choose'><%= dataset["title"] %></label>
+                  </div>
                 <% end %>
               </div>
             </div>
@@ -50,6 +48,22 @@
               </div>
             </div>
             <div class="tab-pane" id="tab3">
+              <div class="sql-examples">
+                <label>SQL Query Examples</label>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>SQL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+              </div>
+
               <div class="data-view"></div>
             </div>
             <hr />

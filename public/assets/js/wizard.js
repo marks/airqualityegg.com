@@ -1,4 +1,4 @@
-var rules;
+var rules, mapView
 $(function() { 
 var endpoint = "http://54.204.10.90:5000/api"
 var ckan = new CKAN.Client(endpoint)
@@ -42,13 +42,24 @@ var DataView = Backbone.View.extend({
         model: dataset
       })
     };
-    var mapView = {
+    mapView = {
       id: 'map',
       label: 'Map',
       view: new recline.View.Map({
-        model: dataset
+        model: dataset,
       })
     };
+    mapView.view.geoJsonLayerOptions.onEachFeature = function(feature, layer){
+      var attributes = view.model.records._byId[feature.properties.cid].attributes
+      var aqi = attributes.computed_aqi
+      if(aqi){
+        var aqi_css_class = aqiToColor(aqi).replace("#","")
+        layer.setIcon(L.divIcon({className: 'aqi-bg-'+aqi_css_class+' leaflet-div-icon'}))        
+      } else {
+        layer.setIcon(L.divIcon({className: 'leaflet-div-icon'}))        
+      }
+    }
+
     view = new recline.View.MultiView({
       model: dataset,
       views: [gridView, graphView, mapView],
@@ -120,6 +131,7 @@ var DataView = Backbone.View.extend({
 });
 
   if($(".wizardify").length){
+    var dataset_key, resource_id, chosen_resource;
     // $(".wizardify").bootstrapWizard({'tabClass': 'bwizard-steps'});
     $('.wizardify').bootstrapWizard({
       tabClass: 'bwizard-steps',
@@ -129,13 +141,25 @@ var DataView = Backbone.View.extend({
             alert("Please select exactly one dataset to build a visualization off of.")
             return false;
           }
-
         }
         if(index==2) {
+          chosen_resource = $(".resource-choose:checked")
+          dataset_key = chosen_resource.data("dataset-key")
+          resource_id = chosen_resource.data("resource-id")
+          console.log(dataset_key, resource_id)
+
+          $(".sql-examples tbody").html("")
+          $.each(datasets[dataset_key].extras_hash, function(key,value){
+            if(key.match("SQL")){
+              $(".sql-examples tbody").append("<tr><td><strong>"+key+"</strong><td><span style='font-family: monospace'>"+value+"</span></td></tr>")
+            }
+          })
+
           var view = new DataView({
-            resourceId: $(".resource-choose:checked").data("resource-id"),
+            resourceId: resource_id,
             el: $(".data-view")
           });
+
         }
         // var debug = ""
         // $("input").each(function(x,y){
@@ -181,3 +205,21 @@ var DataView = Backbone.View.extend({
 
 
 });
+
+
+function celsiusToFahrenheit(value){
+  return parseFloat(value) * 9 / 5 + 32
+}
+
+function aqiToColor(aqi){
+  // var aqi = (range[0]+range[1])/2.00
+  var color;
+  if (aqi <= 50) { color = "#00E400" }
+  else if(aqi > 51 && aqi <= 100) { color = "#FFFF00"}
+  else if(aqi > 101 && aqi <= 150) { color = "#FF7E00"}
+  else if(aqi > 151 && aqi <= 200) { color = "#FF0000"}
+  else if(aqi > 201 && aqi <= 300) { color = "#99004C"}
+  else if(aqi > 301 && aqi <= 500) { color = "#4C0026"}
+  else { color = "#000000"}
+  return color;
+}
