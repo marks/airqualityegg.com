@@ -78,6 +78,7 @@ var AQE = (function ( $ ) {
       }).addTo(map);
       L.control.groupedLayers([], groupedOverlays).addTo(map);
       L.control.locate({locateOptions: {maxZoom: 9}}).addTo(map);
+      L.control.fullscreen().addTo(map);
       legend.addTo(map)
 
       // if on an site's page, zoom in close to the site
