@@ -184,9 +184,10 @@ var AQE = (function ( $ ) {
     var html = ""
     $.each(data, function(n,item){
       html += "<div class='alert' style='margin-bottom:10px; padding: 5px; background-color:"+item.aqi_cat.color+"; color:"+item.aqi_cat.font+"'>"
-      html += "<strong>AQI category "+item.Category.Name.toLowerCase()+ " forecasted for "+item.ParameterName+" on "+item.DateForecast+" in/around the "+item.ReportingArea+"</strong>"
+      html += "<strong>AQI category "+item.Category.Name.toLowerCase()+ " forecasted for "+item.ParameterName+" on "+item.DateForecast+" in/around "+item.ReportingArea+"</strong>"
       html += "</div> "
     })
+    if(html == ""){html = "<div class='alert alert-info'>AirNowAPI.org doesnt have any AQI forecasts within 50 miles of the map center. Try panning to a different area.</div>"}
     $("#home-map-aqis-container").html(html)
   }
 
