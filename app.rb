@@ -88,7 +88,7 @@ class AirQualityEgg < Sinatra::Base
         SELECT
           data_table.aqs_id,data_table.date, data_table.time,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
         FROM "#{META["aqs"]["data_resource_id"]}" data_table
-        WHERE data_table.aqs_id = '#{id}'
+        WHERE data_table.aqs_id = '#{id}' AND data_tables.parameter != "CO"
         ORDER BY date desc,time desc
         LIMIT (
           SELECT COUNT(DISTINCT(data_table.parameter))
@@ -100,7 +100,7 @@ class AirQualityEgg < Sinatra::Base
 
     def sql_for_average_over_days(table, id,n_days)
       if table == "aqe"
-        "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{META["#{table}"]["data_resource_id"]}\" WHERE feed_id=#{id} AND datetime >= current_date - #{n_days} GROUP BY parameter"
+        "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{META["#{table}"]["data_resource_id"]}\" WHERE feed_id=#{id} AND datetime >= current_date - #{n_days} AND parameter != 'CO' GROUP BY parameter"
       else #aqs
         "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{META["#{table}"]["data_resource_id"]}\" WHERE aqs_id='#{id}' AND date >= current_date - #{n_days} GROUP BY parameter"      
       end
@@ -113,7 +113,7 @@ class AirQualityEgg < Sinatra::Base
         FROM
           "#{META["aqe"]["site_resource_id"]}" sites_table
         INNER JOIN "#{META["aqe"]["data_resource_id"]}" data_table ON sites_table.id = data_table.feed_id
-        WHERE sites_table.id = #{id}
+        WHERE sites_table.id = #{id} AND data_table.parameter != 'CO'
         order by datetime desc
         LIMIT (
           SELECT COUNT(DISTINCT(data_table.parameter))
@@ -289,7 +289,7 @@ class AirQualityEgg < Sinatra::Base
 
     if params[:include_recent_history]
       series = []
-      recent_history_sql = "SELECT feed_id,parameter,datetime,value,unit from \"#{META["aqe"]["data_resource_id"]}\" WHERE feed_id = #{params[:id]} and datetime > current_date - 45 order by datetime "
+      recent_history_sql = "SELECT feed_id,parameter,datetime,value,unit from \"#{META["aqe"]["data_resource_id"]}\" WHERE feed_id = #{params[:id]} and datetime > current_date - 45 and parameter != 'CO' order by datetime "
       recent_history = sql_search_ckan(recent_history_sql).compact
       series_names = recent_history.map{|x| x["parameter"]}.uniq
       series_names.each do |series_name|
