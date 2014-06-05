@@ -27,6 +27,13 @@
   height: 7px !important;
 }
 
+.leaflet-div-icon-propaqe{
+  border-radius: 7px;
+  width: 14px !important;
+  height: 19px !important;
+  text-align: center;
+}
+
 .aqi-bg-FFFF00{
   background-color: #00E400 !important;
   box-shadow: 0px 0px 20px 8px #00E400;

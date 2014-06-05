@@ -21,7 +21,7 @@ ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 META = {}
 # set some metadata # todo - cleanup
-["aqs","aqe","jeffschools"].each do |key|
+["aqs","aqe","jeffschools","propaqe"].each do |key|
   META[key] = get_ckan_package_by_slug(ENV["CKAN_#{key.upcase}_DATASET_ID"])
   META[key]["site_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"]
   META[key]["data_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"]
@@ -167,7 +167,6 @@ class AirQualityEgg < Sinatra::Base
     content_type :json
     cache_key = "ckan_proxy/#{key}.geojson"
     cached_data = settings.cache.fetch(cache_key) do
-      puts 
       all_aqe_sites = sql_search_ckan(sql_for_all_sites_by_key(key))
       geojson = []
       all_aqe_sites.each do |feature|

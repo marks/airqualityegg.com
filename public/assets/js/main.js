@@ -274,6 +274,17 @@ var AQE = (function ( $ ) {
       html += "</div>"
       layer.bindPopup(html)
     }
+    else if(item.type == "propaqe"){
+      layer.setIcon(L.divIcon({className: 'leaflet-div-icon leaflet-div-icon-propaqe', html:item.group_code}))        
+      var html = "<div><h4>Proposed Egg Location Details</h4>"
+      html += "<table class='table table-striped' data-object_id='"+item.object_id+"'>"
+      html += "<tr><td>Object ID</td><td>"+item.object_id+" </td></tr>"
+      html += "<tr><td>Group Code </td><td>"+item.group_code+"</td></tr>"
+      html += "<tr><td>Coordinates </td><td>"+item.lat+", "+item.lon+"</td></tr>"
+      html += "</table>" 
+      html += "</div>"
+      layer.bindPopup(html)
+    }
 
 
   }
@@ -324,6 +335,13 @@ var AQE = (function ( $ ) {
       if(filter_selections["jeffschools"] == "true" && item.District == "JEFFERSONCOUNTY"){ show = true }
       else{ show = false }
     }
+    else if(item.type == "propaqe"){
+      console.log("here")
+      if(filter_selections["propaqe-group-1"] == "true" && item.group_code == "1"){ show = true }
+      else if(filter_selections["propaqe-group-2"] == "true" && item.group_code == "2"){ show = true }
+      else if(filter_selections["propaqe-group-3"] == "true" && item.group_code == "3"){ show = true }
+      else{ show = false }
+    }
 
     return show
   }
@@ -339,6 +357,11 @@ var AQE = (function ( $ ) {
     filter_selections["last-datapoint-within-24-hours"] = $('input.filter-last-datapoint-within-24-hours:checked').val()
     filter_selections["last-datapoint-within-168-hours"] = $('input.filter-last-datapoint-within-168-hours:checked').val()
     filter_selections["last-datapoint-not-within-168-hours"] = $('input.filter-last-datapoint-not-within-168-hours:checked').val()
+    // propaqe
+    filter_selections["propaqe-group-1"] = $('input.filter-propaqe-group-1:checked').val()
+    filter_selections["propaqe-group-2"] = $('input.filter-propaqe-group-2:checked').val()
+    filter_selections["propaqe-group-3"] = $('input.filter-propaqe-group-3:checked').val()
+
     // aqs specific
     filter_selections["active-sites"] = $('input.filter-active-sites:checked').val()
     // jeffschools specific
