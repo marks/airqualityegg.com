@@ -21,7 +21,7 @@ ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 META = {}
 # set some metadata # todo - cleanup
-["aqs","aqe"].each do |key|
+["aqs","aqe","jeffschools"].each do |key|
   META[key] = get_ckan_package_by_slug(ENV["CKAN_#{key.upcase}_DATASET_ID"])
   META[key]["site_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"]
   META[key]["data_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"]
@@ -186,6 +186,19 @@ class AirQualityEgg < Sinatra::Base
       geojson
     end
     return cached_data
+  end
+
+  get '/aqs/forecast.json' do
+    content_type :json
+    params[:date] = Date.today.to_s if params[:date].to_s == ""
+    params[:distance] = 50 if params[:distance].to_s == ""
+    url = "http://www.airnowapi.org/aq/forecast/latLong/?format=application/json&latitude=#{params[:lat]}&longitude=#{params[:lon]}&date=&distance=#{params[:distance]}&API_KEY=#{ENV["AIRNOW_API_KEY"]}"
+    data = JSON.parse(RestClient.get(url))
+    results = data.map do |result|
+      result[:aqi_cat] = category_number_to_category(result["Category"]["Number"])
+      result
+    end
+    results.to_json
   end
 
   get '/aqs/:id.json' do

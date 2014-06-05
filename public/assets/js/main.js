@@ -101,6 +101,13 @@ var AQE = (function ( $ ) {
       //   }
       // })
 
+      map.on('moveend', function (eventLayer) {
+        var map_center = map.getCenter()
+        $("#home-map-aqis-container").html("")
+        $.getJSON("/aqs/forecast.json?lat="+map_center.lat+"&lon="+map_center.lng, formatForecastDetails)
+      })
+
+
       map.on('draw:created', function (e) {
           if(typeof(drawn) != "undefined"){map.removeLayer(drawn)} // remove previously drawn item
           in_bounds = {} // reset in_bounds away
@@ -171,6 +178,16 @@ var AQE = (function ( $ ) {
       event.preventDefault();
     });
 
+  }
+
+  function formatForecastDetails(data){
+    var html = ""
+    $.each(data, function(n,item){
+      html += "<div class='alert' style='margin-bottom:10px; padding: 5px; background-color:"+item.aqi_cat.color+"; color:"+item.aqi_cat.font+"'>"
+      html += "<strong>AQI category "+item.Category.Name.toLowerCase()+ " forecasted for "+item.ParameterName+" on "+item.DateForecast+" in/around "+item.ReportingArea+"</strong>"
+      html += "</div> "
+    })
+    $("#home-map-aqis-container").html(html)
   }
 
   function formatSensorDetails(data){
@@ -302,6 +319,7 @@ var AQE = (function ( $ ) {
       else{ show = false }
     }
     else if(item.type == "jeffschools"){
+      console.log("here")
       if(filter_selections["jeffschools"] == "true" && item.District == "JEFFERSONCOUNTY"){ show = true }
       else{ show = false }
     }
