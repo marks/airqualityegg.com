@@ -286,6 +286,20 @@ var AQE = (function ( $ ) {
       html += "</div>"
       layer.bindPopup(html)
     }
+    else if(item.type == "bike"){
+      layer.setIcon(L.divIcon({className: 'leaflet-div-icon leaflet-div-icon-bike', html:item.bike_id}))        
+      var html = "<div><h4>Bike Sensor Details</h4>"
+      html += "<table class='table table-striped' data-bike_id='"+item.bike_id+"'>"
+      html += "<tr><td>Bike ID</td><td>"+item.bike_id+" </td></tr>"
+      html += "<tr><td>Time</td><td>"+item.datetime+" </td></tr>"
+      html += "<tr><td>Sensor </td><td>"+item.parameter+"</td></tr>"
+      html += "<tr><td>Value </td><td>"+item.value+"</td></tr>"
+      html += "<tr><td>Units </td><td>"+item.unit+"</td></tr>"
+      html += "<tr><td>Coordinates </td><td>"+item.lat+", "+item.lon+"</td></tr>"
+      html += "</table>" 
+      html += "</div>"
+      layer.bindPopup(html)
+    }
 
 
   }
@@ -332,15 +346,23 @@ var AQE = (function ( $ ) {
       else{ show = false }
     }
     else if(item.type == "jeffschools"){
-      console.log("here")
       if(filter_selections["jeffschools"] == "true" && item.District == "JEFFERSONCOUNTY"){ show = true }
       else{ show = false }
     }
     else if(item.type == "propaqe"){
-      console.log("here")
       if(filter_selections["propaqe-group-1"] == "true" && item.group_code == "1"){ show = true }
       else if(filter_selections["propaqe-group-2"] == "true" && item.group_code == "2"){ show = true }
       else if(filter_selections["propaqe-group-3"] == "true" && item.group_code == "3"){ show = true }
+      else{ show = false }
+    }
+    else if(item.type == "bike"){
+      if(filter_selections["bike-O3"] == "true" && item.parameter == "O3"){ show = true }
+      else if(filter_selections["bike-CO"] == "true" && item.parameter == "CO"){ show = true }
+      else if(filter_selections["bike-NO2"] == "true" && item.parameter == "NO2"){ show = true }
+      else if(filter_selections["bike-VOC"] == "true" && item.parameter == "VOC"){ show = true }
+      else if(filter_selections["bike-Particulate"] == "true" && item.parameter == "PARTICULATE"){ show = true }
+      else if(filter_selections["bike-RHUM"] == "true" && item.parameter == "RHUM"){ show = true }
+      else if(filter_selections["bike-TEMP"] == "true" && item.parameter == "TEMP"){ show = true }
       else{ show = false }
     }
 
@@ -362,11 +384,18 @@ var AQE = (function ( $ ) {
     filter_selections["propaqe-group-1"] = $('input.filter-propaqe-group-1:checked').val()
     filter_selections["propaqe-group-2"] = $('input.filter-propaqe-group-2:checked').val()
     filter_selections["propaqe-group-3"] = $('input.filter-propaqe-group-3:checked').val()
-
     // aqs specific
     filter_selections["active-sites"] = $('input.filter-active-sites:checked').val()
     // jeffschools specific
     filter_selections["jeffschools"] = $('input.filter-jeffschools:checked').val()
+    // durham labs
+    filter_selections["bike-O3"] = $('input.filter-bike-O3:checked').val()
+    filter_selections["bike-CO"] = $('input.filter-bike-CO:checked').val()
+    filter_selections["bike-NO2"] = $('input.filter-bike-NO2:checked').val()
+    filter_selections["bike-VOC"] = $('input.filter-bike-VOC:checked').val()
+    filter_selections["bike-Particulate"] = $('input.filter-bike-Particulate:checked').val()
+    filter_selections["bike-TEMP"] = $('input.filter-bike-TEMP:checked').val()
+    filter_selections["bike-RHUM"] = $('input.filter-bike-RHUM:checked').val()
 
     geoJsonLayers[key] = L.geoJson(layersData[key], {
       onEachFeature: onEachFeature,

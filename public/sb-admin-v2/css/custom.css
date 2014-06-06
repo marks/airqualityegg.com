@@ -34,6 +34,14 @@
   text-align: center;
 }
 
+.leaflet-div-icon-bike{
+  border-radius: 7px;
+  width: auto !important;
+  height: auto !important;
+  text-align: center;
+  padding: 1px;
+}
+
 .aqi-bg-FFFF00{
   background-color: #00E400 !important;
   box-shadow: 0px 0px 20px 8px #00E400;
