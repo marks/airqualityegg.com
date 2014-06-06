@@ -1,4 +1,3 @@
-
 var map, in_bounds, drawn, filter_selections = {}, loaded_at = new Date();
 var geoJsonLayers = {}, layersData = {}
 
@@ -65,7 +64,7 @@ var AQE = (function ( $ ) {
       "Snow": snow_layer,
       "Pressure": pressure_layer,
       "Temperature": temp_layer,
-      "Wind": wind_layer,
+      "Wind": wind_layer
     }
   };
 
@@ -88,6 +87,7 @@ var AQE = (function ( $ ) {
       }).addTo(map);
       L.control.groupedLayers([], groupedOverlays).addTo(map);
       L.control.locate({locateOptions: {maxZoom: 9}}).addTo(map);
+      L.control.fullscreen().addTo(map);
       legend.addTo(map)
 
       // if on an site's page, zoom in close to the site
@@ -110,6 +110,13 @@ var AQE = (function ( $ ) {
       //     egg_heatmap.setData(Array().concat(active_eggs,inactive_eggs_24h,inactive_eggs_6h))
       //   }
       // })
+
+      map.on('moveend', function (eventLayer) {
+        var map_center = map.getCenter()
+        $("#home-map-aqis-container").html("")
+        $.getJSON("/aqs/forecast.json?lat="+map_center.lat+"&lon="+map_center.lng, formatForecastDetails)
+      })
+
 
       map.on('draw:created', function (e) {
           if(typeof(drawn) != "undefined"){map.removeLayer(drawn)} // remove previously drawn item
@@ -181,6 +188,17 @@ var AQE = (function ( $ ) {
       event.preventDefault();
     });
 
+  }
+
+  function formatForecastDetails(data){
+    var html = ""
+    $.each(data, function(n,item){
+      html += "<div class='alert' style='margin-bottom:10px; padding: 5px; background-color:"+item.aqi_cat.color+"; color:"+item.aqi_cat.font+"'>"
+      html += "<strong>AQI category "+item.Category.Name.toLowerCase()+ " forecasted for "+item.ParameterName+" on "+item.DateForecast+" in/around "+item.ReportingArea+"</strong>"
+      html += "</div> "
+    })
+    if(html == ""){html = "<div class='alert alert-info'>AirNowAPI.org doesnt have any AQI forecasts within 50 miles of the map center. Try panning to a different area.</div>"}
+    $("#home-map-aqis-container").html(html)
   }
 
   function formatSensorDetails(data){
@@ -266,6 +284,31 @@ var AQE = (function ( $ ) {
       html += "</div>"
       layer.bindPopup(html)
     }
+    else if(item.type == "propaqe"){
+      layer.setIcon(L.divIcon({className: 'leaflet-div-icon leaflet-div-icon-propaqe', html:item.group_code}))        
+      var html = "<div><h4>Proposed Egg Location Details</h4>"
+      html += "<table class='table table-striped' data-object_id='"+item.object_id+"'>"
+      html += "<tr><td>Object ID</td><td>"+item.object_id+" </td></tr>"
+      html += "<tr><td>Group Code </td><td>"+item.group_code+"</td></tr>"
+      html += "<tr><td>Coordinates </td><td>"+item.lat+", "+item.lon+"</td></tr>"
+      html += "</table>" 
+      html += "</div>"
+      layer.bindPopup(html)
+    }
+    else if(item.type == "bike"){
+      layer.setIcon(L.divIcon({className: 'leaflet-div-icon leaflet-div-icon-bike', html:item.bike_id}))        
+      var html = "<div><h4>Bike Sensor Details</h4>"
+      html += "<table class='table table-striped' data-bike_id='"+item.bike_id+"'>"
+      html += "<tr><td>Bike ID</td><td>"+item.bike_id+" </td></tr>"
+      html += "<tr><td>Time</td><td>"+item.datetime+" </td></tr>"
+      html += "<tr><td>Sensor </td><td>"+item.parameter+"</td></tr>"
+      html += "<tr><td>Value </td><td>"+item.value+"</td></tr>"
+      html += "<tr><td>Units </td><td>"+item.unit+"</td></tr>"
+      html += "<tr><td>Coordinates </td><td>"+item.lat+", "+item.lon+"</td></tr>"
+      html += "</table>" 
+      html += "</div>"
+      layer.bindPopup(html)
+    }
 
 
   }
@@ -315,6 +358,22 @@ var AQE = (function ( $ ) {
       if(filter_selections["jeffschools"] == "true" && item.District == "JEFFERSONCOUNTY"){ show = true }
       else{ show = false }
     }
+    else if(item.type == "propaqe"){
+      if(filter_selections["propaqe-group-1"] == "true" && item.group_code == "1"){ show = true }
+      else if(filter_selections["propaqe-group-2"] == "true" && item.group_code == "2"){ show = true }
+      else if(filter_selections["propaqe-group-3"] == "true" && item.group_code == "3"){ show = true }
+      else{ show = false }
+    }
+    else if(item.type == "bike"){
+      if(filter_selections["bike-O3"] == "true" && item.parameter == "O3"){ show = true }
+      else if(filter_selections["bike-CO"] == "true" && item.parameter == "CO"){ show = true }
+      else if(filter_selections["bike-NO2"] == "true" && item.parameter == "NO2"){ show = true }
+      else if(filter_selections["bike-VOC"] == "true" && item.parameter == "VOC"){ show = true }
+      else if(filter_selections["bike-Particulate"] == "true" && item.parameter == "PARTICULATE"){ show = true }
+      else if(filter_selections["bike-RHUM"] == "true" && item.parameter == "RHUM"){ show = true }
+      else if(filter_selections["bike-TEMP"] == "true" && item.parameter == "TEMP"){ show = true }
+      else{ show = false }
+    }
 
     return show
   }
@@ -330,10 +389,22 @@ var AQE = (function ( $ ) {
     filter_selections["last-datapoint-within-24-hours"] = $('input.filter-last-datapoint-within-24-hours:checked').val()
     filter_selections["last-datapoint-within-168-hours"] = $('input.filter-last-datapoint-within-168-hours:checked').val()
     filter_selections["last-datapoint-not-within-168-hours"] = $('input.filter-last-datapoint-not-within-168-hours:checked').val()
+    // propaqe
+    filter_selections["propaqe-group-1"] = $('input.filter-propaqe-group-1:checked').val()
+    filter_selections["propaqe-group-2"] = $('input.filter-propaqe-group-2:checked').val()
+    filter_selections["propaqe-group-3"] = $('input.filter-propaqe-group-3:checked').val()
     // aqs specific
     filter_selections["active-sites"] = $('input.filter-active-sites:checked').val()
     // jeffschools specific
     filter_selections["jeffschools"] = $('input.filter-jeffschools:checked').val()
+    // durham labs
+    filter_selections["bike-O3"] = $('input.filter-bike-O3:checked').val()
+    filter_selections["bike-CO"] = $('input.filter-bike-CO:checked').val()
+    filter_selections["bike-NO2"] = $('input.filter-bike-NO2:checked').val()
+    filter_selections["bike-VOC"] = $('input.filter-bike-VOC:checked').val()
+    filter_selections["bike-Particulate"] = $('input.filter-bike-Particulate:checked').val()
+    filter_selections["bike-TEMP"] = $('input.filter-bike-TEMP:checked').val()
+    filter_selections["bike-RHUM"] = $('input.filter-bike-RHUM:checked').val()
 
     geoJsonLayers[key] = L.geoJson(layersData[key], {
       onEachFeature: onEachFeature,
@@ -442,96 +513,5 @@ var AQE = (function ( $ ) {
 
   }
 
-  // function addAQIGauges(){
-  //   $(".current-value-gauge").each(function(n,span){
-  //     var value = $(span).data("aqi-value")
-  //     var gauge_id = $(span).attr("id")
-  //     if(value > 0){
-  //       $('#'+gauge_id).highcharts({
-  //               chart: {
-  //                   type: 'gauge',
-  //                   plotBorderWidth: 0,
-  //                   plotShadow: false,
-  //                   backgroundColor:'rgba(255, 255, 255, 0.002)',
-  //                   marginLeft:-55
-  //               },
-  //               credits: { enabled: false },
-  //               exporting: { enabled: false },
-  //               title: { text: ''},
-  //               subtitle: { text: 'AQI:', align: 'left', floating: true, x:-10, y:5},
-  //               pane: {
-  //                   startAngle: -90,
-  //                   endAngle: 90,
-  //                   background: null
-  //               },
-  //               plotOptions: {
-  //                   gauge: {
-  //                       dataLabels: { enabled: false },
-  //                       dial: { radius: '80%' }
-  //                   }
-  //               },
-  //               yAxis: {
-  //                   min: 0,
-  //                   max: 500,
-  //                   minorTickInterval: 'auto',
-  //                   minorTickWidth: 0,
-  //                   minorTickLength: 10,
-  //                   minorTickPosition: 'inside',
-  //                   minorTickColor: '#666',
-
-  //                   tickPixelInterval: 30,
-  //                   tickWidth: 2,
-  //                   tickPosition: 'inside',
-  //                   tickLength: 10,
-  //                   tickColor: '#666',
-  //                   labels: {
-  //                       step: 5,
-  //                       rotation: 'auto'
-  //                   },
-  //                   title: { text: '' },
-  //                   plotBands: [{
-  //                       from: 0,
-  //                       to: 50,
-  //                       color: '#00E000'
-  //                   }, {
-  //                       from: 51,
-  //                       to: 100,
-  //                       color: '#FFFF00'
-  //                   }, {
-  //                       from: 101,
-  //                       to: 150,
-  //                       color: '#FF7E00'
-  //                   }, {
-  //                       from: 151,
-  //                       to: 200,
-  //                       color: '#FF0000'
-  //                   }, {
-  //                       from: 201,
-  //                       to: 300,
-  //                       color: '#99004C'
-  //                   }, {
-  //                       from: 301,
-  //                       to: 500,
-  //                       color: '#4C0026'
-  //                   }]
-  //               },
-  //               tooltip: {
-  //                 formatter: function(){
-  //                   return 'AQI = '+this.point.y;
-  //                 }
-  //               },
-
-  //               series: [{
-  //                   name: 'AQI',
-  //                   data: [{y: value}],
-  //               }]
-
-  //           },
-  //           function () {}
-  //       );
-
-  //     }
-  //   })
-  // }
 
 })( jQuery );
