@@ -88,7 +88,7 @@ class AirQualityEgg < Sinatra::Base
         SELECT
           data_table.aqs_id,data_table.date, data_table.time,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
         FROM "#{META["aqs"]["data_resource_id"]}" data_table
-        WHERE data_table.aqs_id = '#{id}' AND data_tables.parameter != "CO"
+        WHERE data_table.aqs_id = '#{id}'
         ORDER BY date desc,time desc
         LIMIT (
           SELECT COUNT(DISTINCT(data_table.parameter))
@@ -208,6 +208,7 @@ class AirQualityEgg < Sinatra::Base
 
     data[:datastreams] = {}
     datastreams_sql = sql_for_aqs_datastreams(params[:id])
+    puts datastreams_sql
     datastreams_data = sql_search_ckan(datastreams_sql)
     datastreams_data.each do |datastream|
       data[:datastreams][datastream["parameter"].to_sym] = datastream if datastream
