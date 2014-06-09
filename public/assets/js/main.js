@@ -366,7 +366,6 @@ var AQE = (function ( $ ) {
       else if(filter_selections["bike-TEMP"] == "true" && item.parameter == "TEMP"){ show = true }
       else{ show = false }
     }
-    map.fireEvent('dataload')
     return show
   }
 
@@ -402,6 +401,7 @@ var AQE = (function ( $ ) {
       onEachFeature: onEachFeature,
       filter: filterFeatures
     }).addTo(map);
+    map.fireEvent('dataload')
 
   }
 
