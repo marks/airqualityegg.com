@@ -133,7 +133,6 @@ var AQE = (function ( $ ) {
           form.method = "post"
           form.target = "_blank"
           $.each(in_bounds, function(type,ids){
-            console.log(ids)
             var input = document.createElement("input");
             input.name = type;
             input.value = ids.join(",");
@@ -308,8 +307,6 @@ var AQE = (function ( $ ) {
   function filterFeatures(feature, layer) {
     var item = feature.properties
     var show = true
-
-    if($(".dashboard-map").length > 0){return show} // no filtering on dashboard pages
 
     if(item.type == "aqe"){
       // indoor/outdoor ===========
