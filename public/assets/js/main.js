@@ -65,7 +65,8 @@ var AQE = (function ( $ ) {
     // load feeds and then initialize map and add the markers
     if($(".map").length >= 1){
       // set up leaflet map
-      map = L.map('map_canvas', {scrollWheelZoom: false, layers: []})
+      map = L.map('map_canvas', {scrollWheelZoom: false, loadingControl: true, layers: []})
+      map.fireEvent('dataloading')
       map.setView([38.22847167526397, -85.76099395751953], 11); // louisville
       var hash = new L.Hash(map);
     
@@ -365,7 +366,7 @@ var AQE = (function ( $ ) {
       else if(filter_selections["bike-TEMP"] == "true" && item.parameter == "TEMP"){ show = true }
       else{ show = false }
     }
-
+    map.fireEvent('dataload')
     return show
   }
 
