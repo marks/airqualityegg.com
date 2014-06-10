@@ -9,7 +9,10 @@
     </div>
     <div id="query-result"><pre></pre></div>
   </div>
- --></div>
+ -->
+
+
+</div>
 
 <div class="row">
   <div class="col-lg-9">
@@ -42,7 +45,7 @@
                 <label>Now choose a visualization type</label>
                 <% [{"name" => "Recline (tables, graphs, and maps)", "value" => "recline"}].each do |view_type| %>
                   <div class="radio">
-                    <label><input type="radio" name="view_type-choose" chedked value="<%= view_type["value"] %>"><%= view_type["name"] %></label>
+                    <label><input type="radio" name="view_type-choose" checked value="<%= view_type["value"] %>"><%= view_type["name"] %></label>
                   </div>
                 <% end %>
               </div>

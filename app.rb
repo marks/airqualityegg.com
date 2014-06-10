@@ -21,7 +21,7 @@ ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 META = {}
 # set some metadata # todo - cleanup
-["aqs","aqe","jeffschools","propaqe","bike"].each do |key|
+ENV["CKAN_DATASET_KEYS"].split(",").each do |key|
   META[key] = get_ckan_package_by_slug(ENV["CKAN_#{key.upcase}_DATASET_ID"])
   META[key]["site_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"]
   META[key]["data_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"]
