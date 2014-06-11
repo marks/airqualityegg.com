@@ -82,6 +82,13 @@ var AQE = (function ( $ ) {
       L.control.fullscreen().addTo(map);
       legend.addTo(map)
 
+      map.on('moveend', function (eventLayer) {
+        var map_center = map.getCenter()
+        $("#home-map-aqis-container").html("")
+        $.getJSON("/aqs/forecast.json?lat="+map_center.lat+"&lon="+map_center.lng, formatForecastDetails)
+      })
+      map.fireEvent('moveend')
+
       // if on an site's page, zoom in close to the site
       if ( $(".dashboard-map").length && feed_location) {
         map.setView(feed_location,9)
@@ -102,13 +109,6 @@ var AQE = (function ( $ ) {
       //     egg_heatmap.setData(Array().concat(active_eggs,inactive_eggs_24h,inactive_eggs_6h))
       //   }
       // })
-
-      map.on('moveend', function (eventLayer) {
-        var map_center = map.getCenter()
-        $("#home-map-aqis-container").html("")
-        $.getJSON("/aqs/forecast.json?lat="+map_center.lat+"&lon="+map_center.lng, formatForecastDetails)
-      })
-
 
       map.on('draw:created', function (e) {
           if(typeof(drawn) != "undefined"){map.removeLayer(drawn)} // remove previously drawn item
