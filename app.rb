@@ -435,7 +435,9 @@ class AirQualityEgg < Sinatra::Base
       "/vendor/jQuery-QueryBuilder/query-builder.js",
       "/vendor/recline/dist/recline.js",
       "/vendor/ckan.js/ckan.js",
-      "/assets/js/wizard.js",
+      "/vendor/recline-warehouse/data.export.js",
+      "/vendor/recline-warehouse/view.export.js",
+      "/assets/js/wizard.js"
     ]
     erb :wizard
   end

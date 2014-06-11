@@ -49,6 +49,16 @@ $(function() {
           model: dataset,
         })
       };
+
+      exportView = {
+        id: 'export',
+        label: 'Export',
+        view: new recline.View.Export({
+          model: dataset, // recline dataset
+          size: 5 // optional, show only first 5 records in preview (default 10)
+        })
+      };
+
       mapView.view.geoJsonLayerOptions.onEachFeature = function(feature, layer){
         var attributes = view.model.records._byId[feature.properties.cid].attributes
         var aqi = attributes.computed_aqi
@@ -62,7 +72,7 @@ $(function() {
 
       view = new recline.View.MultiView({
         model: dataset,
-        views: [gridView, graphView, mapView],
+        views: [gridView, graphView, mapView, exportView],
         sidebarViews: [],
         el: $el,
         disablePager: true,
