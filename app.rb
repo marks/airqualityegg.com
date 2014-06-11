@@ -27,6 +27,27 @@ ENV["CKAN_DATASET_KEYS"].split(",").each do |key|
   META[key]["data_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"]
 end
 
+ENV["CKAN_DATASET_KEYS_SITES_JOINABLE"].split(",").each do |dataset_key|
+  fields = {}
+  META[dataset_key]["extras_hash"].select{|k,v| k.match("field_containing_site_")}.sort.each do |k,v|
+    field_as = k.gsub("field_containing_site_","")
+    field_key = v
+    fields[field_as] = field_key
+  end
+  # puts fields.inspect
+  sql = "SELECT '#{dataset_key}' AS site_type, "
+  sql += fields.map { |as,key|
+    if ["latitude","longitude"].include?(as)
+      cast_as = "float"
+    else 
+      cast_as = "VARCHAR(255)"
+    end
+    "#{key}::#{cast_as} AS #{as}"
+  }.join(", ")
+  sql += " FROM \"#{META[dataset_key]["site_resource_id"]}\" #{dataset_key}"
+  META[dataset_key]["site_join_sql"] = sql
+end
+
 class AirQualityEgg < Sinatra::Base
   register Sinatra::MultiRoute
 
@@ -176,7 +197,7 @@ class AirQualityEgg < Sinatra::Base
             :"properties" => feature.merge("type" => key, "id" => feature[META[key]["extras_hash"]["field_containing_site_id"]]),
             :"geometry" => {
                 "type" =>  "Point",
-                "coordinates" => [feature[META[key]["extras_hash"]["field_containing_longitude"]], feature[META[key]["extras_hash"]["field_containing_latitude"]]]
+                "coordinates" => [feature[META[key]["extras_hash"]["field_containing_site_longitude"]], feature[META[key]["extras_hash"]["field_containing_site_latitude"]]]
             }
         }
       end
@@ -382,6 +403,18 @@ class AirQualityEgg < Sinatra::Base
   end
 
   get '/wizard' do
+
+    @joinable_sites = ENV["CKAN_DATASET_KEYS_SITES_JOINABLE"].split(",")
+
+
+
+
+# .map do |dataset_key|
+#   META[dataset_key]["site_join_sql"].
+# end
+
+
+
     @custom_css = [
       "/vendor/recline/vendor/slickgrid/2.0.1/slick.grid.css",
       "/vendor/recline/vendor/leaflet.markercluster/MarkerCluster.css",

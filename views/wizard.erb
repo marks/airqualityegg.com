@@ -1,4 +1,5 @@
 <div class="row">
+
   <div class="col-lg-12">
     <h1>Wizard Demo</h1>
 <!--     <div id="query-builder"></div>
@@ -33,6 +34,7 @@
             <div class="tab-pane" id="tab1">
               <div class="form-group">
                 <label>First, let's choose dataset resource(s) to visualize:</label>
+                <div class="alert alert-warning">At the moment, you can select any of the following datasets one at a time or select both AQE and AQS to see a join.</div>
                 <% META.each do |key,dataset| %>
                   <div class="checkbox">
                     <label><input data-resource-id='<%= dataset["extras_hash"]["default_resource_id"] or dataset["resources"].first["id"] %>' name='resource-choose-<%= key %>' type="checkbox" data-dataset-key="<%= key %>" class='resource-choose'><%= dataset["title"] %></label>

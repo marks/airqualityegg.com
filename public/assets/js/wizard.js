@@ -1,7 +1,6 @@
 var rules, mapView
 $(function() { 
-  var endpoint = "http://54.204.10.90:5000/api"
-  var ckan = new CKAN.Client(endpoint)
+  var ckan = new CKAN.Client(ckan_endpoint)
 
   var DataView = Backbone.View.extend({
     class: 'data-view',
@@ -10,8 +9,9 @@ $(function() {
       // var resource = new Backbone.Model
       this.dataset = new recline.Model.Dataset({
         id: options.resourceId,
-        endpoint: endpoint,
-        backend: 'ckan'
+        endpoint: ckan_endpoint,
+        backend: 'ckan',
+        initialSql: options.initialSql
       });
       this.dataset.fetch()
         .done(function() {
@@ -19,11 +19,12 @@ $(function() {
         });
     },
     render: function() {
-      var html = Mustache.render(this.template, {resource: this.dataset.toJSON()});
+      this.view = this._makeMultiView(this.dataset, this.$el.find('.multiview'));
+      
+      var html = Mustache.render(this.template, {initialSql: this.view.model.attributes.initialSql});
       this.$el.html(html);
 
-      this.view = this._makeMultiView(this.dataset, this.$el.find('.multiview'));
-      this.dataset.query({size: this.dataset.recordCount});
+      // this.dataset.query({size: this.dataset.recordCount});
     },
 
     _makeMultiView: function(dataset, $el) {
@@ -80,7 +81,7 @@ $(function() {
         <label>SQL Query</label> \
         <p class="help-block">Query this table using SQL via the <a href="http://docs.ckan.org/en/latest/maintaining/datastore.html#ckanext.datastore.logic.action.datastore_search_sql">DataStore SQL API</a></p> \
         <div class="form-group"> \
-        <textarea class="form-control sql-query-textarea" style="width: 100%;">SELECT * FROM "{{resource.id}}"</textarea> \
+        <textarea class="form-control sql-query-textarea" style="width: 100%;">{{initialSql}}</textarea> \
         </div> \
         <div class="sql-error alert alert-error alert-danger" style="display: none;"></div> \
         <button type="submit" class="btn btn-primary btn-default">Query</button> \
@@ -129,102 +130,94 @@ $(function() {
     }
   });
 
-    if($(".wizardify").length){
-      var dataset_key, resource_id, chosen_resource;
-      // $(".wizardify").bootstrapWizard({'tabClass': 'bwizard-steps'});
-      $('.wizardify').bootstrapWizard({
-        tabClass: 'bwizard-steps',
-        onNext: function(tab, navigation, index) {
-          if(index==1) {
-            if($("#tab1 .checkbox input:checked").length != 1){
-              alert("Please select exactly one dataset to build a visualization off of.")
-              return false;
+  if($(".wizardify").length){
+    var dataset_key, resource_id, chosen_resource;
+    // $(".wizardify").bootstrapWizard({'tabClass': 'bwizard-steps'});
+    $('.wizardify').bootstrapWizard({
+      tabClass: 'bwizard-steps',
+      onNext: function(tab, navigation, index) {
+        if(index==1) {
+          var chosen_dataset_keys = _.map($("#tab1 .checkbox input:checked"),function(x){return $(x).data("dataset-key")}).sort()
+          if(chosen_dataset_keys.length != 1){
+            if(chosen_dataset_keys.toString() == datasets_sites_joinable.toString()){
+              return true
             }
+            alert("Please select exactly one dataset to build a visualization off of or select datasets that can be joined together")
+            return false;
           }
-          if(index==2) {
-            chosen_resource = $(".resource-choose:checked")
-            dataset_key = chosen_resource.data("dataset-key")
-            resource_id = chosen_resource.data("resource-id")
-            console.log(dataset_key, resource_id)
+        }
+        if(index==2) {
+          chosen_resource = $(".resource-choose:checked")
+          dataset_key = chosen_resource.data("dataset-key")
+          resource_id = chosen_resource.data("resource-id")
+          $(".sql-examples tbody").html("")
 
-            $(".sql-examples tbody").html("")
+          // only show examples if we are dealing with just one data set (not a join)
+          if(chosen_resource.length == 1){
+            var initialSql = 'SELECT * FROM "'+resource_id+'"'            
+
+            // show SQL query examples, if there are any
+            var example_count = 0
             $.each(datasets[dataset_key].extras_hash, function(key,value){
-              if(key.match("SQL")){
-                $(".sql-examples tbody").append("<tr class='example-query'><td class='example-sql-description'><strong><a href='#'>"+key+"</a></strong><td class='example-sql'><span style='font-family: monospace'>"+value+"</span></td></tr>")
+              if(key.match("SQL Sample")){
+                $(".sql-examples tbody").append("<tr class='example-query'><td class='example-sql-description'><strong><a href='#'>"+dataset_key.toUpperCase()+" "+key+"</a></strong><td class='example-sql'><span style='font-family: monospace'>"+value+"</span></td></tr>")
+                example_count += 1
               }
             })
-
-            var view = new DataView({
-              resourceId: resource_id,
-              el: $(".data-view")
-            });
-
+            if(example_count == 0){
+              $(".sql-examples").hide()
+            }
+          } else { // for joins
+            var chosen_dataset_keys = _.map($("#tab1 .checkbox input:checked"),function(x){return $(x).data("dataset-key")}).sort()
+            var datasets_sites_join_sql = _.map(chosen_dataset_keys, function(chosen_dataset_key){
+              return datasets[chosen_dataset_key]["site_join_sql"]
+            }).join(" UNION ")
+            console.log(datasets_sites_join_sql)
+            $(".sql-query-textarea").val(datasets_sites_join_sql)
+            var initialSql = datasets_sites_join_sql
+            $(".sql-examples tbody").append("<tr class='example-query'><td class='example-sql-description'><strong><a href='#'>Default SQL for joining "+chosen_dataset_keys.join('/')+" datasets together</a></strong><td class='example-sql'><span style='font-family: monospace'>"+initialSql+"</span></td></tr>")
           }
-          // var debug = ""
-          // $("input").each(function(x,y){
-          //   debug += $(y).attr("name") + " = <pre>" + $(y).val() + "</pre>"
-          // })
-          // $("#wizard-data").html(debug)          
+
+          var view = new DataView({
+            resourceId: resource_id,
+            el: $(".data-view"),
+            initialSql: initialSql
+          });
+
+
         }
-      });
+        // var debug = ""
+        // $("input").each(function(x,y){
+        //   debug += $(y).attr("name") + " = <pre>" + $(y).val() + "</pre>"
+        // })
+        // $("#wizard-data").html(debug)          
+      }
+    });
 
-    }
-
-
-    // $('#query-builder').queryBuilder({
-    //   filters: [{
-    //     id: 'name',
-    //     label: 'Name',
-    //     type: 'string',
-    //     operators: ['equal', 'not_equal', 'is_null', 'is_not_null']
-    //   }, {
-    //     id: 'category',
-    //     label: 'Category',
-    //     type: 'integer',
-    //     input: 'select',
-    //     multiple: true,
-    //     values: {
-    //       1: 'Books',
-    //       2: 'Movies',
-    //       3: 'Music',
-    //       4: 'Tools',
-    //       5: 'Goodies',
-    //       6: 'Clothes'
-    //     },
-    //     operators: ['equal', 'not_equal', 'is_null', 'is_not_null']
-    //   }]
-    // })
-
-    // $('#query-builder-submit').on('click', function() {
-    //   rules = $('#query-builder').queryBuilder('getRules')
-    //   $('#query-result')
-    //     .find('pre').html(JSON.stringify(rules, undefined, 2));
-    //   console.log(rules)
-    // });
-
-
-    $(".example-sql-description").live('click', function(e, target) {
-      e.preventDefault();
-      var sql_td = $(e.target).parent().parent().parent().find(".example-sql")
-      $(".sql-query-textarea").val(sql_td.text())
-    })
-
-
-  });
-
-  function celsiusToFahrenheit(value){
-    return parseFloat(value) * 9 / 5 + 32
   }
 
-  function aqiToColor(aqi){
-    // var aqi = (range[0]+range[1])/2.00
-    var color;
-    if (aqi <= 50) { color = "#00E400" }
-    else if(aqi > 51 && aqi <= 100) { color = "#FFFF00"}
-    else if(aqi > 101 && aqi <= 150) { color = "#FF7E00"}
-    else if(aqi > 151 && aqi <= 200) { color = "#FF0000"}
-    else if(aqi > 201 && aqi <= 300) { color = "#99004C"}
-    else if(aqi > 301 && aqi <= 500) { color = "#4C0026"}
-    else { color = "#000000"}
-    return color;
-  }
+  $(".example-sql-description").live('click', function(e, target) {
+    e.preventDefault();
+    var sql_td = $(e.target).parent().parent().parent().find(".example-sql")
+    $(".sql-query-textarea").val(sql_td.text())
+  })
+
+
+});
+
+function celsiusToFahrenheit(value){
+  return parseFloat(value) * 9 / 5 + 32
+}
+
+function aqiToColor(aqi){
+  // var aqi = (range[0]+range[1])/2.00
+  var color;
+  if (aqi <= 50) { color = "#00E400" }
+  else if(aqi > 51 && aqi <= 100) { color = "#FFFF00"}
+  else if(aqi > 101 && aqi <= 150) { color = "#FF7E00"}
+  else if(aqi > 151 && aqi <= 200) { color = "#FF0000"}
+  else if(aqi > 201 && aqi <= 300) { color = "#99004C"}
+  else if(aqi > 301 && aqi <= 500) { color = "#4C0026"}
+  else { color = "#000000"}
+  return color;
+}

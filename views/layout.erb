@@ -160,8 +160,10 @@
 
 
     <script>
+        var ckan_endpoint = "<%= ENV["CKAN_HOST"] %>/api"
         var dataset_keys = <%= META.keys.to_json %>
         var datasets = <%= META.to_json %>
+        var datasets_sites_joinable = <%= @joinable_sites.to_a.to_json %>.sort();
     </script>
 
     <% if @custom_js %>
