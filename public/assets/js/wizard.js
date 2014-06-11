@@ -164,15 +164,14 @@ $(function() {
       onNext: function(tab, navigation, index) {
         if(index==1) {
           var chosen_dataset_keys = _.map($("#tab1 .checkbox input:checked"),function(x){return $(x).data("dataset-key")}).sort()
-          console.log(chosen_dataset_keys)
-          if(chosen_dataset_keys.toString() == datasets_sites_joinable.toString()){
-            return true
+
+          if ( chosen_dataset_keys.toString() == datasets_sites_joinable.toString() ){
+            // doing am allowed join, we are ok
           }
-          else if(chosen_dataset_keys.length != 1){
+          else if( chosen_dataset_keys.length != 1 ){
             alert("Please select exactly one dataset to build a visualization off of or select datasets that can be joined together")
             return false;
           }
-
 
           chosen_resource = $(".resource-choose:checked")
           dataset_key = chosen_resource.data("dataset-key")
@@ -180,9 +179,8 @@ $(function() {
           $(".sql-examples tbody").html("")
 
           // only show examples if we are dealing with just one data set (not a join)
-          if(chosen_resource.length == 1){
+          if(chosen_dataset_keys.length == 1){
             var initialSql = 'SELECT * FROM "'+resource_id+'"'            
-
             // show SQL query examples, if there are any
             var example_count = 0
             $.each(datasets[dataset_key].extras_hash, function(key,value){
@@ -195,7 +193,8 @@ $(function() {
               $(".sql-examples").hide()
             }
           } else { // for joins
-            var chosen_dataset_keys = _.map($("#tab1 .checkbox input:checked"),function(x){return $(x).data("dataset-key")}).sort()
+
+            console.log("herE")
             var datasets_sites_join_sql = _.map(chosen_dataset_keys, function(chosen_dataset_key){
               return datasets[chosen_dataset_key]["site_join_sql"]
             }).join(" UNION ")
