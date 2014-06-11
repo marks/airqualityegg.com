@@ -12,9 +12,9 @@ my.Export = Backbone.View.extend({
   template: _.template(
     '<h3>Export</h3> \
     <div class="export-buttons">  \
-      <div class="btn-group"> \
+      <div class="btn-group exporter-group"> \
         <% _.each(exporters, function(item, idx) { %> \
-        <a href="#" class="btn <%- idx === exporter ? \'active\' : \'\' %> exporter" data-exporter="<%- idx %>"><%- item.label %></a> \
+        <a href="#" class="btn btn-default <%- idx === exporter ? \'active\' : \'\' %> exporter" data-exporter="<%- idx %>"><%- item.label %></a> \
         <% }); %> \
       </div> \
       <% if (options.size) { %> \
@@ -27,7 +27,7 @@ my.Export = Backbone.View.extend({
     <% if (preview) { %> \
     <div class="preview"> \
       <h3>Preview</h3> \
-      <textarea><%- preview %></textarea> \
+      <textarea class="form-control export-preview"><%- preview %></textarea> \
     </div> \
     <% } %>'
   ),
@@ -40,12 +40,14 @@ my.Export = Backbone.View.extend({
   exporters: [
     {
       label: 'CSV',
-      fn: recline.Data.Export.CSV
+      fn: recline.Data.Export.CSV,
+      charset: 'text/csv'
     },
-    {
-      label: 'JSON',
-      fn: recline.Data.Export.JSON
-    }
+    // {
+    //   label: 'JSON',
+    //   fn: recline.Data.Export.JSON,
+    //   charset: 'text/attachment'
+    // }
   ],
 
   initialize: function() {
@@ -103,8 +105,14 @@ my.Export = Backbone.View.extend({
 
   onExportAll: function(e) {
     var size = this.options.size;
+    // display all data and send to browser to download
     this.options.size = null;
+    var exporter_id = parseInt($(".exporter-group .active").data("exporter"))
+    var exporting_as = this.exporters[exporter_id]
+    console.log(exporting_as)
     this.render();
+    document.location.href = 'data:'+exporting_as.charset+';charset=utf-8,'+encodeURIComponent($("textarea.export-preview").last().html())
+    // set size back to normal
     this.options.size = size;    
   }
 });

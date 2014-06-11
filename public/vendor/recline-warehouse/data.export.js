@@ -1,3 +1,4 @@
+/* extracted/borrowed from https://github.com/dundalek/recline-warehouse */
 this.recline = this.recline || {};
 this.recline.Data = this.recline.Data || {};
 this.recline.Data.Export = this.recline.Data.Export || {};

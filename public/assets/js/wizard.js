@@ -87,19 +87,35 @@ $(function() {
     },
 
     template: ' \
-      <form class="form query-sql" role="form"> \
-        <label>SQL Query</label> \
-        <p class="help-block">Query this table using SQL via the <a href="http://docs.ckan.org/en/latest/maintaining/datastore.html#ckanext.datastore.logic.action.datastore_search_sql">DataStore SQL API</a></p> \
-        <div class="form-group"> \
-        <textarea class="form-control sql-query-textarea" style="width: 100%;">{{initialSql}}</textarea> \
+      <div class="panel panel-default"> \
+        <div class="panel-heading"> \
+          <h4 class="panel-title">SQL Query</h4> \
         </div> \
-        <div class="sql-error alert alert-error alert-danger" style="display: none;"></div> \
-        <button type="submit" class="btn btn-primary btn-default">Query</button> \
+        <div class="panel-collapse collapse in"> \
+          <div class="panel-body"> \
+            <form class="form query-sql" role="form"> \
+              <p class="help-block">Query this table using SQL via the <a href="http://docs.ckan.org/en/latest/maintaining/datastore.html#ckanext.datastore.logic.action.datastore_search_sql">DataStore SQL API</a></p> \
+              <div class="form-group"> \
+              <textarea class="form-control sql-query-textarea" style="width: 100%;">{{initialSql}}</textarea> \
+              </div> \
+              <div class="sql-error alert alert-error alert-danger" style="display: none;"></div> \
+              <button type="submit" class="btn btn-primary btn-default">Query</button> \
+              </div> \
+            </form> \
+          </div> \
         </div> \
-      </form> \
-      <hr /> \
-      <div class="sql-results"></div> \
-      <div class="multiview"></div> \
+      </div> \
+      <div class="panel panel-default"> \
+        <div class="panel-heading"> \
+          <h4 class="panel-title">Results: Browse, Visualize, and/or Export</h4> \
+        </div> \
+        <div class="panel-collapse collapse in"> \
+          <div class="panel-body"> \
+            <div class="sql-results"></div> \
+            <div class="multiview"></div> \
+          </div> \
+        </div> \
+      </div> \
       ',
 
     sqlQuery: function(e) {
@@ -148,15 +164,16 @@ $(function() {
       onNext: function(tab, navigation, index) {
         if(index==1) {
           var chosen_dataset_keys = _.map($("#tab1 .checkbox input:checked"),function(x){return $(x).data("dataset-key")}).sort()
-          if(chosen_dataset_keys.length != 1){
-            if(chosen_dataset_keys.toString() == datasets_sites_joinable.toString()){
-              return true
-            }
+          console.log(chosen_dataset_keys)
+          if(chosen_dataset_keys.toString() == datasets_sites_joinable.toString()){
+            return true
+          }
+          else if(chosen_dataset_keys.length != 1){
             alert("Please select exactly one dataset to build a visualization off of or select datasets that can be joined together")
             return false;
           }
-        }
-        if(index==2) {
+
+
           chosen_resource = $(".resource-choose:checked")
           dataset_key = chosen_resource.data("dataset-key")
           resource_id = chosen_resource.data("resource-id")
