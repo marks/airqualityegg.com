@@ -288,7 +288,8 @@ var AQE = (function ( $ ) {
       html += "</div>"
       layer.bindPopup(html)
     } else {
-      layer.setIcon(L.divIcon({className: 'leaflet-div-icon-text', html:item.type}))
+      var html = "<div><h4>"+item.type.toUpperCase()+" ID #"+item.id+"</h4></div>"
+      layer.bindPopup(html)
     }
 
 
