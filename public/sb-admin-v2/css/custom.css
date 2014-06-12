@@ -51,6 +51,15 @@
   height: 7px !important;
 }
 
+.leaflet-div-icon-text{
+  border-radius: 7px;
+  min-width: 7px;
+  min-height: 7px;
+  width: auto !important;
+  height: auto !important;
+}
+
+
 .leaflet-div-icon-propaqe{
   border-radius: 7px;
   width: 14px !important;

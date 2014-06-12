@@ -32,21 +32,6 @@ var AQE = (function ( $ ) {
   var temp_layer = L.OWM.temperature({opacity: 0.5});
   var wind_layer = L.OWM.wind({opacity: 0.5});
 
-  var legend = L.control({position: 'bottomright'});
-    legend.onAdd = function (map) {
-    var div = L.DomUtil.create('div', 'info legend')
-    var div_html = "";
-    div_html += "<div class='leaflet-control-layers leaflet-control leaflet-control-legend leaflet-control-layers-expanded'><div class='leaflet-control-layers-base'></div><div class='leaflet-control-layers-separator' style='display: none;'></div><div class='leaflet-control-layers-overlays'><div class='leaflet-control-layers-group' id='leaflet-control-layers-group-2'><span class='leaflet-control-layers-group-name'>Legend</span>";
-    div_html += "<table class=''>"
-    div_html += "<tr><td align='center'><img style='width:19px; height:20px;' src='"+eggIconURL+"' alt='egg'> </td><td> Air Quality Egg</td></tr>";
-    div_html += "<tr><td align='center'><img src='"+aqsIconURL+"' alt='blue dot'> </td><td> EPA Air Quality System Site</td></tr>";
-    div_html += "<tr><td align='center'><img style='width:19px; height:19px;' src='"+schoolIconURL+"' alt='school'> </td><td> Schools from Dept of Education</td></tr>";
-    div_html += "</table>"
-    div_html += "</div></div></div>"
-    div.innerHTML = div_html
-    return div;
-  };
-
   var groupedOverlays = {
     "OpenWeatherMap": {
       "Clouds": clouds_layer,
@@ -80,7 +65,6 @@ var AQE = (function ( $ ) {
       L.control.groupedLayers([], groupedOverlays).addTo(map);
       L.control.locate({locateOptions: {maxZoom: 9}}).addTo(map);
       L.control.fullscreen().addTo(map);
-      legend.addTo(map)
 
       map.on('moveend', function (eventLayer) {
         var map_center = map.getCenter()
@@ -95,20 +79,13 @@ var AQE = (function ( $ ) {
       }
 
       $.each(dataset_keys, function(n,key){
-        $.getJSON("/ckan_proxy/"+key+".geojson", function(data){
-          layersData[key] = data
-          update_map(key)
-        })        
+        if($(".filter-"+key+":checked").length > 0){
+          $.getJSON("/ckan_proxy/"+key+".geojson", function(data){
+            layersData[key] = data
+            update_map(key)
+          })        
+        }
       })
-
-      // map.on('overlayadd', function (eventLayer) {
-      //   if(eventLayer.name == "Heatmap (of all eggs)" && eventLayer.group.name == "Air Quality Eggs"){
-      //     var active_eggs = egg_layer.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 5]})
-      //     var inactive_eggs_24h = egg_layer_inactive_24h.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 1]})
-      //     var inactive_eggs_6h = egg_layer_inactive_6h.getLayers().map(function(l){return [l.getLatLng().lat, l.getLatLng().lng, 1]})
-      //     egg_heatmap.setData(Array().concat(active_eggs,inactive_eggs_24h,inactive_eggs_6h))
-      //   }
-      // })
 
       map.on('draw:created', function (e) {
           if(typeof(drawn) != "undefined"){map.removeLayer(drawn)} // remove previously drawn item
@@ -173,10 +150,21 @@ var AQE = (function ( $ ) {
     })
 
     $( ".submit-map-filters" ).on('click',function( event ) {
-      $.each(Object.keys(geoJsonLayers), function(n,key){
-        update_map(key)
-      })
       event.preventDefault();
+      $.each(dataset_keys, function(n,key){
+        if($(".filter-"+key+":checked").length > 0){
+          if(layersData[key] == undefined){
+            $.getJSON("/ckan_proxy/"+key+".geojson", function(data){
+              layersData[key] = data
+              update_map(key)
+            })
+          } else {
+            update_map(key)
+          }
+        } else {
+          update_map(key)
+        }
+      })
     });
 
   }
@@ -299,6 +287,8 @@ var AQE = (function ( $ ) {
       html += "</table>" 
       html += "</div>"
       layer.bindPopup(html)
+    } else {
+      layer.setIcon(L.divIcon({className: 'leaflet-div-icon-text', html:item.type}))
     }
 
 
@@ -347,6 +337,14 @@ var AQE = (function ( $ ) {
       if(filter_selections["jeffschools"] == "true" && item.District == "JEFFERSONCOUNTY"){ show = true }
       else{ show = false }
     }
+    else if(item.type == "parks"){
+      if(filter_selections["parks"] == "true"){ show = true }
+      else{ show = false }
+    }
+    else if(item.type == "food"){
+      if(filter_selections["food"] == "true"){ show = true }
+      else{ show = false }
+    }
     else if(item.type == "propaqe"){
       if(filter_selections["propaqe-group-1"] == "true" && item.group_code == "1"){ show = true }
       else if(filter_selections["propaqe-group-2"] == "true" && item.group_code == "2"){ show = true }
@@ -362,13 +360,13 @@ var AQE = (function ( $ ) {
       else if(filter_selections["bike-RHUM"] == "true" && item.parameter == "RHUM"){ show = true }
       else if(filter_selections["bike-TEMP"] == "true" && item.parameter == "TEMP"){ show = true }
       else{ show = false }
+    } else {
+      show = false
     }
     return show
   }
 
-  function update_map(key){
-    if(typeof(geoJsonLayers[key]) != "undefined"){map.removeLayer(geoJsonLayers[key]);}    // clear all markers
-
+  function update_filters(){
     // set filter selections to be used by filterFeatures
     // aqe specific
     filter_selections["indoor-eggs"] = $('input.filter-indoor-eggs:checked').val()
@@ -385,6 +383,9 @@ var AQE = (function ( $ ) {
     filter_selections["active-sites"] = $('input.filter-active-sites:checked').val()
     // jeffschools specific
     filter_selections["jeffschools"] = $('input.filter-jeffschools:checked').val()
+    // portal.louisvilleky.gov
+    filter_selections["food"] = $('input.filter-food:checked').val()
+    filter_selections["parks"] = $('input.filter-parks:checked').val()
     // durham labs
     filter_selections["bike-O3"] = $('input.filter-bike-O3:checked').val()
     filter_selections["bike-CO"] = $('input.filter-bike-CO:checked').val()
@@ -393,11 +394,18 @@ var AQE = (function ( $ ) {
     filter_selections["bike-Particulate"] = $('input.filter-bike-Particulate:checked').val()
     filter_selections["bike-TEMP"] = $('input.filter-bike-TEMP:checked').val()
     filter_selections["bike-RHUM"] = $('input.filter-bike-RHUM:checked').val()
+  }
+
+  function update_map(key){
+    if(typeof(geoJsonLayers[key]) != "undefined"){map.removeLayer(geoJsonLayers[key]);}    // clear all markers
+    update_filters()
 
     geoJsonLayers[key] = L.geoJson(layersData[key], {
       onEachFeature: onEachFeature,
       filter: filterFeatures
     }).addTo(map);
+
+    console.log(key+' - updated map')
     map.fireEvent('dataload')
 
   }
