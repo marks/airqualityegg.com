@@ -21,6 +21,14 @@ var AQE = (function ( $ ) {
       iconUrl: schoolIconURL,
       iconSize: [17, 17], // size of the icon
   });
+
+  var defaultIconURL = '/vendor/leaflet-0.8-dev-06062014/images/marker-icon.png'
+  var schoolIcon = L.icon({
+    iconUrl: schoolIconURL,
+    iconSize: [12, 20], // size of the icon
+  });
+
+
   var heatmapIconURL = '/assets/img/heatmap_legend.png'
 
   // OpenWeatherMap Layers
@@ -288,6 +296,7 @@ var AQE = (function ( $ ) {
       html += "</div>"
       layer.bindPopup(html)
     } else {
+      layer.setIcon(defaultIconURL)
       var html = "<div><h4>"+item.type.toUpperCase()+" ID #"+item.id+"</h4></div>"
       layer.bindPopup(html)
     }
