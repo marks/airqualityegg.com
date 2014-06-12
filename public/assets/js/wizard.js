@@ -1,7 +1,9 @@
-var rules, mapView
+var aceEditor, mapView
 $(function() { 
-  var ckan = new CKAN.Client(ckan_endpoint)
 
+  // highly based on rgrp's ckan data explorer
+  var ckan = new CKAN.Client(ckan_endpoint)
+  var ace_sql_editor;
   var DataView = Backbone.View.extend({
     class: 'data-view',
     initialize: function(options) {
@@ -94,9 +96,8 @@ $(function() {
         <div class="panel-collapse collapse in"> \
           <div class="panel-body"> \
             <form class="form query-sql" role="form"> \
-              <p class="help-block">Query this table using SQL via the <a href="http://docs.ckan.org/en/latest/maintaining/datastore.html#ckanext.datastore.logic.action.datastore_search_sql">DataStore SQL API</a></p> \
               <div class="form-group"> \
-              <textarea class="form-control sql-query-textarea" style="width: 100%;">{{initialSql}}</textarea> \
+              <div id="sql-query" style="width:100%; height:150px;">{{initialSql}}</div> \
               </div> \
               <div class="sql-error alert alert-error alert-danger" style="display: none;"></div> \
               <button type="submit" class="btn btn-primary btn-default">Query</button> \
@@ -124,7 +125,7 @@ $(function() {
 
       var $error = this.$el.find('.sql-error');
       $error.hide();
-      var sql = this.$el.find('.query-sql textarea').val();
+      var sql = aceEditor.getValue()// this.$el.find('.query-sql textarea').val();
       // replace ';' on end of sql as seems to trigger a json error
       sql = sql.replace(/;$/, '');
       ckan.datastoreSqlQuery(sql, function(err, data) {
@@ -156,11 +157,21 @@ $(function() {
     }
   });
 
+
+  // data visualization wizard
   if($(".wizardify").length){
     var dataset_key, resource_id, chosen_resource;
     // $(".wizardify").bootstrapWizard({'tabClass': 'bwizard-steps'});
     $('.wizardify').bootstrapWizard({
       tabClass: 'bwizard-steps',
+      onTabShow: function(tab, navigation, index) {
+        if(index == 1){
+          setTimeout(function(){
+            aceEditor = ace.edit("sql-query");
+            aceEditor.getSession().setMode("ace/mode/sql");            
+          }, 1000);
+        }
+      },
       onNext: function(tab, navigation, index) {
         if(index==1) {
           var chosen_dataset_keys = _.map($("#tab1 .checkbox input:checked"),function(x){return $(x).data("dataset-key")}).sort()
@@ -193,13 +204,11 @@ $(function() {
               $(".sql-examples").hide()
             }
           } else { // for joins
-
-            console.log("herE")
             var datasets_sites_join_sql = _.map(chosen_dataset_keys, function(chosen_dataset_key){
               return datasets[chosen_dataset_key]["site_join_sql"]
             }).join(" UNION ")
             console.log(datasets_sites_join_sql)
-            $(".sql-query-textarea").val(datasets_sites_join_sql)
+            $("#sql-query").val(datasets_sites_join_sql)
             var initialSql = datasets_sites_join_sql
             $(".sql-examples tbody").append("<tr class='example-query'><td class='example-sql-description'><strong><a href='#'>Default SQL for joining "+chosen_dataset_keys.join('/')+" datasets together</a></strong><td class='example-sql'><span style='font-family: monospace'>"+initialSql+"</span></td></tr>")
           }
@@ -225,7 +234,8 @@ $(function() {
   $(".example-sql-description").live('click', function(e, target) {
     e.preventDefault();
     var sql_td = $(e.target).parent().parent().parent().find(".example-sql")
-    $(".sql-query-textarea").val(sql_td.text())
+    aceEditor.setValue(sql_td.text())
+    // $("#sql-query").val(sql_td.text())
   })
 
 

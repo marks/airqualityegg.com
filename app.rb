@@ -404,23 +404,16 @@ class AirQualityEgg < Sinatra::Base
 
   get '/wizard' do
 
+    @datasets = META
     @joinable_sites = ENV["CKAN_DATASET_KEYS_SITES_JOINABLE"].split(",")
-
-
-
-
-# .map do |dataset_key|
-#   META[dataset_key]["site_join_sql"].
-# end
-
-
 
     @custom_css = [
       "/vendor/recline/vendor/slickgrid/2.0.1/slick.grid.css",
       "/vendor/recline/vendor/leaflet.markercluster/MarkerCluster.css",
       "/vendor/recline/vendor/leaflet.markercluster/MarkerCluster.Default.css",
       "/vendor/recline/dist/recline.css",
-      "/vendor/jQuery-QueryBuilder/query-builder.css"
+      "/vendor/jQuery-QueryBuilder/query-builder.css",
+      "http://shjs.sourceforge.net/sh_style.css"
     ]
     @custom_js = [
       "/vendor/recline/vendor/underscore/1.4.4/underscore.js",
@@ -437,6 +430,8 @@ class AirQualityEgg < Sinatra::Base
       "/vendor/ckan.js/ckan.js",
       "/vendor/recline-warehouse/data.export.js",
       "/vendor/recline-warehouse/view.export.js",
+      "http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js",
+      "http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/mode-pgsql.js",
       "/assets/js/wizard.js"
     ]
     erb :wizard

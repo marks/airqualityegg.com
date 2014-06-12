@@ -18,7 +18,7 @@
           <div class="form-group">
             <h3>First, let's choose dataset resource(s) to visualize:</h3>
             <div class="alert alert-warning">At the moment, you can select any of the following datasets one at a time or select both AQE and AQS to see a join.</div>
-            <% META.each do |key,dataset| %>
+            <% @datasets.each do |key,dataset| %>
               <div class="checkbox">
                 <label><input data-resource-id='<%= dataset["extras_hash"]["default_resource_id"] or dataset["resources"].first["id"] %>' name='resource-choose-<%= key %>' type="checkbox" data-dataset-key="<%= key %>" class='resource-choose'><%= dataset["title"] %></label>
               </div>
