@@ -59,7 +59,7 @@ var AQE = (function ( $ ) {
     if($(".map").length >= 1){
       // set up leaflet map
       map = L.map('map_canvas', {scrollWheelZoom: false, loadingControl: true, layers: []})
-      map.fireEvent('dataloading')
+      // map.fireEvent('dataloading')
       map.setView([38.22847167526397, -85.76099395751953], 11); // louisville
       var hash = new L.Hash(map);
     
@@ -445,8 +445,8 @@ var AQE = (function ( $ ) {
       filter: filterFeatures
     }).addTo(map);
 
-    console.log(key+' - updated map')
-    map.fireEvent('dataload')
+    // console.log(key+' - updated map')
+    // map.fireEvent('dataload')
 
   }
 
