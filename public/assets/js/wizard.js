@@ -13,7 +13,8 @@ $(function() {
         id: options.resourceId,
         endpoint: ckan_endpoint,
         backend: 'ckan',
-        initialSql: options.initialSql
+        initialSql: options.initialSql,
+        isJoin: options.isJoin
       });
       this.dataset.fetch()
         .done(function() {
@@ -23,15 +24,19 @@ $(function() {
     render: function() {
       this.view = this._makeMultiView(this.dataset, this.$el.find('.multiview'));
       
-      var html = Mustache.render(this.template, {initialSql: this.view.model.attributes.initialSql});
+      var html = Mustache.render(this.template, {initialSql: this.dataset.attributes.initialSql});
       this.$el.html(html);
 
-      $.each(this.dataset.fields.models, function(n,field){
-        $(".resource-fields tbody").append("<tr><td>"+field.attributes.id+"</td><td>"+field.attributes.type+"</td></tr>")
-      })
-      $(".resource-fields").height($(".sql-examples").height()+20)
+      if(this.dataset.isJoin == false){
+        $.each(this.dataset.fields.models, function(n,field){
+          $(".resource-fields tbody").append("<tr><td>"+field.attributes.id+"</td><td>"+field.attributes.type+"</td></tr>")
+        })
+        $(".resource-fields").height($(".sql-examples").height()+20)
+      } else {
+        $(".resource-fields").html("<p>Fields for joins coming soon!</p>")
+      }
 
-      this.dataset.query({size: this.dataset.recordCount});
+      // this.dataset.query({size: this.dataset.recordCount});
     },
 
     _makeMultiView: function(dataset, $el) {
@@ -214,6 +219,7 @@ $(function() {
 
           // only show examples if we are dealing with just one data set (not a join)
           if(chosen_dataset_keys.length == 1){
+            var isJoin = false
             if(datasets[dataset_key]['extras_hash']['Default SQL']){
               var initialSql = datasets[dataset_key]['extras_hash']['Default SQL']
             } else {
@@ -232,6 +238,7 @@ $(function() {
               $(".sql-examples").hide()
             }
           } else { // for joins
+            var isJoin = true
             var datasets_sites_join_sql = _.map(chosen_dataset_keys, function(chosen_dataset_key){
               return datasets[chosen_dataset_key]["site_join_sql"]
             }).join(" UNION ")
@@ -244,9 +251,9 @@ $(function() {
           var view = new DataView({
             resourceId: resource_id,
             el: $(".data-view"),
-            initialSql: initialSql
+            initialSql: initialSql,
+            isJoin: isJoin
           });
-
 
         }
       }
