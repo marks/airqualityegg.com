@@ -153,7 +153,7 @@ class AirQualityEgg < Sinatra::Base
         EOS
       elsif key == "parks"
         <<-EOS
-          SELECT "ParkKey", "DisplayName", "StreetAddr", "City", "State", "ZipCode", "Url", "Telephone", "Latitude", "Longitude", array_agg("Amenity")
+          SELECT "ParkKey", "DisplayName", "StreetAddr", "City", "State", "ZipCode", "Url", "Telephone", "Latitude", "Longitude", array_agg("Amenity") AS "Amenities"
           FROM \"#{META[key]["data_resource_id"]}\"
           GROUP BY "ParkKey", "DisplayName", "StreetAddr", "City", "State", "ZipCode", "Url", "Telephone", "Latitude", "Longitude"
         EOS

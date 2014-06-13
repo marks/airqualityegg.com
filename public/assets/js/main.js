@@ -23,8 +23,8 @@ var AQE = (function ( $ ) {
   });
 
   var defaultIconURL = '/vendor/leaflet-0.8-dev-06062014/images/marker-icon.png'
-  var schoolIcon = L.icon({
-    iconUrl: schoolIconURL,
+  var defaultIcon = L.icon({
+    iconUrl: defaultIconURL,
     iconSize: [12, 20], // size of the icon
   });
 
@@ -295,8 +295,24 @@ var AQE = (function ( $ ) {
       html += "</table>" 
       html += "</div>"
       layer.bindPopup(html)
+    }
+    else if(item.type == "parks"){
+      console.log(item)
+      layer.setIcon(defaultIcon)
+      var html = "<div><h4>Park Details</h4>"
+      html += "<table class='table table-striped' data-bike_id='"+item.ParkKey+"'>"
+      html += "<tr><td>Park Key</td><td>"+item.ParkKey+" </td></tr>"
+      html += "<tr><td>Name</td><td><a href='"+item.Url+"' target='blank'>"+item.DisplayName+"</a> </td></tr>"
+      html += "<tr><td>Amenities</td><td>"+item.Amenities.join(", ")+" </td></tr>"
+      html += "<tr><td>Telephone</td><td>"+item.Telephone+" </td></tr>"
+      html += "<tr><td>Address</td><td>"+item.StreetAddr+" </td></tr>"
+      html += "<tr><td>City</td><td>"+item.City+" </td></tr>"
+      html += "<tr><td>State</td><td>"+item.State+" </td></tr>"
+      html += "<tr><td>Zip</td><td>"+item.ZipCode+" </td></tr>"
+      html += "</table>" 
+      html += "</div>"
+      layer.bindPopup(html)
     } else {
-      layer.setIcon(defaultIconURL)
       var html = "<div><h4>"+item.type.toUpperCase()+" ID #"+item.id+"</h4></div>"
       layer.bindPopup(html)
     }
