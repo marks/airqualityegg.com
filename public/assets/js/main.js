@@ -159,7 +159,6 @@ var AQE = (function ( $ ) {
 
     $( ".submit-map-filters" ).on('click',function( event ) {
       event.preventDefault();
-      map.fireEvent('dataloading')
       $.each(dataset_keys, function(n,key){
         if($(".filter-"+key+":checked").length > 0){
           if(layersData[key] == undefined){
@@ -174,7 +173,6 @@ var AQE = (function ( $ ) {
           update_map(key)
         }
       })
-      map.fireEvent('dataload')
     });
 
   }
