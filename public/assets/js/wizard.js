@@ -26,7 +26,12 @@ $(function() {
       var html = Mustache.render(this.template, {initialSql: this.view.model.attributes.initialSql});
       this.$el.html(html);
 
-      // this.dataset.query({size: this.dataset.recordCount});
+      $.each(this.dataset.fields.models, function(n,field){
+        $(".resource-fields tbody").append("<tr><td>"+field.attributes.id+"</td><td>"+field.attributes.type+"</td></tr>")
+      })
+      $(".resource-fields").height($(".sql-examples").height()+20)
+
+      this.dataset.query({size: this.dataset.recordCount});
     },
 
     _makeMultiView: function(dataset, $el) {
@@ -242,11 +247,6 @@ $(function() {
 
 
         }
-        // var debug = ""
-        // $("input").each(function(x,y){
-        //   debug += $(y).attr("name") + " = <pre>" + $(y).val() + "</pre>"
-        // })
-        // $("#wizard-data").html(debug)          
       }
     });
 
