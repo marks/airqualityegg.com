@@ -61,6 +61,22 @@ $(function() {
         })
       };
 
+      filtersView = {
+        id: 'filterEditor',
+        label: 'Filters',
+        view: new recline.View.FilterEditor({
+          model: dataset
+        })
+      }
+
+      fieldsView = {
+        id: 'fieldsView',
+        label: 'Fields',
+        view: new recline.View.Fields({
+          model: dataset
+        })
+      }
+
       mapView.view.geoJsonLayerOptions.onEachFeature = function(feature, layer){
         var attributes = view.model.records._byId[feature.properties.cid].attributes
         var aqi = attributes.computed_aqi
@@ -75,7 +91,7 @@ $(function() {
       view = new recline.View.MultiView({
         model: dataset,
         views: [gridView, graphView, mapView, exportView],
-        sidebarViews: [],
+        sidebarViews: [fieldsView,filtersView],
         el: $el,
         disablePager: true,
         disableQueryEditor: true
