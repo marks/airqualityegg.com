@@ -159,6 +159,7 @@ var AQE = (function ( $ ) {
 
     $( ".submit-map-filters" ).on('click',function( event ) {
       event.preventDefault();
+      map.fireEvent('dataloading')
       $.each(dataset_keys, function(n,key){
         if($(".filter-"+key+":checked").length > 0){
           if(layersData[key] == undefined){
@@ -173,6 +174,7 @@ var AQE = (function ( $ ) {
           update_map(key)
         }
       })
+      map.fireEvent('dataload')
     });
 
   }
@@ -297,7 +299,6 @@ var AQE = (function ( $ ) {
       layer.bindPopup(html)
     }
     else if(item.type == "parks"){
-      console.log(item)
       layer.setIcon(defaultIcon)
       var html = "<div><h4>Park Details</h4>"
       html += "<table class='table table-striped' data-bike_id='"+item.ParkKey+"'>"
@@ -309,6 +310,21 @@ var AQE = (function ( $ ) {
       html += "<tr><td>City</td><td>"+item.City+" </td></tr>"
       html += "<tr><td>State</td><td>"+item.State+" </td></tr>"
       html += "<tr><td>Zip</td><td>"+item.ZipCode+" </td></tr>"
+      html += "</table>" 
+      html += "</div>"
+      layer.bindPopup(html)
+    }
+    else if(item.type == "food"){
+      layer.setIcon(defaultIcon)
+      var html = "<div><h4>Inspected Establishment Details</h4>"
+      html += "<table class='table table-striped' data-bike_id='"+item.EstablishmentID+"'>"
+      html += "<tr><td>Establishment ID</td><td>"+item.EstablishmentID+" </td></tr>"
+      html += "<tr><td>Name</td><td>"+item.EstablishmentName+"</a> </td></tr>"
+      html += "<tr><td>Inspection Scores</td><td>"+item.Inspections.join(", ")+" </td></tr>"
+      html += "<tr><td>Address</td><td>"+item.Address+" </td></tr>"
+      html += "<tr><td>City</td><td>"+item.City+" </td></tr>"
+      html += "<tr><td>State</td><td>"+item.State+" </td></tr>"
+      html += "<tr><td>Zip</td><td>"+item.Zip+" </td></tr>"
       html += "</table>" 
       html += "</div>"
       layer.bindPopup(html)

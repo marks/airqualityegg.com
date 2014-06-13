@@ -191,7 +191,12 @@ $(function() {
 
           // only show examples if we are dealing with just one data set (not a join)
           if(chosen_dataset_keys.length == 1){
-            var initialSql = 'SELECT * FROM "'+resource_id+'"'            
+            if(datasets[dataset_key]['extras_hash']['Default SQL']){
+              var initialSql = datasets[dataset_key]['extras_hash']['Default SQL']
+            } else {
+              var initialSql = 'SELECT * FROM "'+resource_id+'"'
+            }
+            
             // show SQL query examples, if there are any
             var example_count = 0
             $.each(datasets[dataset_key].extras_hash, function(key,value){

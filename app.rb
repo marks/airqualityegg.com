@@ -145,21 +145,19 @@ class AirQualityEgg < Sinatra::Base
     end
 
     def sql_for_all_sites_by_key(key)
-      if key == "aqe"
-        <<-EOS
-          SELECT site_table.id,site_table.created,site_table.description,site_table.location_domain,site_table.location_ele,site_table.location_exposure,site_table.location_lat,site_table.location_lon,site_table.title,site_table.status,
-          (SELECT data_table.datetime FROM \"#{META[key]["data_resource_id"]}\" data_table WHERE data_table.feed_id = site_table.id order by datetime desc LIMIT 1) AS last_datapoint
-          from \"#{META["aqe"]["site_resource_id"]}\" site_table
-        EOS
-      elsif key == "parks"
-        <<-EOS
-          SELECT "ParkKey", "DisplayName", "StreetAddr", "City", "State", "ZipCode", "Url", "Telephone", "Latitude", "Longitude", array_agg("Amenity") AS "Amenities"
-          FROM \"#{META[key]["data_resource_id"]}\"
-          GROUP BY "ParkKey", "DisplayName", "StreetAddr", "City", "State", "ZipCode", "Url", "Telephone", "Latitude", "Longitude"
-        EOS
+      if META[key]["extras_hash"]["Default SQL"]
+        META[key]["extras_hash"]["Default SQL"]
       else
-        resource_id = META[key]["site_resource_id"].nil? ? META[key]["data_resource_id"] : META[key]["site_resource_id"]
-        "SELECT * from \"#{resource_id}\" #{META[key]["extras_hash"]["default_conditions"]}"
+        if key == "aqe"
+          <<-EOS
+            SELECT site_table.id,site_table.created,site_table.description,site_table.location_domain,site_table.location_ele,site_table.location_exposure,site_table.location_lat,site_table.location_lon,site_table.title,site_table.status,
+            (SELECT data_table.datetime FROM \"#{META[key]["data_resource_id"]}\" data_table WHERE data_table.feed_id = site_table.id order by datetime desc LIMIT 1) AS last_datapoint
+            from \"#{META["aqe"]["site_resource_id"]}\" site_table
+          EOS
+        else
+          resource_id = META[key]["site_resource_id"].nil? ? META[key]["data_resource_id"] : META[key]["site_resource_id"]
+          "SELECT * from \"#{resource_id}\" #{META[key]["extras_hash"]["default_conditions"]}"
+        end
       end
     end
 
