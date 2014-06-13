@@ -189,7 +189,9 @@ $(function() {
         if(index == 1){
           setTimeout(function(){
             aceEditor = ace.edit("sql-query");
-            aceEditor.getSession().setMode("ace/mode/sql");            
+            aceEditor.getSession().setMode("ace/mode/sql");
+            aceEditor.getSession().setWrapLimitRange(80,120);
+            aceEditor.getSession().setUseWrapMode(true);     
           }, 1000);
         }
       },
@@ -259,6 +261,10 @@ $(function() {
     // $("#sql-query").val(sql_td.text())
   })
 
+  $(".zoom-to-city").live('click', function(e, target){
+    e.preventDefault();
+    mapView.view.map.setView(focus_city.latlon, focus_city.zoom)
+  })
 
 });
 

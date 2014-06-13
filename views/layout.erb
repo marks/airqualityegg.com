@@ -161,6 +161,7 @@
         var dataset_keys = <%= META.keys.to_json %>
         var datasets = <%= META.to_json %>
         var datasets_sites_joinable = <%= @joinable_sites.to_a.to_json %>.sort();
+        var focus_city = {name: '<%= ENV["FOCUS_CITY_NAME"] || "USA" %>', latlon: ['<%= ENV["FOCUS_CITY_LAT"] || 39.5 %>', '<%= ENV["FOCUS_CITY_LON"] || 98.35 %>'], zoom: <%= ENV["FOCUS_CITY_ZOOM"] || 10 %>}
     </script>
 
     <% if @custom_js %>

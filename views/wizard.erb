@@ -25,80 +25,74 @@
             <% end %>
           </div>
         </div>
-      <div class="tab-pane" id="tab2">
+        <div class="tab-pane" id="tab2">
 
 
 
 
-      <div class="row">
-        <div class="col-md-9">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h4 class="panel-title">Example SQL Queries</h4>
+          <div class="row">
+            <div class="col-md-9">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">Example SQL Queries</h4>
+                </div>
+                <div class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <div class="sql-examples">
+                      <div class="table-responsive">
+                          <table class="table table-bordered table-striped">
+                              <thead>
+                                  <tr>
+                                      <th>Name</th>
+                                      <th>SQL</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                              </tbody>
+                          </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="panel-collapse collapse in">
-              <div class="panel-body">
-                <div class="sql-examples">
-                  <div class="table-responsive">
-                      <table class="table table-bordered table-striped">
+            <div class="col-md-3">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">Available Fields</h4>
+                </div>
+                <div class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <div class="resource-fields" style="overflow:scroll;">
+                      <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
                           <thead>
                               <tr>
                                   <th>Name</th>
-                                  <th>SQL</th>
+                                  <th>Type</th>
                               </tr>
                           </thead>
                           <tbody>
                           </tbody>
-                      </table>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="col-md-3">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h4 class="panel-title">Available Fields</h4>
-            </div>
-            <div class="panel-collapse collapse in">
-              <div class="panel-body">
-                <div class="resource-fields" style="overflow:scroll;">
-                  <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
-                      <thead>
-                          <tr>
-                              <th>Name</th>
-                              <th>Type</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="data-view">
+            
           </div>
-        </div>
-      </div>
 
-<!--         <div class="panel panel-default">
-          <div class="panel-heading">
-            <h4 class="panel-title">Data View</h4>
+          <div class="text-right">
+            <a href"#" class="zoom-to-city btn btn-default btn-small">Zoom to <%= ENV["FOCUS_CITY_NAME"] %></a>
           </div>
-          <div class="panel-collapse collapse in">
-            <div class="panel-body">
-              <div class="data-view"></div>
-            </div>
-          </div>
-        </div>
-
- --> 
-         <div class="data-view"></div>
-
 
         </div>
+
+
         <hr />
         <ul class="pager wizard">
           <li class="previous first" style="display:none;"><a href="#">First</a></li>
@@ -106,8 +100,8 @@
           <li class="next last" style="display:none;"><a href="#">Last</a></li>
           <li class="next"><a href="#">Next</a></li>
         </ul>
+
       </div>  
     </div>
-
   </div>
 </div>

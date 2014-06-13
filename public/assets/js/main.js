@@ -60,7 +60,7 @@ var AQE = (function ( $ ) {
       // set up leaflet map
       map = L.map('map_canvas', {scrollWheelZoom: false, loadingControl: true, layers: []})
       // map.fireEvent('dataloading')
-      map.setView([38.22847167526397, -85.76099395751953], 11); // louisville
+      map.setView(focus_city.latlon, focus_city.zoom); 
       var hash = new L.Hash(map);
     
       var drawControl = new L.Control.Draw({ draw: { polyline: false, marker: false }});
