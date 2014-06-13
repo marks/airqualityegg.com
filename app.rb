@@ -381,7 +381,7 @@ class AirQualityEgg < Sinatra::Base
     @sensors = []
     params.each do |type,ids|
       ids.split(",").each do |sensor_id|
-        @sensors << {"type" => type, "id" => sensor_id}
+        @sensors << {"type" => type, "id" => sensor_id} if ["aqe","aqs"].include?(type)
       end
       @sensors.uniq.compact!
     end
