@@ -200,7 +200,7 @@ $(function() {
             // show SQL query examples, if there are any
             var example_count = 0
             $.each(datasets[dataset_key].extras_hash, function(key,value){
-              if(key.match("SQL")){
+              if(key.match("SQL Sample")){
                 $(".sql-examples tbody").append("<tr class='example-query'><td class='example-sql-description'><strong><a href='#'>"+dataset_key.toUpperCase()+" "+key+"</a></strong><td class='example-sql'><span style='font-family: monospace'>"+value+"</span></td></tr>")
                 example_count += 1
               }
