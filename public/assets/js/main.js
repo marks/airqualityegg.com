@@ -182,6 +182,15 @@ var AQE = (function ( $ ) {
       })
     });
 
+    $(".row.aqe .average-Temperature").each(function(n,item){
+      var c = $(item).text()
+      var f = celsiusToFahrenheit(c)
+      var f_rounded = Math.round( f * 10 ) / 10;
+      $(item).text(f_rounded)
+    })
+
+
+
   }
 
   function formatForecastDetails(data){
@@ -648,5 +657,9 @@ var AQE = (function ( $ ) {
   //     }
   //   })
   // }
+
+  function celsiusToFahrenheit(value){
+    return parseFloat(value) * 9 / 5 + 32
+  }
 
 })( jQuery );
