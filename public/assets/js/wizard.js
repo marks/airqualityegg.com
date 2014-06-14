@@ -283,7 +283,6 @@ $(function() {
           chosen_resource = $(".resource-choose:checked")
           dataset_key = chosen_resource.data("dataset-key")
           resource_id = chosen_resource.data("resource-id")
-          $(".sql-examples tbody").html("")
 
           // only show examples if we are dealing with just one data set (not a join)
           if(chosen_dataset_keys.length == 1){

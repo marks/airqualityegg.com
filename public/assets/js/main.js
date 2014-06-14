@@ -28,8 +28,12 @@ var AQE = (function ( $ ) {
     iconSize: [12, 20], // size of the icon
   });
 
-
   var heatmapIconURL = '/assets/img/heatmap_legend.png'
+
+  // Propeller Health image overlay and layer 
+  // var propellerhealth_layer_url = 'http://s3.amazonaws.com/healthyaws/propeller_health/propeller_health_heatmap_nov13_shared.png';
+  // var propellerhealth_layer_bounds = [[37.8419378866983038, -86.0292621133016979], [38.5821425225734487, -85.1883896469475275]]
+  // var propellerhealth_layer = L.layerGroup([L.imageOverlay(propellerhealth_layer_url, propellerhealth_layer_bounds, {opacity: 0.8, attribution: "Asthma hotspot heatmap from <a href='http://propellerhealth.com' target=blank>Propeller Health</a>"})])
 
   // OpenWeatherMap Layers
   var clouds_layer = L.OWM.clouds({opacity: 0.8, legendImagePath: 'files/NT2.png'});
@@ -41,6 +45,9 @@ var AQE = (function ( $ ) {
   var wind_layer = L.OWM.wind({opacity: 0.5});
 
   var groupedOverlays = {
+    // "Additional Data":{
+    //   "Louisville Asthma Hotspots": propellerhealth_layer,
+    // },
     "OpenWeatherMap": {
       "Clouds": clouds_layer,
       "Precipiration": precipitation_layer,
@@ -58,7 +65,7 @@ var AQE = (function ( $ ) {
     // load feeds and then initialize map and add the markers
     if($(".map").length >= 1){
       // set up leaflet map
-      map = L.map('map_canvas', {scrollWheelZoom: false, loadingControl: true, layers: []})
+      map = L.map('map_canvas', {scrollWheelZoom: false, loadingControl: true, layers: []}) // propellerhealth_layer
       // map.fireEvent('dataloading')
       map.setView(focus_city.latlon, focus_city.zoom); 
       var hash = new L.Hash(map);
