@@ -14,7 +14,8 @@ $(function() {
         endpoint: ckan_endpoint,
         backend: 'ckan',
         initialSql: options.initialSql,
-        isJoin: options.isJoin
+        isJoin: options.isJoin,
+        datasetKeys: options.datasetKeys
       });
       this.dataset.fetch()
         .done(function() {
@@ -24,10 +25,21 @@ $(function() {
     render: function() {
       this.view = this._makeMultiView(this.dataset, this.$el.find('.multiview'));
       
-      var html = Mustache.render(this.template, {initialSql: this.dataset.attributes.initialSql});
+      var sqlSamples = $.map(datasets[dataset_key].extras_hash, function(value,key){
+        console.log(key)
+        if(key.match("SQL Sample")){
+          return {title: dataset_key.toUpperCase()+" "+key, sql: value}
+        }
+      })
+
+      console.log(sqlSamples)
+
+      var html = Mustache.render(this.template, {initialSql: this.dataset.attributes.initialSql, sqlSamples: sqlSamples});
       this.$el.html(html);
 
-      if(this.dataset.isJoin == false){
+
+      console.log(this.dataset)
+      if(this.dataset.attributes.isJoin == false){      
         $.each(this.dataset.fields.models, function(n,field){
           $(".resource-fields tbody").append("<tr><td>"+field.attributes.id+"</td><td>"+field.attributes.type+"</td></tr>")
         })
@@ -115,6 +127,65 @@ $(function() {
     },
 
     template: ' \
+      <div class="row"> \
+        <div class="col-md-9"> \
+          <div class="panel panel-default"> \
+            <div class="panel-heading"> \
+              <h4 class="panel-title">Example SQL Queries</h4> \
+            </div> \
+            <div class="panel-collapse collapse in"> \
+              <div class="panel-body"> \
+                <div class="sql-examples"> \
+                  <div class="table-responsive"> \
+                    <table class="table table-bordered table-striped"> \
+                        <thead> \
+                          <tr> \
+                            <th>Name</th> \
+                            <th>SQL</th> \
+                          </tr> \
+                        </thead> \
+                        <tbody> \
+                          {{#sqlSamples}}\
+                            <tr class="example-query">\
+                                <td class="example-sql-description"><a href="#" data-sql="{{sql}}">{{title}}</a></td>\
+                                <td><span style="font-family: monospace">{{sql}}</span></td>\
+                            </tr>\
+                          {{/sqlSamples}}" \
+                        </tbody> \
+                    </table> \
+                  </div> \
+                </div> \
+              </div> \
+            </div> \
+          </div> \
+        </div> \
+        <div class="col-md-3"> \
+          <div class="panel panel-default"> \
+            <div class="panel-heading"> \
+              <h4 class="panel-title">Dataset Metadata</h4> \
+            </div> \
+            <div class="panel-collapse collapse in"> \
+              <div class="panel-body"> \
+                <h5>Fields/Columns</h5> \
+                <div class="resource-fields" style="overflow:scroll;"> \
+                  <div class="table-responsive"> \
+                    <table class="table table-bordered table-striped"> \
+                      <thead> \
+                          <tr> \
+                              <th>Name</th> \
+                              <th>Type</th> \
+                          </tr> \
+                      </thead> \
+                      <tbody> \
+                      </tbody> \
+                    </table> \
+                  </div> \
+                </div> \
+              </div> \
+            </div> \
+          </div> \
+        </div> \
+      </div> \
       <div class="panel panel-default"> \
         <div class="panel-heading"> \
           <h4 class="panel-title">SQL Query</h4> \
@@ -203,11 +274,8 @@ $(function() {
       onNext: function(tab, navigation, index) {
         if(index==1) {
           var chosen_dataset_keys = _.map($("#tab1 .checkbox input:checked"),function(x){return $(x).data("dataset-key")}).sort()
-
-          if ( chosen_dataset_keys.toString() == datasets_sites_joinable.toString() ){
-            // doing am allowed join, we are ok
-          }
-          else if( chosen_dataset_keys.length != 1 ){
+          if ( chosen_dataset_keys.toString() == datasets_sites_joinable.toString() ){ // doing am allowed join
+          } else if( chosen_dataset_keys.length != 1 ){
             alert("Please select exactly one dataset to build a visualization off of or select datasets that can be joined together")
             return false;
           }
@@ -219,6 +287,7 @@ $(function() {
 
           // only show examples if we are dealing with just one data set (not a join)
           if(chosen_dataset_keys.length == 1){
+
             var isJoin = false
             if(datasets[dataset_key]['extras_hash']['Default SQL']){
               var initialSql = datasets[dataset_key]['extras_hash']['Default SQL']
@@ -227,16 +296,7 @@ $(function() {
             }
             
             // show SQL query examples, if there are any
-            var example_count = 0
-            $.each(datasets[dataset_key].extras_hash, function(key,value){
-              if(key.match("SQL Sample")){
-                $(".sql-examples tbody").append("<tr class='example-query'><td class='example-sql-description'><strong><a href='#'>"+dataset_key.toUpperCase()+" "+key+"</a></strong><td class='example-sql'><span style='font-family: monospace'>"+value+"</span></td></tr>")
-                example_count += 1
-              }
-            })
-            if(example_count == 0){
-              $(".sql-examples").hide()
-            }
+
           } else { // for joins
             var isJoin = true
             var datasets_sites_join_sql = _.map(chosen_dataset_keys, function(chosen_dataset_key){
@@ -245,14 +305,15 @@ $(function() {
             console.log(datasets_sites_join_sql)
             $("#sql-query").val(datasets_sites_join_sql)
             var initialSql = datasets_sites_join_sql
-            $(".sql-examples tbody").append("<tr class='example-query'><td class='example-sql-description'><strong><a href='#'>Default SQL for joining "+chosen_dataset_keys.join('/')+" datasets together</a></strong><td class='example-sql'><span style='font-family: monospace'>"+initialSql+"</span></td></tr>")
+            $(".sql-examples tbody").append("<tr class='example-query'><td class='example-sql-description'><strong><a href='#' data-sql='"+initialSql+"'>Default SQL for joining "+chosen_dataset_keys.join('/')+" datasets together</a></strong><td class='example-sql'><span style='font-family: monospace'>"+initialSql+"</span></td></tr>")
           }
 
           var view = new DataView({
             resourceId: resource_id,
             el: $(".data-view"),
             initialSql: initialSql,
-            isJoin: isJoin
+            isJoin: isJoin,
+            datasetKeys: chosen_dataset_keys
           });
 
         }
@@ -261,11 +322,11 @@ $(function() {
 
   }
 
-  $(".example-sql-description").live('click', function(e, target) {
+  $(".example-sql-description a").live('click', function(e) {
     e.preventDefault();
-    var sql_td = $(e.target).parent().parent().parent().find(".example-sql")
-    aceEditor.setValue(sql_td.text())
-    // $("#sql-query").val(sql_td.text())
+    
+    var sql = $(e.target).data("sql")
+    aceEditor.setValue(sql)
   })
 
   $(".zoom-to-city").live('click', function(e, target){
