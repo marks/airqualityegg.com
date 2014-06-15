@@ -45,18 +45,15 @@ var AQE = (function ( $ ) {
   var wind_layer = L.OWM.wind({opacity: 0.5});
 
   // via http://www.web-maps.com/gisblog/?p=977
-  var censusTracts = new L.TileLayer.WMS("http://tigerweb.geo.census.gov/ArcGIS/services/tigerWMS/MapServer/WMSServer",
-  {
-    layers: 'Census Tracts',
-    format: 'image/png',
-    transparent: true,
-  //   attribution: TigerAttribution
-  });
+  // var censusTracts = new L.TileLayer.WMS("http://tigerweb.geo.census.gov/ArcGIS/services/tigerWMS/MapServer/WMSServer",
+  // {
+  //   layers: ['Census Tracts','Census Tracts Labels'],
+  //   format: 'image/png',
+  //   transparent: true,
+  // });
 
   var groupedOverlays = {
-    "Additional Data":{
-      "Census Tracts": censusTracts,
-    },
+    "Census Data from JusticeMap.org":{},
     "OpenWeatherMap": {
       "Clouds": clouds_layer,
       "Precipiration": precipitation_layer,
@@ -67,6 +64,14 @@ var AQE = (function ( $ ) {
       "Wind": wind_layer
     }
   };
+
+  var justiceMapAttribution = '<a target=blank href="http://census.gov">US Census data</a> via <a target=blank href="http://justicemap.org">JusticeMap.org</a>'
+  groupedOverlays["Census Data from JusticeMap.org"] = {}
+  $.each(["asian","black","hispanic","indian","multi","white","nonwhite","other","income"],function(n,layer_name){
+    groupedOverlays["Census Data from JusticeMap.org"][toTitleCase(layer_name)+" by Census Tract"] = L.tileLayer(
+      'http://www.justicemap.org/tile/{size}/{layer_name}/{z}/{x}/{y}.png',
+      {size: 'tract', layer_name: layer_name, opacity: 0.75, attribution: justiceMapAttribution})
+  })
 
   initialize()
 
@@ -83,7 +88,7 @@ var AQE = (function ( $ ) {
       map.addControl(drawControl);
 
       L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+          attribution: 'Map data © <a target=blank href="http://openstreetmap.org">OpenStreetMap</a> contributors',
           maxZoom: 18
       }).addTo(map);
       L.control.groupedLayers([], groupedOverlays).addTo(map);
@@ -669,6 +674,10 @@ var AQE = (function ( $ ) {
 
   function celsiusToFahrenheit(value){
     return parseFloat(value) * 9 / 5 + 32
+  }
+
+  function toTitleCase(str){
+      return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
   }
 
 })( jQuery );
