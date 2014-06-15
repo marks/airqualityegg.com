@@ -44,10 +44,19 @@ var AQE = (function ( $ ) {
   var temp_layer = L.OWM.temperature({opacity: 0.5});
   var wind_layer = L.OWM.wind({opacity: 0.5});
 
+  // via http://www.web-maps.com/gisblog/?p=977
+  var censusTracts = new L.TileLayer.WMS("http://tigerweb.geo.census.gov/ArcGIS/services/tigerWMS/MapServer/WMSServer",
+  {
+    layers: 'Census Tracts',
+    format: 'image/png',
+    transparent: true,
+  //   attribution: TigerAttribution
+  });
+
   var groupedOverlays = {
-    // "Additional Data":{
-    //   "Louisville Asthma Hotspots": propellerhealth_layer,
-    // },
+    "Additional Data":{
+      "Census Tracts": censusTracts,
+    },
     "OpenWeatherMap": {
       "Clouds": clouds_layer,
       "Precipiration": precipitation_layer,
