@@ -65,7 +65,7 @@ var AQE = (function ( $ ) {
     }
   };
 
-  var justiceMapAttribution = '<a target=blank href="http://census.gov">US Census data</a> via <a target=blank href="http://justicemap.org">JusticeMap.org</a>'
+  var justiceMapAttribution = '<a target=blank href="http://census.gov">Demographics from 2010 US Census & 2011 American Community Survey (5 yr summary)</a> via <a target=blank href="http://justicemap.org">JusticeMap.org</a>'
   groupedOverlays["Census Data from JusticeMap.org"] = {}
   $.each(["asian","black","hispanic","indian","multi","white","nonwhite","other","income"],function(n,layer_name){
     groupedOverlays["Census Data from JusticeMap.org"][toTitleCase(layer_name)+" by Census Tract"] = L.tileLayer(
