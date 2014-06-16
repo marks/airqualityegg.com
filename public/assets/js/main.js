@@ -104,11 +104,11 @@ var AQE = (function ( $ ) {
         var div_html = "";
         div_html += "<div id='legend' class='leaflet-control-layers leaflet-control leaflet-control-legend leaflet-control-layers-expanded'><div class='leaflet-control-layers-base'></div><div class='leaflet-control-layers-separator' style='display: none;'></div><div class='leaflet-control-layers-overlays'><div class='leaflet-control-layers-group' id='leaflet-control-layers-group-2'><span class='leaflet-control-layers-group-name'>Legend</span>";
 
-        var activeLayers = $.map($(".leaflet-control-layers-overlays").find("input:checked"), function(item){
-          return $.trim($(item).parent().text())
+        var activeLayers = $.each($(".leaflet-control-layers-overlays").find("input:checked"), function(n,item){
+          var name = $.trim($(item).parent().text())
+          var slug = name.split(/ /)[0].toLowerCase()
+          div_html += "<img src='/assets/img/justicemap.org-legends/"+slug+".png' alt='legend for "+name+"'/>"
         })
-        console.log(activeLayers)
-        div_html += "<p>"+activeLayers.join(", ")+"</p>"
         // div_html += "<table class=''>"
         // div_html += "<tr><td align='center'><img style='width:19px; height:19px;' src='' alt='school'> </td><td> Schools from Dept of Education</td></tr>";
         // div_html += "</table>"
@@ -134,37 +134,36 @@ var AQE = (function ( $ ) {
       map.fireEvent('moveend')
 
       map.on('draw:created', function (e) {
-          if(typeof(drawn) != "undefined"){map.removeLayer(drawn)} // remove previously drawn item
-          in_bounds = {} // reset in_bounds away
+        if(typeof(drawn) != "undefined"){map.removeLayer(drawn)} // remove previously drawn item
+        in_bounds = {} // reset in_bounds away
 
-          var type = e.layerType,
-              layer = e.layer;          
-          drawn = layer
+        var type = e.layerType, layer = e.layer;          
+        drawn = layer
 
-          $.each(Object.keys(geoJsonLayers), function(n,type){
-            $.each(geoJsonLayers[type].getLayers(), function(n,item){
-              var layer_in_bounds = drawn.getBounds().contains(item.getLatLng())
-              if(layer_in_bounds){ 
-                if(typeof(in_bounds[item.ref.type]) == "undefined"){ in_bounds[item.ref.type] = [] }
-                in_bounds[item.ref.type].push(item.ref.id)
-              }
-            })
+        $.each(Object.keys(geoJsonLayers), function(n,type){
+          $.each(geoJsonLayers[type].getLayers(), function(n,item){
+            var layer_in_bounds = drawn.getBounds().contains(item.getLatLng())
+            if(layer_in_bounds){ 
+              if(typeof(in_bounds[item.ref.type]) == "undefined"){ in_bounds[item.ref.type] = [] }
+              in_bounds[item.ref.type].push(item.ref.id)
+            }
           })
+        })
 
-          var form = document.createElement("form");
-          form.action = "/compare";
-          form.method = "post"
-          form.target = "_blank"
-          $.each(in_bounds, function(type,ids){
-            var input = document.createElement("input");
-            input.name = type;
-            input.value = ids.join(",");
-            form.appendChild(input);
-          })
-          document.body.appendChild(form);
-          form.submit();
+        var form = document.createElement("form");
+        form.action = "/compare";
+        form.method = "post"
+        form.target = "_blank"
+        $.each(in_bounds, function(type,ids){
+          var input = document.createElement("input");
+          input.name = type;
+          input.value = ids.join(",");
+          form.appendChild(input);
+        })
+        document.body.appendChild(form);
+        form.submit();
 
-          map.addLayer(layer);
+        map.addLayer(layer);
       });
     }
 
@@ -613,19 +612,15 @@ var AQE = (function ( $ ) {
   }
 
   function handleMapLegend(){
-
     var controlContainer = $(map._controlContainer)
-
     // remove legend altogether
     if(controlContainer.find("#legend").length > 0){
       map.removeControl(legend)
     }
-
-    // add legend if 
+    // add legend if it part of a group that has a legend
     if(controlContainer.find("div:contains('Census Data') input:checked").length > 0){
       legend.addTo(map)
     }
-
   }
 
   function celsiusToFahrenheit(value){
