@@ -140,6 +140,7 @@ padding-right: 7px;}
 
 
 ul.dataset-metadata{padding-left:20px;}
+.dataset-metadata-container .panel-body{height: 400px; overflow:scroll;margin-bottom:20px;}
 
 /* for bootstrap-wizard */
 .bwizard-steps {

@@ -56,7 +56,7 @@ $(function() {
       var html = Mustache.render(this.template, {initialSql: this.dataset.attributes.initialSql, sqlSamples: sqlSamples, resourceFields: resourceFields, datasetMetadata: datasetMetadata});
       this.$el.html(html);
       
-      // $(".dataset-metadata-container").height($(".sql-examples").parent().height()+30)
+      $(".dataset-metadata-container .panel-body").height($(".sql-examples").parent().height()+10)
       // this.dataset.query({size: this.dataset.recordCount});
     },
 
