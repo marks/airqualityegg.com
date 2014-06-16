@@ -175,7 +175,6 @@ $(function() {
             </div> \
             <div class="dataset-metadata-container" class="panel-collapse collapse in"> \
               <div class="panel-body"> \
-                <h5>Open Data Portal Links</h5> \
                 <ul class="dataset-metadata"> \
                   {{#datasetMetadata}} \
                     <li>{{{html}}}</li> \
