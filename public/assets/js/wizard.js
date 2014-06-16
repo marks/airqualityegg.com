@@ -278,17 +278,9 @@ $(function() {
     $('.wizardify').bootstrapWizard({
       tabClass: 'bwizard-steps',
       onTabShow: function(tab, navigation, index) {
+        console.log('onTabShow',index)
         if(index == 1){
-          setTimeout(function(){
-            aceEditor = ace.edit("sql-query");
-            aceEditor.getSession().setMode("ace/mode/sql");
-            aceEditor.getSession().setWrapLimitRange(80,120);
-            aceEditor.getSession().setUseWrapMode(true);     
-          }, 1000);
-        }
-      },
-      onNext: function(tab, navigation, index) {
-        if(index==1) {
+
           var chosen_dataset_keys = _.map($("#tab1 .checkbox input:checked"),function(x){return $(x).data("dataset-key")}).sort()
           if ( chosen_dataset_keys.toString() == datasets_sites_joinable.toString() ){ // doing am allowed join
           } else if( chosen_dataset_keys.length != 1 ){
@@ -331,6 +323,12 @@ $(function() {
             datasetKeys: chosen_dataset_keys
           });
 
+          setTimeout(function(){
+            aceEditor = ace.edit("sql-query");
+            aceEditor.getSession().setMode("ace/mode/sql");
+            aceEditor.getSession().setWrapLimitRange(80,120);
+            aceEditor.getSession().setUseWrapMode(true);     
+          }, 1000);
         }
       }
     });

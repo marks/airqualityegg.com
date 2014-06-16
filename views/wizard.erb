@@ -20,21 +20,17 @@
             <div class="alert alert-warning">At the moment, you can select any of the following datasets one at a time or select both AQE and AQS to see a join.</div>
             <% @datasets.each do |key,dataset| %>
               <div class="checkbox">
-                <label><input data-resource-id='<%= dataset["extras_hash"]["default_resource_id"] or dataset["resources"].first["id"] %>' name='resource-choose-<%= key %>' type="checkbox" data-dataset-key="<%= key %>" class='resource-choose'><%= dataset["title"] %></label>
+                <label><input data-resource-id='<%= dataset["extras_hash"]["default_resource_id"] or dataset["resources"].first["id"] %>' name='resource-choose-<%= key %>' type="checkbox" <%= "checked" if @prechosen_datasets.include?(key) %> data-dataset-key="<%= key %>" class='resource-choose'><%= dataset["title"] %></label>
               </div>
             <% end %>
           </div>
         </div>
         <div class="tab-pane" id="tab2">
           <div class="data-view"></div>
-
           <div class="text-right">
             <a href"#" class="zoom-to-city btn btn-default btn-small">Zoom to <%= ENV["FOCUS_CITY_NAME"] %></a>
           </div>
-
         </div>
-
-
         <hr />
         <ul class="pager wizard">
           <li class="previous first" style="display:none;"><a href="#">First</a></li>
@@ -42,7 +38,6 @@
           <li class="next last" style="display:none;"><a href="#">Last</a></li>
           <li class="next"><a href="#">Next</a></li>
         </ul>
-
       </div>  
     </div>
   </div>
