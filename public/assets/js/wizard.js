@@ -25,6 +25,8 @@ $(function() {
     render: function() {
       this.view = this._makeMultiView(this.dataset, this.$el.find('.multiview'));
       
+      $(".resource-fields").height($(".sql-examples").height()-15)
+
       var sqlSamples = $.map(datasets[dataset_key].extras_hash, function(value,key){
         console.log(key)
         if(key.match("SQL Sample")){
@@ -32,22 +34,19 @@ $(function() {
         }
       })
 
-      console.log(sqlSamples)
-
-      var html = Mustache.render(this.template, {initialSql: this.dataset.attributes.initialSql, sqlSamples: sqlSamples});
-      this.$el.html(html);
-
-
-      console.log(this.dataset)
       if(this.dataset.attributes.isJoin == false){      
-        $.each(this.dataset.fields.models, function(n,field){
-          $(".resource-fields tbody").append("<tr><td>"+field.attributes.id+"</td><td>"+field.attributes.type+"</td></tr>")
+        var resourceFields = $.map(this.dataset.fields.models, function(field,n){
+          return {id: field.attributes.id, type: field.attributes.type}
         })
-        $(".resource-fields").height($(".sql-examples").height()+20)
       } else {
-        $(".resource-fields").html("<p>Fields for joins coming soon!</p>")
+        var resourceFields = [{id: 'Fields for joins coming soon!', type:''}]
       }
 
+
+      var html = Mustache.render(this.template, {initialSql: this.dataset.attributes.initialSql, sqlSamples: sqlSamples, resourceFields: resourceFields});
+      this.$el.html(html);
+      $(".resource-fields").height($(".sql-examples").height()-15)
+      
       // this.dataset.query({size: this.dataset.recordCount});
     },
 
@@ -150,7 +149,7 @@ $(function() {
                                 <td class="example-sql-description"><a href="#" data-sql="{{sql}}">{{title}}</a></td>\
                                 <td><span style="font-family: monospace">{{sql}}</span></td>\
                             </tr>\
-                          {{/sqlSamples}}" \
+                          {{/sqlSamples}} \
                         </tbody> \
                     </table> \
                   </div> \
@@ -177,6 +176,12 @@ $(function() {
                           </tr> \
                       </thead> \
                       <tbody> \
+                        {{#resourceFields}}\
+                          <tr class="resource-field">\
+                              <td>{{id}}</td>\
+                              <td>{{type}}</span></td>\
+                          </tr> \
+                        {{/resourceFields}} \
                       </tbody> \
                     </table> \
                   </div> \
