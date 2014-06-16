@@ -122,9 +122,6 @@
   -moz-box-shadow: 0px 0px 10px 1px #CCC;
 }
 
-
-
-
 .egg-icon {
   z-index: 1000 !important;
 }
@@ -141,6 +138,8 @@ padding-right: 7px;}
 .form-group label.header {font-size: 120%; font-weight: 500; }
 .checkbox{margin-left:10px;}
 
+
+ul.dataset-metadata{padding-left:20px;}
 
 /* for bootstrap-wizard */
 .bwizard-steps {
@@ -361,4 +360,3 @@ padding-right: 7px;}
 .dataset.show .viewer .recline-slickgrid {
   height: 500px;
 }
-

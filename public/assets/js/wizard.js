@@ -24,29 +24,33 @@ $(function() {
     },
     render: function() {
       this.view = this._makeMultiView(this.dataset, this.$el.find('.multiview'));
-      
-      $(".resource-fields").height($(".sql-examples").height()-15)
 
       var sqlSamples = $.map(datasets[dataset_key].extras_hash, function(value,key){
-        console.log(key)
         if(key.match("SQL Sample")){
           return {title: dataset_key.toUpperCase()+" "+key, sql: value}
         }
       })
 
-      if(this.dataset.attributes.isJoin == false){      
+      if(this.dataset.attributes.isJoin == false){     
+        var dataset = this.dataset
         var resourceFields = $.map(this.dataset.fields.models, function(field,n){
-          return {id: field.attributes.id, type: field.attributes.type}
+          return {id: dataset.attributes.datasetKeys[0]+'.'+field.attributes.id, type: field.attributes.type}
         })
       } else {
         var resourceFields = [{id: 'Fields for joins coming soon!', type:''}]
       }
 
+      var datasetMetadata = []
+      $.each(this.dataset.attributes.datasetKeys, function(n, datasetKey){
+        var dataset = datasets[datasetKey]
+        var url = ckan_endpoint.replace('/api','/dataset/') + dataset.name
+        datasetMetadata.push({html: '<a target="blank" title="'+dataset.title+'" href="'+url+'">Dataset: '+dataset.title+'</a>' })
+      })
 
-      var html = Mustache.render(this.template, {initialSql: this.dataset.attributes.initialSql, sqlSamples: sqlSamples, resourceFields: resourceFields});
+      var html = Mustache.render(this.template, {initialSql: this.dataset.attributes.initialSql, sqlSamples: sqlSamples, resourceFields: resourceFields, datasetMetadata: datasetMetadata});
       this.$el.html(html);
-      $(".resource-fields").height($(".sql-examples").height()-15)
       
+      // $(".dataset-metadata-container").height($(".sql-examples").parent().height()+30)
       // this.dataset.query({size: this.dataset.recordCount});
     },
 
@@ -127,7 +131,7 @@ $(function() {
 
     template: ' \
       <div class="row"> \
-        <div class="col-md-9"> \
+        <div class="col-md-8"> \
           <div class="panel panel-default"> \
             <div class="panel-heading"> \
               <h4 class="panel-title">Example SQL Queries</h4> \
@@ -144,10 +148,10 @@ $(function() {
                           </tr> \
                         </thead> \
                         <tbody> \
-                          {{#sqlSamples}}\
-                            <tr class="example-query">\
-                                <td class="example-sql-description"><a href="#" data-sql="{{sql}}">{{title}}</a></td>\
-                                <td><span style="font-family: monospace">{{sql}}</span></td>\
+                          {{#sqlSamples}} \
+                            <tr class="example-query"> \
+                                <td class="example-sql-description"><a href="#" data-sql="{{sql}}">{{title}}</a></td> \
+                                <td><span style="font-family: monospace">{{sql}}</span></td> \
                             </tr>\
                           {{/sqlSamples}} \
                         </tbody> \
@@ -158,13 +162,20 @@ $(function() {
             </div> \
           </div> \
         </div> \
-        <div class="col-md-3"> \
+        <div class="col-md-4"> \
           <div class="panel panel-default"> \
             <div class="panel-heading"> \
               <h4 class="panel-title">Dataset Metadata</h4> \
             </div> \
-            <div class="panel-collapse collapse in"> \
+            <div class="dataset-metadata-container" class="panel-collapse collapse in"> \
               <div class="panel-body"> \
+                <h5>Open Data Portal Links</h5> \
+                <ul class="dataset-metadata"> \
+                  {{#datasetMetadata}} \
+                    <li>{{{html}}}</li> \
+                  {{/datasetMetadata}} \
+                </ul> \
+                <hr /> \
                 <h5>Fields/Columns</h5> \
                 <div class="resource-fields" style="overflow:scroll;"> \
                   <div class="table-responsive"> \
@@ -296,7 +307,7 @@ $(function() {
             if(datasets[dataset_key]['extras_hash']['Default SQL']){
               var initialSql = datasets[dataset_key]['extras_hash']['Default SQL']
             } else {
-              var initialSql = 'SELECT * FROM "'+resource_id+'"'
+              var initialSql = 'SELECT * FROM "'+resource_id+'" '+ dataset_key
             }
             
             // show SQL query examples, if there are any
