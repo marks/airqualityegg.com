@@ -28,9 +28,8 @@ var AQE = (function ( $ ) {
     iconSize: [12, 20], // size of the icon
   });
 
-  var heatmapIconURL = '/assets/img/heatmap_legend.png'
-
   // Propeller Health image overlay and layer 
+  // var heatmapIconURL = '/assets/img/heatmap_legend.png'
   // var propellerhealth_layer_url = 'http://s3.amazonaws.com/healthyaws/propeller_health/propeller_health_heatmap_nov13_shared.png';
   // var propellerhealth_layer_bounds = [[37.8419378866983038, -86.0292621133016979], [38.5821425225734487, -85.1883896469475275]]
   // var propellerhealth_layer = L.layerGroup([L.imageOverlay(propellerhealth_layer_url, propellerhealth_layer_bounds, {opacity: 0.8, attribution: "Asthma hotspot heatmap from <a href='http://propellerhealth.com' target=blank>Propeller Health</a>"})])
@@ -65,12 +64,16 @@ var AQE = (function ( $ ) {
     }
   };
 
+
+
+
+  var legend = L.control({position: 'bottomright'});
   var justiceMapAttribution = '<a target=blank href="http://census.gov">Demographics from 2010 US Census & 2011 American Community Survey (5 yr summary)</a> via <a target=blank href="http://justicemap.org">JusticeMap.org</a>'
   groupedOverlays["Census Data from JusticeMap.org"] = {}
   $.each(["asian","black","hispanic","indian","multi","white","nonwhite","other","income"],function(n,layer_name){
     groupedOverlays["Census Data from JusticeMap.org"][toTitleCase(layer_name)+" by Census Tract"] = L.tileLayer(
       'http://www.justicemap.org/tile/{size}/{layer_name}/{z}/{x}/{y}.png',
-      {size: 'tract', layer_name: layer_name, opacity: 0.75, attribution: justiceMapAttribution})
+      {size: 'tract', layer_name: layer_name, opacity: 0.45, attribution: justiceMapAttribution})
   })
 
   initialize()
@@ -95,26 +98,40 @@ var AQE = (function ( $ ) {
       L.control.locate({locateOptions: {maxZoom: 9}}).addTo(map);
       L.control.fullscreen().addTo(map);
 
+      legend.onAdd = function (map) {
+        console.log(map)
+        var div = L.DomUtil.create('div', 'info legend')
+        var div_html = "";
+        div_html += "<div id='legend' class='leaflet-control-layers leaflet-control leaflet-control-legend leaflet-control-layers-expanded'><div class='leaflet-control-layers-base'></div><div class='leaflet-control-layers-separator' style='display: none;'></div><div class='leaflet-control-layers-overlays'><div class='leaflet-control-layers-group' id='leaflet-control-layers-group-2'><span class='leaflet-control-layers-group-name'>Legend</span>";
+
+        var activeLayers = $.map($(".leaflet-control-layers-overlays").find("input:checked"), function(item){
+          return $.trim($(item).parent().text())
+        })
+        console.log(activeLayers)
+        div_html += "<p>"+activeLayers.join(", ")+"</p>"
+        // div_html += "<table class=''>"
+        // div_html += "<tr><td align='center'><img style='width:19px; height:19px;' src='' alt='school'> </td><td> Schools from Dept of Education</td></tr>";
+        // div_html += "</table>"
+        div_html += "</div></div></div>"
+        div.innerHTML = div_html
+        return div;
+      };
+
+
+      map.on('overlayadd', function (eventLayer) {
+        handleMapLegend()
+      });
+
+      map.on('overlayremove', function (eventLayer) {
+        handleMapLegend()
+      });
+
       map.on('moveend', function (eventLayer) {
         var map_center = map.getCenter()
         $("#home-map-aqis-container").html("")
         $.getJSON("/aqs/forecast.json?lat="+map_center.lat+"&lon="+map_center.lng, formatForecastDetails)
       })
       map.fireEvent('moveend')
-
-      // if on an site's page, zoom in close to the site
-      if ( $(".dashboard-map").length && feed_location) {
-        map.setView(feed_location,9)
-      }
-
-      $.each(dataset_keys, function(n,key){
-        if($(".filter-"+key+":checked").length > 0){
-          $.getJSON("/ckan_proxy/"+key+".geojson", function(data){
-            layersData[key] = data
-            update_map(key)
-          })        
-        }
-      })
 
       map.on('draw:created', function (e) {
           if(typeof(drawn) != "undefined"){map.removeLayer(drawn)} // remove previously drawn item
@@ -150,6 +167,21 @@ var AQE = (function ( $ ) {
           map.addLayer(layer);
       });
     }
+
+    // if on an site's page, zoom in close to the site
+    if ( $(".dashboard-map").length && feed_location) {
+      map.setView(feed_location,9)
+    }
+
+    // loop through datasets
+    $.each(dataset_keys, function(n,key){
+      if($(".filter-"+key+":checked").length > 0){
+        $.getJSON("/ckan_proxy/"+key+".geojson", function(data){
+          layersData[key] = data
+          update_map(key)
+        })        
+      }
+    })
 
     // if on egg dashboard
     if($("#dashboard-egg-chart").length){
@@ -580,97 +612,21 @@ var AQE = (function ( $ ) {
 
   }
 
-  // function addAQIGauges(){
-  //   $(".current-value-gauge").each(function(n,span){
-  //     var value = $(span).data("aqi-value")
-  //     var gauge_id = $(span).attr("id")
-  //     if(value > 0){
-  //       $('#'+gauge_id).highcharts({
-  //               chart: {
-  //                   type: 'gauge',
-  //                   plotBorderWidth: 0,
-  //                   plotShadow: false,
-  //                   backgroundColor:'rgba(255, 255, 255, 0.002)',
-  //                   marginLeft:-55
-  //               },
-  //               credits: { enabled: false },
-  //               exporting: { enabled: false },
-  //               title: { text: ''},
-  //               subtitle: { text: 'AQI:', align: 'left', floating: true, x:-10, y:5},
-  //               pane: {
-  //                   startAngle: -90,
-  //                   endAngle: 90,
-  //                   background: null
-  //               },
-  //               plotOptions: {
-  //                   gauge: {
-  //                       dataLabels: { enabled: false },
-  //                       dial: { radius: '80%' }
-  //                   }
-  //               },
-  //               yAxis: {
-  //                   min: 0,
-  //                   max: 500,
-  //                   minorTickInterval: 'auto',
-  //                   minorTickWidth: 0,
-  //                   minorTickLength: 10,
-  //                   minorTickPosition: 'inside',
-  //                   minorTickColor: '#666',
+  function handleMapLegend(){
 
-  //                   tickPixelInterval: 30,
-  //                   tickWidth: 2,
-  //                   tickPosition: 'inside',
-  //                   tickLength: 10,
-  //                   tickColor: '#666',
-  //                   labels: {
-  //                       step: 5,
-  //                       rotation: 'auto'
-  //                   },
-  //                   title: { text: '' },
-  //                   plotBands: [{
-  //                       from: 0,
-  //                       to: 50,
-  //                       color: '#00E000'
-  //                   }, {
-  //                       from: 51,
-  //                       to: 100,
-  //                       color: '#FFFF00'
-  //                   }, {
-  //                       from: 101,
-  //                       to: 150,
-  //                       color: '#FF7E00'
-  //                   }, {
-  //                       from: 151,
-  //                       to: 200,
-  //                       color: '#FF0000'
-  //                   }, {
-  //                       from: 201,
-  //                       to: 300,
-  //                       color: '#99004C'
-  //                   }, {
-  //                       from: 301,
-  //                       to: 500,
-  //                       color: '#4C0026'
-  //                   }]
-  //               },
-  //               tooltip: {
-  //                 formatter: function(){
-  //                   return 'AQI = '+this.point.y;
-  //                 }
-  //               },
+    var controlContainer = $(map._controlContainer)
 
-  //               series: [{
-  //                   name: 'AQI',
-  //                   data: [{y: value}],
-  //               }]
+    // remove legend altogether
+    if(controlContainer.find("#legend").length > 0){
+      map.removeControl(legend)
+    }
 
-  //           },
-  //           function () {}
-  //       );
+    // add legend if 
+    if(controlContainer.find("div:contains('Census Data') input:checked").length > 0){
+      legend.addTo(map)
+    }
 
-  //     }
-  //   })
-  // }
+  }
 
   function celsiusToFahrenheit(value){
     return parseFloat(value) * 9 / 5 + 32

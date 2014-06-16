@@ -28,9 +28,8 @@ var AQE = (function ( $ ) {
     iconSize: [12, 20], // size of the icon
   });
 
-  var heatmapIconURL = '/assets/img/heatmap_legend.png'
-
   // Propeller Health image overlay and layer 
+  var heatmapIconURL = '/assets/img/heatmap_legend.png'
   var propellerhealth_layer_url = 'http://s3.amazonaws.com/healthyaws/propeller_health/propeller_health_heatmap_nov13_shared.png';
   var propellerhealth_layer_bounds = [[37.8419378866983038, -86.0292621133016979], [38.5821425225734487, -85.1883896469475275]]
   var propellerhealth_layer = L.layerGroup([L.imageOverlay(propellerhealth_layer_url, propellerhealth_layer_bounds, {opacity: 0.8, attribution: "Asthma hotspot heatmap from <a href='http://propellerhealth.com' target=blank>Propeller Health</a>"})])
