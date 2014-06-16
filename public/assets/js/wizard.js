@@ -45,6 +45,11 @@ $(function() {
         var dataset = datasets[datasetKey]
         var url = ckan_endpoint.replace('/api','/dataset/') + dataset.name
         datasetMetadata.push({html: '<a target="blank" title="'+dataset.title+'" href="'+url+'">Dataset: '+dataset.title+'</a>' })
+        $.each(dataset.extras_hash, function(key,value){
+          if(key.match('field_containing_site_') && value != 'NULL'){
+            datasetMetadata.push({html: 'Monitoring site '+key.replace('field_containing_site_','')+': '+datasetKey+'.'+value})
+          }
+        })
       })
 
       var html = Mustache.render(this.template, {initialSql: this.dataset.attributes.initialSql, sqlSamples: sqlSamples, resourceFields: resourceFields, datasetMetadata: datasetMetadata});
