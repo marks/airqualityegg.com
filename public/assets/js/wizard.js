@@ -356,20 +356,3 @@ $(function() {
   })
 
 });
-
-function celsiusToFahrenheit(value){
-  return parseFloat(value) * 9 / 5 + 32
-}
-
-function aqiToColor(aqi){
-  // var aqi = (range[0]+range[1])/2.00
-  var color;
-  if (aqi <= 50) { color = "#00E400" }
-  else if(aqi > 51 && aqi <= 100) { color = "#FFFF00"}
-  else if(aqi > 101 && aqi <= 150) { color = "#FF7E00"}
-  else if(aqi > 151 && aqi <= 200) { color = "#FF0000"}
-  else if(aqi > 201 && aqi <= 300) { color = "#99004C"}
-  else if(aqi > 301 && aqi <= 500) { color = "#4C0026"}
-  else { color = "#000000"}
-  return color;
-}

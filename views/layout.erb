@@ -166,6 +166,7 @@
         var focus_city = {name: '<%= ENV["FOCUS_CITY_NAME"] || "USA" %>', latlon: ['<%= ENV["FOCUS_CITY_LAT"] || 39.5 %>', '<%= ENV["FOCUS_CITY_LON"] || 98.35 %>'], zoom: <%= ENV["FOCUS_CITY_ZOOM"] || 10 %>}
     </script>
 
+    <script src="/assets/js/helpers.js"></script>
     <% if @custom_js %>
       <% @custom_js.to_a.each do |custom_js| %>
         <script src="<%= custom_js %>"></script>

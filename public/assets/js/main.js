@@ -642,12 +642,4 @@ var AQE = (function ( $ ) {
     }
   }
 
-  function celsiusToFahrenheit(value){
-    return parseFloat(value) * 9 / 5 + 32
-  }
-
-  function toTitleCase(str){
-      return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-  }
-
 })( jQuery );
