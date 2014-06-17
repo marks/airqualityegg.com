@@ -25,23 +25,24 @@ $(function() {
     render: function() {
       this.view = this._makeMultiView(this.dataset, this.$el.find('.multiview'));
 
-      var sqlSamples = $.map(datasets[dataset_key].extras_hash, function(value,key){
-        if(key.match("SQL Sample")){
-          return {title: dataset_key.toUpperCase()+" "+key, sql: value}
-        }
-      })
+      var dataset = this.dataset
 
-      if(this.dataset.attributes.isJoin == false){     
-        var dataset = this.dataset
-        var resourceFields = $.map(this.dataset.fields.models, function(field,n){
+      if(dataset.attributes.isJoin == false){     
+        var sqlSamples = $.map(datasets[dataset_key].extras_hash, function(value,key){
+          if(key.match("SQL Sample")){
+            return {title: dataset_key.toUpperCase()+" "+key, sql: value}
+          }
+        })
+        var resourceFields = $.map(dataset.fields.models, function(field,n){
           return {id: dataset.attributes.datasetKeys[0]+'.'+field.attributes.id, type: field.attributes.type}
         })
       } else {
         var resourceFields = [{id: 'Fields for joins coming soon!', type:''}]
+        var sqlSamples = [{title: 'SQL for join', sql: dataset.attributes.initialSql}]
       }
 
       var datasetMetadata = []
-      $.each(this.dataset.attributes.datasetKeys, function(n, datasetKey){
+      $.each(dataset.attributes.datasetKeys, function(n, datasetKey){
         var dataset = datasets[datasetKey]
         var url = ckan_endpoint.replace('/api','/dataset/') + dataset.name
         datasetMetadata.push({html: '<a target="blank" title="'+dataset.title+'" href="'+url+'"><strong>'+dataset.title+'</strong> on the Open Data Portal<i class="fa fa-external-link fa-fw"></i></a>' })
@@ -53,7 +54,7 @@ $(function() {
         })
       })
 
-      var html = Mustache.render(this.template, {initialSql: this.dataset.attributes.initialSql, sqlSamples: sqlSamples, resourceFields: resourceFields, datasetMetadata: datasetMetadata});
+      var html = Mustache.render(this.template, {initialSql: dataset.attributes.initialSql, sqlSamples: sqlSamples, resourceFields: resourceFields, datasetMetadata: datasetMetadata});
       this.$el.html(html);
       
       $(".dataset-metadata-container .panel-body").height($(".sql-examples").parent().height()+10)
@@ -136,7 +137,7 @@ $(function() {
     },
 
     template: ' \
-      <div class="row"> \
+      <div class="row" style="padding-left: 8px; padding-right: 8px;"> \
         <div class="col-md-8"> \
           <div class="panel panel-default"> \
             <div class="panel-heading"> \
@@ -279,13 +280,23 @@ $(function() {
   // data visualization wizard
   if($(".wizardify").length){
     var dataset_key, resource_id, chosen_resource;
-    // $(".wizardify").bootstrapWizard({'tabClass': 'bwizard-steps'});
+
     $('.wizardify').bootstrapWizard({
       tabClass: 'bwizard-steps',
       onTabShow: function(tab, navigation, index) {
         console.log('onTabShow',index)
+        if(index == 0){
+          if(getURLParameterByKey("datasets",true) != ""){
+            prechosen_dataset_keys = getURLParameterByKey("datasets",true).split(",")
+            $.each(prechosen_dataset_keys, function(n,item){
+              $("input[data-dataset-key='"+item+"']").attr("checked",true)
+            })
+            setTimeout(function(){
+              $(".wizardify").bootstrapWizard("show",1)
+            }, 0);
+          }
+        }
         if(index == 1){
-
           var chosen_dataset_keys = _.map($("#tab1 .checkbox input:checked"),function(x){return $(x).data("dataset-key")}).sort()
           if ( chosen_dataset_keys.toString() == datasets_sites_joinable.toString() ){ // doing am allowed join
           } else if( chosen_dataset_keys.length != 1 ){
@@ -294,12 +305,11 @@ $(function() {
           }
 
           chosen_resource = $(".resource-choose:checked")
+          resource_id = chosen_resource.data("resource-id") // used even for joins
           dataset_key = chosen_resource.data("dataset-key")
-          resource_id = chosen_resource.data("resource-id")
 
           // only show examples if we are dealing with just one data set (not a join)
           if(chosen_dataset_keys.length == 1){
-
             var isJoin = false
             if(datasets[dataset_key]['extras_hash']['Default SQL']){
               var initialSql = datasets[dataset_key]['extras_hash']['Default SQL']
@@ -334,8 +344,6 @@ $(function() {
             aceEditor.getSession().setWrapLimitRange(80,120);
             aceEditor.getSession().setUseWrapMode(true);     
           }, 1500);
-
-
 
         }
       }

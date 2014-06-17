@@ -407,9 +407,6 @@ class AirQualityEgg < Sinatra::Base
   end
 
   get '/wizard' do
-
-    @prechosen_datasets = params[:datasets].to_s.split(",")
-
     @datasets = META
     @joinable_sites = ENV["CKAN_DATASET_KEYS_SITES_JOINABLE"].split(",")
 
