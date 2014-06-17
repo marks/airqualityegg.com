@@ -333,7 +333,10 @@ $(function() {
             aceEditor.getSession().setMode("ace/mode/sql");
             aceEditor.getSession().setWrapLimitRange(80,120);
             aceEditor.getSession().setUseWrapMode(true);     
-          }, 1000);
+          }, 1500);
+
+
+
         }
       }
     });

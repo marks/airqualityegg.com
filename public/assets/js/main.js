@@ -51,9 +51,10 @@ var AQE = (function ( $ ) {
   //   transparent: true,
   // });
 
+
   var groupedOverlays = {
     "Census Data from JusticeMap.org":{},
-    "OpenWeatherMap": {
+    "Open Weather Map": {
       "Clouds": clouds_layer,
       "Precipiration": precipitation_layer,
       "Rain": rain_layer,
@@ -61,8 +62,27 @@ var AQE = (function ( $ ) {
       "Pressure": pressure_layer,
       "Temperature": temp_layer,
       "Wind": wind_layer
-    }
+    },
+    "Esri ArcGIS Layers":{}
   };
+
+
+  groupedOverlays["Esri ArcGIS Layers"]["USGS USA Soil Survey"] = new L.esri.TiledMapLayer(
+    "http://server.arcgisonline.com/ArcGIS/rest/services/Specialty/Soil_Survey_Map/MapServer",
+    {opacity: 0.45, attribution:"<a href='http://www.arcgis.com/home/item.html?id=204d94c9b1374de9a21574c9efa31164' target='blank'>USA Soil Survey via ArcGIS MapServer</a>"}
+  )
+
+  groupedOverlays["Esri ArcGIS Layers"]["USA Median Age from 2012 US Census"] = new L.esri.TiledMapLayer(
+    "http://server.arcgisonline.com/arcgis/rest/services/Demographics/USA_Median_Age/MapServer",
+    {opacity: 0.45, attribution:"<a href='http://www.arcgis.com/home/item.html?id=fce0ca8972ae4268bc4a69443b8d1ef5' target='blank'>USA Median Age using 2010 US Census via ArcGIS MapServer</a>"}
+  )
+
+  groupedOverlays["Esri ArcGIS Layers"]["Esri USA Tapestry"] = new L.esri.TiledMapLayer(
+    "http://server.arcgisonline.com/arcgis/rest/services/Demographics/USA_Tapestry/MapServer",
+    {opacity: 0.45, attribution:"<a href='http://www.arcgis.com/home/item.html?id=f5c23594330d431aa5d9a27abb90296d' target='blank'>Esri USA Tapestry via ArcGIS MapServer</a>"}
+  )
+
+
 
 
 
@@ -106,8 +126,7 @@ var AQE = (function ( $ ) {
 
         var activeLayers = $.each($(".leaflet-control-layers-overlays").find("input:checked"), function(n,item){
           var name = $.trim($(item).parent().text())
-          var slug = name.split(/ /)[0].toLowerCase()
-          div_html += "<img src='/assets/img/justicemap.org-legends/"+slug+".png' alt='legend for "+name+"'/>"
+          div_html += "<img src='/assets/img/map_legends/"+name+".png' alt='legend for "+name+"'/>"
         })
         // div_html += "<table class=''>"
         // div_html += "<tr><td align='center'><img style='width:19px; height:19px;' src='' alt='school'> </td><td> Schools from Dept of Education</td></tr>";
