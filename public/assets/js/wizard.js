@@ -1,4 +1,5 @@
 var aceEditor, mapView
+
 $(function() { 
 
   // highly based on rgrp's ckan data explorer
@@ -296,11 +297,16 @@ $(function() {
             }, 0);
           }
         }
+
         if(index == 1){
           var chosen_dataset_keys = _.map($("#tab1 .checkbox input:checked"),function(x){return $(x).data("dataset-key")}).sort()
-          if ( chosen_dataset_keys.toString() == datasets_sites_joinable.toString() ){ // doing am allowed join
+          
+          location.hash = "#datasets="+chosen_dataset_keys.join(",")
+
+          if ( chosen_dataset_keys.toString() == datasets_sites_joinable.toString() ){ // doing an allowed join
           } else if( chosen_dataset_keys.length != 1 ){
             alert("Please select exactly one dataset to build a visualization off of or select datasets that can be joined together")
+            $(".wizardify").bootstrapWizard("show",0)
             return false;
           }
 
