@@ -61,10 +61,11 @@ class AirQualityEgg < Sinatra::Base
 
     puts "WARN: You should set a SESSION_SECRET" unless ENV['SESSION_SECRET']
 
-    set :session_secret, ENV['SESSION_SECRET'] || 'airqualityegg_session_secret'
+    set :protection, :except => :frame_options
+    set :session_secret, ENV['SESSION_SECRET'] || 'louisville_session_secret'
     set :cache, Dalli::Client.new
-    settings.cache.flush
     set :time_zone, ActiveSupport::TimeZone.new("Eastern Time (US & Canada)")
+    settings.cache.flush
   end
 
   configure :production do
