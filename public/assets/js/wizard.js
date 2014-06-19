@@ -59,7 +59,7 @@ $(function() {
       this.$el.html(html);
       
       $(".dataset-metadata-container .panel-body").height($(".sql-examples").parent().height()+10)
-      // this.dataset.query({size: this.dataset.recordCount});
+      this.sqlQuery()
     },
 
     _makeMultiView: function(dataset, $el) {
@@ -132,9 +132,14 @@ $(function() {
       return view;
     },
 
+    _onSwitchView: function(e) {
+      var viewName = $(e.target).attr('data-view');
+      addOrReplacePairInHash("viewName",viewName)
+    },
 
     events: {
-      'submit .query-sql': 'sqlQuery'
+      'submit .query-sql': 'sqlQuery',
+      'click .navigation a': '_onSwitchView'
     },
 
     template: ' \
@@ -241,16 +246,23 @@ $(function() {
 
     sqlQuery: function(e) {
       var self = this;
-      e.preventDefault();
+      if(e){ e.preventDefault(); }
 
       var $error = this.$el.find('.sql-error');
       $error.hide();
-      var sql = aceEditor.getValue()// this.$el.find('.query-sql textarea').val();
+
+      if(typeof(aceEditor) != "undefined"){
+        var sql = aceEditor.getValue()// this.$el.find('.query-sql textarea').val();        
+      } else {
+        // if aceEditor hasnt loaded yet, just use the iniitalSql option. User shouldnt have had time to change it
+        var sql = view.model.attributes.initialSql
+      }
+
       // replace ';' on end of sql as seems to trigger a json error
       sql = sql.replace(/;$/, '');
 
       // save hash here
-      addOrReplacePairInHash("sql",sql)
+      addOrReplacePairInHash("sql",encodeURIComponent(sql))
 
       ckan.datastoreSqlQuery(sql, function(err, data) {
         if (err) {
@@ -277,6 +289,12 @@ $(function() {
 
         self.sqlResultsView = self._makeMultiView(dataset, $el);
         dataset.query({size: dataset.recordCount});
+
+        var requested_view = getURLParameterByKey("viewName",true)
+        if(requested_view != ""){
+          view.updateNav(requested_view)
+          view.state.set({currentView: requested_view});
+        }
       });
     }
   });
@@ -328,14 +346,11 @@ $(function() {
               var initialSql = 'SELECT * FROM "'+resource_id+'" '+ dataset_key
             }
             
-            // show SQL query examples, if there are any
-
           } else { // for joins
             var isJoin = true
             var datasets_sites_join_sql = _.map(chosen_dataset_keys, function(chosen_dataset_key){
               return datasets[chosen_dataset_key]["site_join_sql"]
             }).join(" UNION ")
-            console.log(datasets_sites_join_sql)
             $("#sql-query").val(datasets_sites_join_sql)
             var initialSql = datasets_sites_join_sql
             $(".sql-examples tbody").append("<tr class='example-query'><td class='example-sql-description'><strong><a href='#' data-sql='"+initialSql+"'>Default SQL for joining "+chosen_dataset_keys.join('/')+" datasets together</a></strong><td class='example-sql'><span style='font-family: monospace'>"+initialSql+"</span></td></tr>")
@@ -344,7 +359,6 @@ $(function() {
           // override initialSql if it's specied in the URL
           if(getURLParameterByKey("sql",true)){ var initialSql = getURLParameterByKey("sql", true) }
 
-          console.log(initialSql)
           var view = new DataView({
             resourceId: resource_id,
             el: $(".data-view"),
@@ -358,7 +372,7 @@ $(function() {
             aceEditor.getSession().setMode("ace/mode/sql");
             aceEditor.getSession().setWrapLimitRange(80,120);
             aceEditor.getSession().setUseWrapMode(true);     
-          }, 1000);
+          }, 1000); // TODO - figure out why this has to wait 1 second
 
         }
       }
