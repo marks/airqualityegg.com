@@ -11,6 +11,19 @@ function getURLParameterByKey(name,hash) {
   return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
+function addOrReplacePairInHash(key,new_value){
+  var current_value = getURLParameterByKey(key,true)
+  if(current_value){
+    if(current_value == new_value){ } // do nothing
+    else{
+      // replace value
+      var current_hash = location.hash
+      location.hash = current_hash.replace(key+'='+current_value,key+'='+new_value)
+    }
+  } else {
+    location.hash += '&'+key+'='+new_value
+  }
+}
 function celsiusToFahrenheit(value){
   return parseFloat(value) * 9 / 5 + 32
 }

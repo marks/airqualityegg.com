@@ -220,7 +220,7 @@ $(function() {
               <div id="sql-query" style="width:100%; height:150px;">{{initialSql}}</div> \
               </div> \
               <div class="sql-error alert alert-error alert-danger" style="display: none;"></div> \
-              <button type="submit" class="btn btn-primary btn-default">Query</button> \
+              <button type="submit" class="btn btn-lg btn-primary btn-default pull-right">Run Query</button> \
               </div> \
             </form> \
           </div> \
@@ -248,6 +248,10 @@ $(function() {
       var sql = aceEditor.getValue()// this.$el.find('.query-sql textarea').val();
       // replace ';' on end of sql as seems to trigger a json error
       sql = sql.replace(/;$/, '');
+
+      // save hash here
+      addOrReplacePairInHash("sql",sql)
+
       ckan.datastoreSqlQuery(sql, function(err, data) {
         if (err) {
           var msg = '<p>Error: ' + err.message + '</p>';
@@ -301,7 +305,8 @@ $(function() {
         if(index == 1){
           var chosen_dataset_keys = _.map($("#tab1 .checkbox input:checked"),function(x){return $(x).data("dataset-key")}).sort()
           
-          location.hash = "#datasets="+chosen_dataset_keys.join(",")
+          // location.hash = "#datasets="+chosen_dataset_keys.join(",")
+          addOrReplacePairInHash("datasets",chosen_dataset_keys.join(","))
 
           if ( chosen_dataset_keys.toString() == datasets_sites_joinable.toString() ){ // doing an allowed join
           } else if( chosen_dataset_keys.length != 1 ){
@@ -336,6 +341,10 @@ $(function() {
             $(".sql-examples tbody").append("<tr class='example-query'><td class='example-sql-description'><strong><a href='#' data-sql='"+initialSql+"'>Default SQL for joining "+chosen_dataset_keys.join('/')+" datasets together</a></strong><td class='example-sql'><span style='font-family: monospace'>"+initialSql+"</span></td></tr>")
           }
 
+          // override initialSql if it's specied in the URL
+          if(getURLParameterByKey("sql",true)){ var initialSql = getURLParameterByKey("sql", true) }
+
+          console.log(initialSql)
           var view = new DataView({
             resourceId: resource_id,
             el: $(".data-view"),
@@ -349,7 +358,7 @@ $(function() {
             aceEditor.getSession().setMode("ace/mode/sql");
             aceEditor.getSession().setWrapLimitRange(80,120);
             aceEditor.getSession().setUseWrapMode(true);     
-          }, 1500);
+          }, 1000);
 
         }
       }
