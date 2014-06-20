@@ -174,7 +174,11 @@ class AirQualityEgg < Sinatra::Base
   get '/' do
     @local_feed_path = '/all_eggs.geojson'
     @error = session.delete(:error)
-    erb :home
+    if params[:embed] == "true"
+      erb :home, :layout => :layout_embed
+    else
+      erb :home
+    end
   end
 
   get '/derby' do

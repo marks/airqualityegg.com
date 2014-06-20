@@ -148,7 +148,7 @@ $(function() {
     },
 
     template: ' \
-      <div class="row no-show-on-embed" style="padding-left: 8px; padding-right: 8px;"> \
+      <div class="row hide-on-embed" style="padding-left: 8px; padding-right: 8px;"> \
         <div class="col-md-8"> \
           <div class="panel panel-default"> \
             <div class="panel-heading"> \
@@ -219,7 +219,7 @@ $(function() {
           </div> \
         </div> \
       </div> \
-      <div class="panel no-show-on-embed panel-default"> \
+      <div class="panel hide-on-embed panel-default"> \
         <div class="panel-heading"> \
           <h4 class="panel-title">SQL Query</h4> \
         </div> \
@@ -237,7 +237,7 @@ $(function() {
         </div> \
       </div> \
       <div class="panel panel-default"> \
-        <div class="panel-heading no-show-on-embed"> \
+        <div class="panel-heading hide-on-embed"> \
           <h4 class="panel-title">Results: Browse, Visualize, and/or Export</h4> \
         </div> \
         <div class="panel-collapse collapse in"> \
