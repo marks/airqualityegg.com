@@ -121,10 +121,15 @@ $(function() {
         }
       }
 
+      if(getURLParameterByKey("embed") == "true"){
+        var sidebarViews = []
+      } else {
+        var sidebarViews = [fieldsView,filtersView]
+      }
       view = new recline.View.MultiView({
         model: dataset,
         views: [gridView, graphView, mapView, exportView],
-        sidebarViews: [fieldsView,filtersView],
+        sidebarViews: sidebarViews,
         el: $el,
         disablePager: true,
         disableQueryEditor: true
@@ -143,7 +148,7 @@ $(function() {
     },
 
     template: ' \
-      <div class="row" style="padding-left: 8px; padding-right: 8px;"> \
+      <div class="row no-show-on-embed" style="padding-left: 8px; padding-right: 8px;"> \
         <div class="col-md-8"> \
           <div class="panel panel-default"> \
             <div class="panel-heading"> \
@@ -214,7 +219,7 @@ $(function() {
           </div> \
         </div> \
       </div> \
-      <div class="panel panel-default"> \
+      <div class="panel no-show-on-embed panel-default"> \
         <div class="panel-heading"> \
           <h4 class="panel-title">SQL Query</h4> \
         </div> \
@@ -232,7 +237,7 @@ $(function() {
         </div> \
       </div> \
       <div class="panel panel-default"> \
-        <div class="panel-heading"> \
+        <div class="panel-heading no-show-on-embed"> \
           <h4 class="panel-title">Results: Browse, Visualize, and/or Export</h4> \
         </div> \
         <div class="panel-collapse collapse in"> \

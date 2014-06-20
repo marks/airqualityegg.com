@@ -1,3 +1,9 @@
+.embed-body .no-show-on-embed {display: none;}
+/* recline.js hacks for embed */
+.embed-body .data-view-sidebar{display: none !important;}
+.embed-body .panel{border: none !important;}
+
+
 a:hover {cursor:pointer;}
 .popup_metadata table,.popup_metadata th,.popup_metadata td { border:1px solid #ccc; }
 
