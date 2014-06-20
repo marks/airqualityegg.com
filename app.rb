@@ -174,6 +174,10 @@ class AirQualityEgg < Sinatra::Base
   get '/' do
     @local_feed_path = '/all_eggs.geojson'
     @error = session.delete(:error)
+
+    @custom_js = [ "/assets/js/embed.js", "/assets/js/main.js" ]
+    @embeddable = true
+
     if params[:embed] == "true"
       erb :home, :layout => :layout_embed
     else
@@ -440,8 +444,12 @@ class AirQualityEgg < Sinatra::Base
       "/vendor/recline-warehouse/view.export.js",
       "http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js",
       "http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/mode-pgsql.js",
+      "/assets/js/embed.js",
       "/assets/js/wizard.js"
     ]
+
+    @embeddable = true
+
     if params[:embed] == "true"
       erb :wizard, :layout => :layout_embed
     else

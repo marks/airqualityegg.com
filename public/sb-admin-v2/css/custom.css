@@ -3,8 +3,8 @@
 .embed-content .hide-on-embed {display: none;}
 /* recline.js hacks for embed */
 .embed-content .data-view-sidebar{display: none !important;}
-/*.embed-content .panel{border: none !important;}
-*/
+
+.sharethis span span {margin-bottom: -11px;}
 
 a:hover {cursor:pointer;}
 .popup_metadata table,.popup_metadata th,.popup_metadata td { border:1px solid #ccc; }
