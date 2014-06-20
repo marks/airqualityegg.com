@@ -18,7 +18,7 @@ function addOrReplacePairInHash(key,new_value){
     else{
       // replace value
       var current_hash = location.hash
-      location.hash = current_hash.replace(key+'='+current_value,key+'='+new_value)
+      location.hash = current_hash.replace(key+'='+encodeURIComponent(current_value),key+'='+new_value)
     }
   } else {
     location.hash += '&'+key+'='+new_value
