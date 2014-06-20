@@ -438,7 +438,11 @@ class AirQualityEgg < Sinatra::Base
       "http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/mode-pgsql.js",
       "/assets/js/wizard.js"
     ]
-    erb :wizard
+    if params[:embed] == "true"
+      erb :wizard, :layout => :layout_embed
+    else
+      erb :wizard
+    end
   end
 
   get '/cache/flush' do
