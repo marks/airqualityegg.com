@@ -1,7 +1,9 @@
-.embed-body .no-show-on-embed {display: none;}
+/* embed stuff */
+.embed-body{padding-top: 10px}
+.embed-content .no-show-on-embed {display: none;}
 /* recline.js hacks for embed */
-.embed-body .data-view-sidebar{display: none !important;}
-.embed-body .panel{border: none !important;}
+.embed-content .data-view-sidebar{display: none !important;}
+.embed-content .panel{border: none !important;}
 
 
 a:hover {cursor:pointer;}
