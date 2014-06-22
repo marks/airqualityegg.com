@@ -99,9 +99,13 @@ var AQE = (function ( $ ) {
       // set up leaflet map
       map = L.map('map_canvas', {scrollWheelZoom: false, loadingControl: true, layers: []}) // propellerhealth_layer
       // map.fireEvent('dataloading')
-      map.setView(focus_city.latlon, focus_city.zoom); 
+
+      if(location.hash == ""){
+        map.setView(focus_city.latlon, focus_city.zoom)
+      } 
+
       var hash = new L.Hash(map);
-    
+
       var drawControl = new L.Control.Draw({ draw: { polyline: false, marker: false }});
       map.addControl(drawControl);
 
@@ -362,10 +366,20 @@ var AQE = (function ( $ ) {
       var html = "<div><h4>Bike Sensor Details</h4>"
       html += "<table class='table table-striped' data-bike_id='"+item.bike_id+"'>"
       html += "<tr><td>Bike ID</td><td>"+item.bike_id+" </td></tr>"
-      html += "<tr><td>Time</td><td>"+item.datetime+" </td></tr>"
-      html += "<tr><td>Sensor </td><td>"+item.parameter+"</td></tr>"
-      html += "<tr><td>Value </td><td>"+item.value+"</td></tr>"
-      html += "<tr><td>Units </td><td>"+item.unit+"</td></tr>"
+      // html += "<tr><td>Time</td><td>"+item.datetime+" </td></tr>"
+      // html += "<tr><td>Sensor </td><td>"+item.parameter+"</td></tr>"
+      // html += "<tr><td>Value </td><td>"+item.value+"</td></tr>"
+      // html += "<tr><td>Units </td><td>"+item.unit+"</td></tr>"
+
+      // Julienne 6/22/14 "Route1" special format
+      html += "<tr><td>Speed (m/s) </td><td>"+item.SPEED_ms+"</td></tr>"
+      html += "<tr><td>Ozone (PPB) </td><td>"+item.O3_PPB+"</td></tr>"
+      html += "<tr><td>Volatile Organics (PPM) </td><td>"+item.VOC_PPM+"</td></tr>"
+      html += "<tr><td>Particulate (UG/M3) </td><td>"+item.PART_UGM3+"</td></tr>"
+      html += "<tr><td>Nitrogen Dioxide (PPB) </td><td>"+item.NO2_PPB+"</td></tr>"
+      html += "<tr><td>Carbon Monoxide (PPM) </td><td>"+item.CO_PPM+"</td></tr>"
+      html += "<tr><td>Temperature (F) </td><td>"+item.TEMP_F+"</td></tr>"
+      html += "<tr><td>Humidity (%) </td><td>"+item.RHUM+"</td></tr>"
       html += "<tr><td>Coordinates </td><td>"+item.lat+", "+item.lon+"</td></tr>"
       html += "</table>" 
       html += "</div>"
@@ -467,13 +481,14 @@ var AQE = (function ( $ ) {
       else{ show = false }
     }
     else if(item.type == "bike"){
-      if(filter_selections["bike-O3"] == "true" && item.parameter == "O3"){ show = true }
-      else if(filter_selections["bike-CO"] == "true" && item.parameter == "CO"){ show = true }
-      else if(filter_selections["bike-NO2"] == "true" && item.parameter == "NO2"){ show = true }
-      else if(filter_selections["bike-VOC"] == "true" && item.parameter == "VOC"){ show = true }
-      else if(filter_selections["bike-Particulate"] == "true" && item.parameter == "PARTICULATE"){ show = true }
-      else if(filter_selections["bike-RHUM"] == "true" && item.parameter == "RHUM"){ show = true }
-      else if(filter_selections["bike-TEMP"] == "true" && item.parameter == "TEMP"){ show = true }
+      if(filter_selections["bike-test-06222014"] == "true"){ show = true }
+      // if(filter_selections["bike-O3"] == "true" && item.parameter == "O3"){ show = true }
+      // else if(filter_selections["bike-CO"] == "true" && item.parameter == "CO"){ show = true }
+      // else if(filter_selections["bike-NO2"] == "true" && item.parameter == "NO2"){ show = true }
+      // else if(filter_selections["bike-VOC"] == "true" && item.parameter == "VOC"){ show = true }
+      // else if(filter_selections["bike-Particulate"] == "true" && item.parameter == "PARTICULATE"){ show = true }
+      // else if(filter_selections["bike-RHUM"] == "true" && item.parameter == "RHUM"){ show = true }
+      // else if(filter_selections["bike-TEMP"] == "true" && item.parameter == "TEMP"){ show = true }
       else{ show = false }
     } else {
       show = false
@@ -502,13 +517,14 @@ var AQE = (function ( $ ) {
     filter_selections["food"] = $('input.filter-food:checked').val()
     filter_selections["parks"] = $('input.filter-parks:checked').val()
     // durham labs
-    filter_selections["bike-O3"] = $('input.filter-bike-O3:checked').val()
-    filter_selections["bike-CO"] = $('input.filter-bike-CO:checked').val()
-    filter_selections["bike-NO2"] = $('input.filter-bike-NO2:checked').val()
-    filter_selections["bike-VOC"] = $('input.filter-bike-VOC:checked').val()
-    filter_selections["bike-Particulate"] = $('input.filter-bike-Particulate:checked').val()
-    filter_selections["bike-TEMP"] = $('input.filter-bike-TEMP:checked').val()
-    filter_selections["bike-RHUM"] = $('input.filter-bike-RHUM:checked').val()
+    filter_selections["bike-test-06222014"] = $('input.filter-bike-test-06222014:checked').val()
+    // filter_selections["bike-O3"] = $('input.filter-bike-O3:checked').val()
+    // filter_selections["bike-CO"] = $('input.filter-bike-CO:checked').val()
+    // filter_selections["bike-NO2"] = $('input.filter-bike-NO2:checked').val()
+    // filter_selections["bike-VOC"] = $('input.filter-bike-VOC:checked').val()
+    // filter_selections["bike-Particulate"] = $('input.filter-bike-Particulate:checked').val()
+    // filter_selections["bike-TEMP"] = $('input.filter-bike-TEMP:checked').val()
+    // filter_selections["bike-RHUM"] = $('input.filter-bike-RHUM:checked').val()
   }
 
   function update_map(key){
