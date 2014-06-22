@@ -106,7 +106,10 @@ var AQE = (function ( $ ) {
         var hash_info = location.hash.replace('#','').split("/")
         map.setView([hash_info[1],hash_info[2]], hash_info[0])
       }
-      var hash = new L.Hash(map);
+
+      setTimeout(function(){
+        var hash = new L.Hash(map);
+      }, 500);
 
       var drawControl = new L.Control.Draw({ draw: { polyline: false, marker: false }});
       map.addControl(drawControl);
