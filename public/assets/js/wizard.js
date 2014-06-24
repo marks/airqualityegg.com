@@ -45,8 +45,18 @@ $(function() {
       var datasetMetadata = []
       $.each(dataset.attributes.datasetKeys, function(n, datasetKey){
         var dataset = datasets[datasetKey]
+        console.log(dataset)
         var url = ckan_endpoint.replace('/api','/dataset/') + dataset.name
         datasetMetadata.push({html: '<a target="blank" title="'+dataset.title+'" href="'+url+'"><strong>'+dataset.title+'</strong> on the Open Data Portal<i class="fa fa-external-link fa-fw"></i></a>' })
+        $.each(["author","maintainer"], function(n,role){
+          var role_email = dataset[role+'_email']
+          var role_name = dataset[role]
+          var role_html = ""
+          if(role_email){ role_html += "<a href='mailto:"+role_email+"' title='Email maintainer'>" }
+          if(role_name){ role_html += toTitleCase(role) +": " +role_name }
+          if(role_email){ role_html += "</a>" }
+          if(role_html != ""){ datasetMetadata.push({html: role_html}) }
+        })
         datasetMetadata.push({html: 'Description: '+dataset.notes })
         $.each(dataset.extras_hash, function(key,value){
           if(key.match('field_containing_site_') && value != 'NULL'){
@@ -312,7 +322,7 @@ $(function() {
     $('.wizardify').bootstrapWizard({
       tabClass: 'bwizard-steps',
       onTabShow: function(tab, navigation, index) {
-        console.log('onTabShow',index)
+        // console.log('onTabShow',index)
         if(index == 0){
           if(getURLParameterByKey("datasets",true) != ""){
             prechosen_dataset_keys = getURLParameterByKey("datasets",true).split(",")
