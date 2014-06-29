@@ -38,6 +38,7 @@ GEM
     foreman (0.63.0)
       dotenv (>= 0.7)
       thor (>= 0.13.6)
+    geocoder (1.2.2)
     httparty (0.11.0)
       multi_json (~> 1.0)
       multi_xml (>= 0.5.2)
@@ -123,6 +124,7 @@ DEPENDENCIES
   capybara
   dalli
   foreman
+  geocoder
   memcachier
   newrelic_rpm
   oboe-heroku

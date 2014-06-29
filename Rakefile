@@ -3,7 +3,7 @@ require 'rake'
 require 'rspec/core/rake_task'
 require 'sinatra/activerecord/rake'
 
-Dir.glob('lib/tasks/*.rake').each { |r| import r }
+Dir.glob('lib/tasks/**/*.rake').each { |r| import r }
 
 desc "Run specs"
 task :spec do

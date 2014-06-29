@@ -32,3 +32,4 @@ end
 
 gem 'andand'
 gem 'sinatra-contrib'
+gem 'geocoder'
