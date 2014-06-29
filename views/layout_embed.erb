@@ -39,93 +39,23 @@
 
 </head>
 
-<body>
-
-    <div id="wrapper">
-
-        <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="/">
-                    Healthy Air Dashboard
-                    <span class="btn-warning">(Under Development)</span>
-                </a>
+<body class="embed-body">
 
 
-            </div>
-            <!-- /.navbar-header -->
-
-            <ul class="nav navbar-top-links navbar-right">
-                <li class="visible-md visible-lg">
-                    <a href="http://instituteforhealthyairwaterandsoil.org/" target='blank' title="Institute for Healthy Air Water and Soil">
-                        <strong>Visit the Insitute's homepage</strong>
-                        <i class="fa fa-external-link fa-fw"></i> 
-                    </a>
-                </li>
-            </ul>
-            <!-- /.navbar-top-links -->
-
-            <div class="navbar-default navbar-static-side" role="navigation">
-                <div class="sidebar-collapse">
-                    <ul class="nav" id="side-menu">
-                        <li>
-                            <a href="/"><i class="fa fa-home fa-fw"></i> Home page</a>
-                        </li>
-                        <li>
-                            <a href=""><i class="fa fa-dashboard fa-fw"></i> Sample pages</a>
-                            <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="/egg/2017904434">Air Quality Egg</a>
-                                </li>
-                                <li>
-                                    <a href="/aqs/211110027">EPA AQS/AirNow site</a>
-                                </li>
-                                <li>
-                                    <a href="/compare?&amp;aqe=1347815471,2017904434,1635956865,1745225876,183445282&aqs=211110043,211110067,180431004">Compare multiple sites</a>
-                                </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
-                        </li>
-                        <li>
-                            <a href="/wizard"><i class="fa fa-magic fa-fw"></i> Data Visualization Wizard </a>
-                        </li>
-                        <li>
-                            <a href="http://alpha.louisvilleairmap.com"><i class="fa fa-wrench fa-fw"></i> Open Data Portal <i class="fa fa-external-link fa-fw"></i></a>
-                        </li>
-                        <li>
-                            <a href="http://instituteforhealthyairwaterandsoil.org/" target='blank' title="Institute for Healthy Air Water and Soil">
-                                Visit the Insitute's homepage
-                                <i class="fa fa-external-link fa-fw"></i> 
-                            </a>
-                        </li>
-
-                        <li>
-                                <a href="http://socialhealthinsights.com/" target="blank">Developed by<br />
-                                Social Health Insights
-                                <i class="fa fa-external-link fa-fw"></i> 
-                            </a>
-                        </li>
-                    </ul>
-                    <!-- /#side-menu -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Embed from <strong><a href='http://louisvilleairmap.com' target='blank'>LouisvilleAirMap.com</a></strong></h3>
+                    </div>
+                    <div class="panel-body embed-content">
+                        <%= yield %>
+                    </div>
                 </div>
-                <!-- /.sidebar-collapse -->
             </div>
-            <!-- /.navbar-static-side -->
-        </nav>
-
-        <div id="page-wrapper">
-            <%= yield %>
-            <div class="row"><div class="col-lg-12"><br /><br /></div></div>
         </div>
-        <!-- /#page-wrapper -->
     </div>
-    <!-- /#wrapper -->
-
 
     <!-- general -->
     <script src="/vendor/recline/vendor/jquery/1.7.1/jquery.js"></script>
@@ -187,10 +117,7 @@
         ga('send', 'pageview');
       </script>
     <% end %>
-
-    <%= erb :_embed_modal if @embeddable %>
-
-
+    
 </body>
 
 </html>

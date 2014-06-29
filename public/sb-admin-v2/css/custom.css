@@ -1,3 +1,12 @@
+/* embed stuff */
+.embed-body{padding-top: 10px}
+.embed-content .hide-on-embed {display: none;}
+/* recline.js hacks for embed */
+.embed-content .data-view-sidebar{display: none !important;}
+
+.sharethis span span {margin-bottom: -11px;}
+
+a:hover {cursor:pointer;}
 .popup_metadata table,.popup_metadata th,.popup_metadata td { border:1px solid #ccc; }
 
 .leaflet-control-layers-group-name {
@@ -14,6 +23,30 @@
   padding-left: .5em;
 }
 
+.leaflet-control-loading {
+    /* This is where your loading indicator would go */
+    background: url("/assets/img/loading.gif");
+}
+
+.leaflet-control-loading,
+.leaflet-control-zoom a.leaflet-control-loading ,
+.leaflet-control-zoomslider a.leaflet-control-loading {
+    display: none;
+}
+
+.leaflet-control-loading.is-loading,
+.leaflet-control-zoom a.leaflet-control-loading.is-loading,
+.leaflet-control-zoomslider a.leaflet-control-loading.is-loading  {
+    display: block;
+}
+
+/* Necessary for display consistency in Leaflet >= 0.6 */
+.leaflet-bar-part-bottom {
+    border-bottom: medium none;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
 .leaflet-control-legend{
   margin-right: 0px !important;
 }
@@ -27,55 +60,76 @@
   height: 7px !important;
 }
 
-.aqi-bg-FFFF00{
+.leaflet-div-icon-text{
+  border-radius: 7px;
+  min-width: 7px;
+  min-height: 7px;
+  width: auto !important;
+  height: auto !important;
+}
+
+
+.leaflet-div-icon-propaqe{
+  border-radius: 7px;
+  width: 14px !important;
+  height: 19px !important;
+  text-align: center;
+}
+
+.leaflet-div-icon-bike{
+  border-radius: 7px;
+  width: auto !important;
+  height: auto !important;
+  text-align: center;
+  padding: 1px;
+}
+
+.aqi-bg-00E400{
   background-color: #00E400 !important;
-  box-shadow: 0px 0px 20px 8px #00E400;
-  -webkit-box-shadow: 0px 0px 20px 8px #00E400;
-  -moz-box-shadow: 0px 0px 20px 8px #00E400;
+  box-shadow: 0px 0px 10px 1px #00E400;
+  -webkit-box-shadow: 0px 0px 10px 1px #00E400;
+  -moz-box-shadow: 0px 0px 10px 1px #00E400;
 }
 .aqi-bg-FFFF00{
   background-color: #FFFF00 !important;
-  box-shadow: 0px 0px 20px 8px #FFFF00;
-  -webkit-box-shadow: 0px 0px 20px 8px #FFFF00;
-  -moz-box-shadow: 0px 0px 20px 8px #FFFF00;
+  box-shadow: 0px 0px 10px 1px #FFFF00;
+  -webkit-box-shadow: 0px 0px 10px 1px #FFFF00;
+  -moz-box-shadow: 0px 0px 10px 1px #FFFF00;
 }
 .aqi-bg-FF7E00{
   background-color: #FF7E00 !important;
-  box-shadow: 0px 0px 20px 8px #FF7E00;
-  -webkit-box-shadow: 0px 0px 20px 8px #FF7E00;
-  -moz-box-shadow: 0px 0px 20px 8px #FF7E00;
+  box-shadow: 0px 0px 10px 1px #FF7E00;
+  -webkit-box-shadow: 0px 0px 10px 1px #FF7E00;
+  -moz-box-shadow: 0px 0px 10px 1px #FF7E00;
 }
 .aqi-bg-FF0000{
   background-color: #FF0000 !important;
-    box-shadow: 0px 0px 20px 8px #FF0000;
-  -webkit-box-shadow: 0px 0px 20px 8px #FF0000;
-  -moz-box-shadow: 0px 0px 20px 8px #FF0000;
+    box-shadow: 0px 0px 10px 1px #FF0000;
+  -webkit-box-shadow: 0px 0px 10px 1px #FF0000;
+  -moz-box-shadow: 0px 0px 10px 1px #FF0000;
 }
 
 .aqi-bg-99004C{
   background-color: #99004C !important;
-    box-shadow: 0px 0px 20px 8px #99004C;
-  -webkit-box-shadow: 0px 0px 20px 8px #99004C;
-  -moz-box-shadow: 0px 0px 20px 8px #99004C;
+    box-shadow: 0px 0px 10px 1px #99004C;
+  -webkit-box-shadow: 0px 0px 10px 1px #99004C;
+  -moz-box-shadow: 0px 0px 10px 1px #99004C;
 }
 
 .aqi-bg-4C0026{
   background-color: #4C0026 !important;
-  box-shadow: 0px 0px 20px 8px #4C0026;
-  -webkit-box-shadow: 0px 0px 20px 8px #4C0026;
-  -moz-box-shadow: 0px 0px 20px 8px #4C0026;
+  box-shadow: 0px 0px 10px 1px #4C0026;
+  -webkit-box-shadow: 0px 0px 10px 1px #4C0026;
+  -moz-box-shadow: 0px 0px 10px 1px #4C0026;
 }
 
 
 .aqi-bg-000000{
   background-color: #CCC !important;
-  box-shadow: 0px 0px 20px 8px #CCC;
-  -webkit-box-shadow: 0px 0px 20px 8px #CCC;
-  -moz-box-shadow: 0px 0px 20px 8px #CCC;
+  box-shadow: 0px 0px 10px 1px #CCC;
+  -webkit-box-shadow: 0px 0px 10px 1px #CCC;
+  -moz-box-shadow: 0px 0px 10px 1px #CCC;
 }
-
-
-
 
 .egg-icon {
   z-index: 1000 !important;
@@ -94,6 +148,9 @@ padding-right: 7px;}
 .checkbox{margin-left:10px;}
 
 
+ul.dataset-metadata{padding-left:20px;}
+.dataset-metadata-container .panel-body{height: 400px; overflow:scroll;margin-bottom:20px;}
+.leaflet-top.leaflet-right{z-index:99999999999;}
 /* for bootstrap-wizard */
 .bwizard-steps {
   display: inline-block;
@@ -313,4 +370,3 @@ padding-right: 7px;}
 .dataset.show .viewer .recline-slickgrid {
   height: 500px;
 }
-

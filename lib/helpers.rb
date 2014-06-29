@@ -401,5 +401,24 @@ module AppHelpers
     end
   end
 
+  def category_number_to_category(category_number)
+    category_number = category_number.to_s
+    if category_number == "7"
+      return {:name => "Unavailable", :color => "#FFF", :font => "#000"}
+    elsif category_number == "1"
+      return {:name => "Good", :color => "#00E000", :font => "#000"}
+    elsif category_number == "2"
+      return {:name => "Moderate", :color => "#FFFF00", :font => "#000"}
+    elsif category_number == "3"
+      return {:name => "Unhealthy for Sensitive Groups", :color => "#FF7E00", :font => "#000"}
+    elsif category_number == "4"
+      return {:name => "Unhealthy", :color => "#FF0000", :font => "#000"}
+    elsif category_number == "5"
+      return {:name => "Very Unhealthy", :color => "#99004C", :font => "#FFF"}
+    elsif category_number == "6"
+      return {:name => "Hazardous", :color => "#4C0026", :font => "#FFF"}
+    end
+  end
+
 end
 

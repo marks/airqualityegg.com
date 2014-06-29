@@ -21,10 +21,31 @@ ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 META = {}
 # set some metadata # todo - cleanup
-["aqs","aqe"].each do |key|
+ENV["CKAN_DATASET_KEYS"].split(",").each do |key|
   META[key] = get_ckan_package_by_slug(ENV["CKAN_#{key.upcase}_DATASET_ID"])
   META[key]["site_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"]
   META[key]["data_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"]
+end
+
+ENV["CKAN_DATASET_KEYS_SITES_JOINABLE"].split(",").each do |dataset_key|
+  fields = {}
+  META[dataset_key]["extras_hash"].select{|k,v| k.match("field_containing_site_")}.sort.each do |k,v|
+    field_as = k.gsub("field_containing_site_","")
+    field_key = v
+    fields[field_as] = field_key
+  end
+  # puts fields.inspect
+  sql = "SELECT '#{dataset_key}' AS site_type, "
+  sql += fields.map { |as,key|
+    if ["latitude","longitude"].include?(as)
+      cast_as = "float"
+    else 
+      cast_as = "VARCHAR(255)"
+    end
+    "#{key}::#{cast_as} AS #{as}"
+  }.join(", ")
+  sql += " FROM \"#{META[dataset_key]["site_resource_id"]}\" #{dataset_key}"
+  META[dataset_key]["site_join_sql"] = sql
 end
 
 class AirQualityEgg < Sinatra::Base
@@ -40,10 +61,11 @@ class AirQualityEgg < Sinatra::Base
 
     puts "WARN: You should set a SESSION_SECRET" unless ENV['SESSION_SECRET']
 
-    set :session_secret, ENV['SESSION_SECRET'] || 'airqualityegg_session_secret'
+    set :protection, :except => :frame_options
+    set :session_secret, ENV['SESSION_SECRET'] || 'louisville_session_secret'
     set :cache, Dalli::Client.new
-    settings.cache.flush
     set :time_zone, ActiveSupport::TimeZone.new("Eastern Time (US & Canada)")
+    settings.cache.flush
   end
 
   configure :production do
@@ -100,7 +122,7 @@ class AirQualityEgg < Sinatra::Base
 
     def sql_for_average_over_days(table, id,n_days)
       if table == "aqe"
-        "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{META["#{table}"]["data_resource_id"]}\" WHERE feed_id=#{id} AND datetime >= current_date - #{n_days} GROUP BY parameter"
+        "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{META["#{table}"]["data_resource_id"]}\" WHERE feed_id=#{id} AND datetime >= current_date - #{n_days} AND parameter != 'CO' GROUP BY parameter"
       else #aqs
         "SELECT parameter, AVG(value) AS avg_value, AVG(computed_aqi) AS avg_aqi FROM \"#{META["#{table}"]["data_resource_id"]}\" WHERE aqs_id='#{id}' AND date >= current_date - #{n_days} GROUP BY parameter"      
       end
@@ -113,7 +135,7 @@ class AirQualityEgg < Sinatra::Base
         FROM
           "#{META["aqe"]["site_resource_id"]}" sites_table
         INNER JOIN "#{META["aqe"]["data_resource_id"]}" data_table ON sites_table.id = data_table.feed_id
-        WHERE sites_table.id = #{id}
+        WHERE sites_table.id = #{id} AND data_table.parameter != 'CO'
         order by datetime desc
         LIMIT (
           SELECT COUNT(DISTINCT(data_table.parameter))
@@ -124,14 +146,19 @@ class AirQualityEgg < Sinatra::Base
     end
 
     def sql_for_all_sites_by_key(key)
-      if key == "aqe"
-        <<-EOS
-          SELECT site_table.id,site_table.created,site_table.description,site_table.location_domain,site_table.location_ele,site_table.location_exposure,site_table.location_lat,site_table.location_lon,site_table.title,site_table.status,
-          (SELECT data_table.datetime FROM \"#{META["aqe"]["data_resource_id"]}\" data_table WHERE data_table.feed_id = site_table.id order by datetime desc LIMIT 1) AS last_datapoint
-          from \"#{META["aqe"]["site_resource_id"]}\" site_table
-        EOS
+      if META[key]["extras_hash"]["Default SQL"]
+        META[key]["extras_hash"]["Default SQL"]
       else
-        "SELECT * from \"#{META[key]["site_resource_id"]}\" #{META[key]["extras_hash"]["default_conditions"]}"
+        if key == "aqe"
+          <<-EOS
+            SELECT site_table.id,site_table.created,site_table.description,site_table.location_domain,site_table.location_ele,site_table.location_exposure,site_table.location_lat,site_table.location_lon,site_table.title,site_table.status,
+            (SELECT data_table.datetime FROM \"#{META[key]["data_resource_id"]}\" data_table WHERE data_table.feed_id = site_table.id order by datetime desc LIMIT 1) AS last_datapoint
+            from \"#{META["aqe"]["site_resource_id"]}\" site_table
+          EOS
+        else
+          resource_id = META[key]["site_resource_id"].nil? ? META[key]["data_resource_id"] : META[key]["site_resource_id"]
+          "SELECT * from \"#{resource_id}\" #{META[key]["extras_hash"]["default_conditions"]}"
+        end
       end
     end
 
@@ -147,7 +174,15 @@ class AirQualityEgg < Sinatra::Base
   get '/' do
     @local_feed_path = '/all_eggs.geojson'
     @error = session.delete(:error)
-    erb :home
+
+    @custom_js = [ "/assets/js/embed.js", "/assets/js/main.js" ]
+    @embeddable = true
+
+    if params[:embed] == "true"
+      erb :home, :layout => :layout_embed
+    else
+      erb :home
+    end
   end
 
   get '/derby' do
@@ -167,7 +202,6 @@ class AirQualityEgg < Sinatra::Base
     content_type :json
     cache_key = "ckan_proxy/#{key}.geojson"
     cached_data = settings.cache.fetch(cache_key) do
-      puts 
       all_aqe_sites = sql_search_ckan(sql_for_all_sites_by_key(key))
       geojson = []
       all_aqe_sites.each do |feature|
@@ -176,7 +210,7 @@ class AirQualityEgg < Sinatra::Base
             :"properties" => feature.merge("type" => key, "id" => feature[META[key]["extras_hash"]["field_containing_site_id"]]),
             :"geometry" => {
                 "type" =>  "Point",
-                "coordinates" => [feature[META[key]["extras_hash"]["field_containing_longitude"]], feature[META[key]["extras_hash"]["field_containing_latitude"]]]
+                "coordinates" => [feature[META[key]["extras_hash"]["field_containing_site_longitude"]], feature[META[key]["extras_hash"]["field_containing_site_latitude"]]]
             }
         }
       end
@@ -188,6 +222,19 @@ class AirQualityEgg < Sinatra::Base
     return cached_data
   end
 
+  get '/aqs/forecast.json' do
+    content_type :json
+    params[:date] = Date.today.to_s if params[:date].to_s == ""
+    params[:distance] = 50 if params[:distance].to_s == ""
+    url = "http://www.airnowapi.org/aq/forecast/latLong/?format=application/json&latitude=#{params[:lat]}&longitude=#{params[:lon]}&date=&distance=#{params[:distance]}&API_KEY=#{ENV["AIRNOW_API_KEY"]}"
+    data = JSON.parse(RestClient.get(url))
+    results = data.map do |result|
+      result[:aqi_cat] = category_number_to_category(result["Category"]["Number"])
+      result
+    end
+    results.to_json
+  end
+
   get '/aqs/:id.json' do
     content_type :json
 
@@ -195,6 +242,7 @@ class AirQualityEgg < Sinatra::Base
 
     data[:datastreams] = {}
     datastreams_sql = sql_for_aqs_datastreams(params[:id])
+    puts datastreams_sql
     datastreams_data = sql_search_ckan(datastreams_sql)
     datastreams_data.each do |datastream|
       data[:datastreams][datastream["parameter"].to_sym] = datastream if datastream
@@ -277,7 +325,7 @@ class AirQualityEgg < Sinatra::Base
 
     if params[:include_recent_history]
       series = []
-      recent_history_sql = "SELECT feed_id,parameter,datetime,value,unit from \"#{META["aqe"]["data_resource_id"]}\" WHERE feed_id = #{params[:id]} and datetime > current_date - 45 order by datetime "
+      recent_history_sql = "SELECT feed_id,parameter,datetime,value,unit from \"#{META["aqe"]["data_resource_id"]}\" WHERE feed_id = #{params[:id]} and datetime > current_date - 45 and parameter != 'CO' order by datetime "
       recent_history = sql_search_ckan(recent_history_sql).compact
       series_names = recent_history.map{|x| x["parameter"]}.uniq
       series_names.each do |series_name|
@@ -342,7 +390,7 @@ class AirQualityEgg < Sinatra::Base
     @sensors = []
     params.each do |type,ids|
       ids.split(",").each do |sensor_id|
-        @sensors << {"type" => type, "id" => sensor_id}
+        @sensors << {"type" => type, "id" => sensor_id} if ["aqe","aqs"].include?(type)
       end
       @sensors.uniq.compact!
     end
@@ -368,12 +416,16 @@ class AirQualityEgg < Sinatra::Base
   end
 
   get '/wizard' do
+    @datasets = META
+    @joinable_sites = ENV["CKAN_DATASET_KEYS_SITES_JOINABLE"].split(",")
+
     @custom_css = [
       "/vendor/recline/vendor/slickgrid/2.0.1/slick.grid.css",
       "/vendor/recline/vendor/leaflet.markercluster/MarkerCluster.css",
       "/vendor/recline/vendor/leaflet.markercluster/MarkerCluster.Default.css",
       "/vendor/recline/dist/recline.css",
-      "/vendor/jQuery-QueryBuilder/query-builder.css"
+      "/vendor/jQuery-QueryBuilder/query-builder.css",
+      "http://shjs.sourceforge.net/sh_style.css"
     ]
     @custom_js = [
       "/vendor/recline/vendor/underscore/1.4.4/underscore.js",
@@ -388,9 +440,21 @@ class AirQualityEgg < Sinatra::Base
       "/vendor/jQuery-QueryBuilder/query-builder.js",
       "/vendor/recline/dist/recline.js",
       "/vendor/ckan.js/ckan.js",
-      "/assets/js/wizard.js",
+      "/vendor/recline-warehouse/data.export.js",
+      "/vendor/recline-warehouse/view.export.js",
+      "http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js",
+      "http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/mode-pgsql.js",
+      "/assets/js/embed.js",
+      "/assets/js/wizard.js"
     ]
-    erb :wizard
+
+    @embeddable = true
+
+    if params[:embed] == "true"
+      erb :wizard, :layout => :layout_embed
+    else
+      erb :wizard
+    end
   end
 
   get '/cache/flush' do
