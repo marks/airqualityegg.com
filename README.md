@@ -61,10 +61,11 @@ website running locally on your machine.
 
 `bundle exec rake`
 
-### Importing AirNow and AirQualityEgg sites and sensor data to CKAN
+### Importing constantly updating datasets data to CKAN
 ```bash
 foreman run bundle exec rake ckan:airnow:update # takes about 45 minutes
 foreman run bundle exec rake ckan:airqualityeggs:update # takes about 10 minutes for 1,000 eggs
+foreman run bundle exec rake ckan:airqualityeggs:update # takes about 10 seconds for 5 sites
 ```
 
 ### To upload local database to Heroku
@@ -79,6 +80,7 @@ Be sure to restart heroku after this as the database socket connection will need
 # run airnow on even hours and airqualityeggs updates on odd hours
 30   */2     *   *  * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake ckan:airnow:update
 30    1-23/2    * * * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake ckan:airqualityeggs:update
+15   1  *	* * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake ckan:famallergy:update  >/dev/null 2>&1
 ```
 
 ## Sample CKAN (Datastore) SQL
