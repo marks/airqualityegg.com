@@ -95,6 +95,19 @@ FROM
 INNER JOIN "d8482637-477b-4e45-a7f5-6b2ceb98c7e5" data_table ON sites_table.id = data_table.feed_id
 LIMIT 10000
 ```
+
+## Backing up
+
+Virtual machine/AWS EC2 full image backups are always a good idea in addition to the following:
+
+### CKAN
+`paster --plugin=ckan db dump 06292014-ckan_full_dump.sql --config=/etc/ckan/default/development.ini`
+`paster --plugin=ckan db simple-dump-json 06292014-ckan.json --config=/etc/ckan/default/development.ini`
+`paster --plugin=ckan db simple-dump-csv 06292014-ckan.csv --config=/etc/ckan/default/development.ini`
+
+### CKAN Datastore
+`pg_dump datastore_default -U ckan_default -W > 06292014-ckan_datastore_dump.sql -h localhost`
+
 ## Contributing
 
 Please see our [Contributing guidelines](https://github.com/xively/airqualityegg.com/blob/master/CONTRIBUTING.md).
