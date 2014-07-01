@@ -21,6 +21,11 @@ var AQE = (function ( $ ) {
       iconUrl: schoolIconURL,
       iconSize: [17, 17], // size of the icon
   });
+  var famallergyIconURL = '/assets/img/famallergy.png'
+  var famallergyIcon = L.icon({
+      iconUrl: famallergyIconURL,
+      iconSize: [17, 17], // size of the icon
+  });
 
   var defaultIconURL = '/vendor/leaflet-0.8-dev-06062014/images/marker-icon.png'
   var defaultIcon = L.icon({
@@ -420,6 +425,23 @@ var AQE = (function ( $ ) {
       html += "</table>" 
       html += "</div>"
       layer.bindPopup(html)
+    }
+    else if(item.type == "famallergy"){
+      layer.setIcon(famallergyIcon)
+      var html = "<div><h4>Family Allergy & Asthma Observation</h4>"
+      html += "<table class='table table-striped' data-famallergy_id='"+item.id+"'>"
+      html += "<tr><td>Site Name</td><td>"+item.name+" </td></tr>"
+      html += "<tr><td>Site Adddress</td><td>"+item.address+" </td></tr>"
+      html += "<tr><td>Site Lat, Lon</td><td>"+item.lat+", "+item.lon+" </td></tr>"
+      html += "<tr><td>Latest Pollen Counts</td><td>"+moment(item.datetime+"Z").fromNow()
+      html += "<br /><strong>Tree:</strong> "+item.trees
+      html += "<br /><strong>Weeds:</strong> "+item.weeds
+      html += "<br /><strong>Grass:</strong> "+item.grass
+      html += "<br /><strong>Mold:</strong> "+item.mold+" </td></tr>"
+      html += "</table>" 
+      html += "<p style='font-size:80%'>From <a href='http://www.familyallergy.com/' target='blank'>Family Allergy and Asthma</a>, 'a group of board-certified allergy and asthma specialists practicing at more than 20 locations throughout Kentucky and Southern Indiana.'"
+      html += "</div>"
+      layer.bindPopup(html)
     } else {
       var html = "<div><h4>"+item.type.toUpperCase()+" ID #"+item.id+"</h4></div>"
       layer.bindPopup(html)
@@ -471,6 +493,10 @@ var AQE = (function ( $ ) {
       if(filter_selections["jeffschools"] == "true" && item.District == "JEFFERSONCOUNTY"){ show = true }
       else{ show = false }
     }
+    else if(item.type == "famallergy"){
+      if(filter_selections["famallergy"] == "true"){ show = true }
+      else{ show = false }
+    }
     else if(item.type == "parks"){
       if(filter_selections["parks"] == "true"){ show = true }
       else{ show = false }
@@ -518,6 +544,8 @@ var AQE = (function ( $ ) {
     filter_selections["active-sites"] = $('input.filter-active-sites:checked').val()
     // jeffschools specific
     filter_selections["jeffschools"] = $('input.filter-jeffschools:checked').val()
+    // famallergy specific
+    filter_selections["famallergy"] = $('input.filter-famallergy:checked').val()
     // portal.louisvilleky.gov
     filter_selections["food"] = $('input.filter-food:checked').val()
     filter_selections["parks"] = $('input.filter-parks:checked').val()
