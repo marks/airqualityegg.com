@@ -55,9 +55,9 @@ a:hover {cursor:pointer;}
 }
 
 .leaflet-div-icon{
-  border-radius: 7px;
-  width: 7px !important;
-  height: 7px !important;
+  border-radius: 10px !important;
+  width: 10px !important;
+  height: 10px !important;
 }
 
 .leaflet-div-icon-text{
