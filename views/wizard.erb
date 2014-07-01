@@ -20,7 +20,7 @@
         <div class="tab-pane hide-on-embed" id="tab1">
           <div class="form-group">
             <h3>First, let's choose dataset resource(s) to visualize:</h3>
-            <div class="alert alert-warning">At the moment, you can select any of the following datasets one at a time or select both AQE and AQS to see a join.</div>
+            <div class="alert alert-warning">At the moment, you can select any of the following datasets one at a time or select any combination of Air Quality Eggs (AQE), Air Quality System (AQS), and/or Family Allergy and Asthma to see a join.</div>
             <% @datasets.each do |key,dataset| %>
               <div class="checkbox">
                 <label><input data-resource-id='<%= dataset["extras_hash"]["default_resource_id"] or dataset["resources"].first["id"] %>' name='resource-choose-<%= key %>' type="checkbox" data-dataset-key="<%= key %>" class='resource-choose'><%= dataset["title"] %></label>
