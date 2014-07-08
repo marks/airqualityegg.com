@@ -177,12 +177,13 @@ class AirQualityEgg < Sinatra::Base
     end
   end
 
-  get '/derby' do
-    protected!
-    @local_feed_path = '/all_eggs.json'
-    @error = session.delete(:error)
-    @custom_js = ['/assets/js/derby.js']
-    erb :home
+  post '/asthmaheat' do
+    # protected!
+    if [params[:username],params[:password]] == [ENV["HTTP_BASIC_USER"], ENV["HTTP_BASIC_PASS"]]
+      "http://s3.amazonaws.com/healthyaws/propeller_health/propeller_health_heatmap_nov13_shared.png"
+    else
+      halt 401
+    end
   end
 
   get '/boston' do

@@ -33,11 +33,7 @@ var AQE = (function ( $ ) {
     iconSize: [12, 20], // size of the icon
   });
 
-  // Propeller Health image overlay and layer 
-  // var heatmapIconURL = '/assets/img/heatmap_legend.png'
-  // var propellerhealth_layer_url = 'http://s3.amazonaws.com/healthyaws/propeller_health/propeller_health_heatmap_nov13_shared.png';
-  // var propellerhealth_layer_bounds = [[37.8419378866983038, -86.0292621133016979], [38.5821425225734487, -85.1883896469475275]]
-  // var propellerhealth_layer = L.layerGroup([L.imageOverlay(propellerhealth_layer_url, propellerhealth_layer_bounds, {opacity: 0.8, attribution: "Asthma hotspot heatmap from <a href='http://propellerhealth.com' target=blank>Propeller Health</a>"})])
+  var heatmapIconURL = '/assets/img/heatmap_legend.png'
 
   // OpenWeatherMap Layers
   var clouds_layer = L.OWM.clouds({opacity: 0.8, legendImagePath: 'files/NT2.png'});
@@ -47,15 +43,6 @@ var AQE = (function ( $ ) {
   var pressure_layer = L.OWM.pressure({opacity: 0.4});
   var temp_layer = L.OWM.temperature({opacity: 0.5});
   var wind_layer = L.OWM.wind({opacity: 0.5});
-
-  // via http://www.web-maps.com/gisblog/?p=977
-  // var censusTracts = new L.TileLayer.WMS("http://tigerweb.geo.census.gov/ArcGIS/services/tigerWMS/MapServer/WMSServer",
-  // {
-  //   layers: ['Census Tracts','Census Tracts Labels'],
-  //   format: 'image/png',
-  //   transparent: true,
-  // });
-
 
   var groupedOverlays = {
     "Census Data from JusticeMap.org":{},
@@ -239,6 +226,7 @@ var AQE = (function ( $ ) {
 
     $( ".submit-map-filters" ).on('click',function( event ) {
       event.preventDefault();
+      authenticateAndLoadAsthmaHeatLayer($('input.filter-asthmaheat-user').val(),$('input.filter-asthmaheat-pass').val())
       $.each(dataset_keys, function(n,key){
         if($(".filter-"+key+":checked").length > 0){
           if(layersData[key] == undefined){
@@ -521,8 +509,6 @@ var AQE = (function ( $ ) {
       // else if(filter_selections["bike-RHUM"] == "true" && item.parameter == "RHUM"){ show = true }
       // else if(filter_selections["bike-TEMP"] == "true" && item.parameter == "TEMP"){ show = true }
       else{ show = false }
-    } else {
-      show = false
     }
     return show
   }
@@ -685,5 +671,19 @@ var AQE = (function ( $ ) {
       legend.addTo(map)
     }
   }
+
+  function authenticateAndLoadAsthmaHeatLayer(username,password){
+    if(username != "" && password != "" ){
+      $.post('/asthmaheat', {username: username, password: password}).done( function(data) {
+        var propellerhealth_layer_url = data;
+        var propellerhealth_layer_bounds = [[37.8419378866983038, -86.0292621133016979], [38.5821425225734487, -85.1883896469475275]]
+        var propellerhealth_layer = L.layerGroup([L.imageOverlay(propellerhealth_layer_url, propellerhealth_layer_bounds, {opacity: 0.8, attribution: "Asthma hotspot heatmap from <a href='http://propellerhealth.com' target=blank>Propeller Health</a>"})])
+        map.addLayer(propellerhealth_layer)
+      });
+    }
+
+  }
+
+
 
 })( jQuery );

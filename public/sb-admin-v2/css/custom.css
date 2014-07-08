@@ -3,7 +3,22 @@
 .embed-content .hide-on-embed {display: none;}
 /* recline.js hacks for embed */
 .embed-content .data-view-sidebar{display: none !important;}
-
+.form-control2{
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+  -webkit-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+  transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+  height: 34px;
+  padding: 4px 10px;
+  font-size: 14px;
+  line-height: 1.428571429;
+  color: #555;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #ccc;
+  width:150px;
+}
 .sharethis span span {margin-bottom: -11px;}
 
 a:hover {cursor:pointer;}
