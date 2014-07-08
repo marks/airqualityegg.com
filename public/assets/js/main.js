@@ -681,7 +681,6 @@ var AQE = (function ( $ ) {
         map.addLayer(propellerhealth_layer)
       });
     }
-
   }
 
 
