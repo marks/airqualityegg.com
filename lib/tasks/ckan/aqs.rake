@@ -148,10 +148,14 @@ namespace :ckan do
         else # update existing resource
           create_resource_data[:resource_id] = resource["id"]
         end
+        begin
         create_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_create", create_resource_data.to_json,
           {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
         create_results = JSON.parse(create_raw)
         resource_id = create_results["result"]["resource_id"]
+        rescue
+          resource_id = resource["id"]
+        end
         puts "Created/updated a new resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
 
         # invoke upsert rake tasks
