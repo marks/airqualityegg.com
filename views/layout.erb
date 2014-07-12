@@ -2,18 +2,13 @@
 <html>
 
 <head>
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Air Quality Maps for Institute for Healthy Air Water and Soil by Social Health Insights</title>
-
     <meta name="description" content="Air Quality Maps for Institute for Healthy Air Water and Soil by Social Health Insights">
     <meta name="author" content="Social Health Insights, Institute for Healthy Air Water and Soil">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    
     <link href="/assets/img/favicon.ico" rel="shortcut icon">
-
     <!-- Core CSS - Include with every page -->
     <link href="/sb-admin-v2/css/bootstrap.min.css" rel="stylesheet">
     <link href="/sb-admin-v2/font-awesome/css/font-awesome.css" rel="stylesheet">
@@ -35,13 +30,9 @@
         <link rel="stylesheet" href="<%= custom_css %>" />
       <% end %>
     <% end %>
-
 </head>
-
 <body>
-
     <div id="wrapper">
-
         <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
@@ -53,21 +44,15 @@
                 <a class="navbar-brand" href="/">
                     Healthy Air Dashboard
                 </a>
-
-
             </div>
-            <!-- /.navbar-header -->
-
-            <ul class="nav navbar-top-links navbar-right">
-                <li class="visible-md visible-lg">
+            <ul class="nav navbar-top-links navbar-right visible-md visible-lg">
+                <li class="">
                     <a href="http://instituteforhealthyairwaterandsoil.org/" target='blank' title="Institute for Healthy Air Water and Soil">
                         <strong>Visit the Insitute's homepage</strong>
                         <i class="fa fa-external-link fa-fw"></i> 
                     </a>
                 </li>
             </ul>
-            <!-- /.navbar-top-links -->
-
             <div class="navbar-default navbar-static-side" role="navigation">
                 <div class="sidebar-collapse">
                     <ul class="nav" id="side-menu">
@@ -75,7 +60,11 @@
                             <a href="/"><i class="fa fa-home fa-fw"></i> Home page</a>
                         </li>
                         <li>
-                            <a href=""><i class="fa fa-dashboard fa-fw"></i> Sample pages</a>
+                            <a href="">
+                                <i class="fa fa-dashboard fa-fw"></i>
+                                Sample pages
+                                <span class="fa arrow"></span>
+                            </a>
                             <ul class="nav nav-second-level">
                                 <li>
                                     <a href="/egg/2017904434">Air Quality Egg</a>
@@ -87,7 +76,6 @@
                                     <a href="/compare?&amp;aqe=1347815471,2017904434,1635956865,1745225876,183445282&amp;aqs=211110043,211110067,180431004">Compare multiple sites</a>
                                 </li>
                             </ul>
-                            <!-- /.nav-second-level -->
                         </li>
                         <li>
                             <a href="/wizard"><i class="fa fa-magic fa-fw"></i> Data Visualization Wizard </a>
@@ -109,33 +97,23 @@
                             </a>
                         </li>
                     </ul>
-                    <!-- /#side-menu -->
                 </div>
-                <!-- /.sidebar-collapse -->
             </div>
-            <!-- /.navbar-static-side -->
         </nav>
 
         <div id="page-wrapper">
             <%= yield %>
             <div class="row"><div class="col-lg-12"><br /><br /></div></div>
         </div>
-        <!-- /#page-wrapper -->
     </div>
-    <!-- /#wrapper -->
-
-
-    <!-- general -->
     <script src="/vendor/recline/vendor/jquery/1.7.1/jquery.js"></script>
     <script src="/sb-admin-v2/js/bootstrap.min.js"></script>
     <script src="/sb-admin-v2/js/plugins/metisMenu/jquery.metisMenu.js"></script>
     <script src="/sb-admin-v2/js/sb-admin.js"></script>
     <script src="/assets/js/vendor/moment-2.5.1.min.js"></script>
     <script src="/assets/js/vendor/jquery.bootstrap.wizard.min.js"></script>
-
     <!-- for mapping -->
     <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
-    <!-- <script src="/vendor/leaflet-0.8-dev-06062014/leaflet.js"></script> -->
     <script src="/vendor/Leaflet-Control.Loading.js"></script>
     <script type="text/javascript" src="/assets/leaflet-openweathermap-master/leaflet-openweathermap.js"></script>
     <script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.24.0/L.Control.Locate.js'></script>
@@ -144,18 +122,12 @@
     <script src="/assets/js/vendor/leaflet.groupedlayercontrol.js"></script>
     <script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.2.2/leaflet.draw.js'></script>
     <script src='//cdn-geoweb.s3.amazonaws.com/esri-leaflet/0.0.1-beta.5/esri-leaflet.js'></script>
-    
-    <!-- <script src="/assets/js/vendor/webgl-heatmap.js"></script>
-    <script src="/assets/js/vendor/webgl-heatmap-leaflet.js"></script> -->
-
     <!-- for charting -->
     <script src="//code.highcharts.com/3.0.10/highcharts.js"></script>
     <script src="//code.highcharts.com/3.0.10/modules/data.js"></script>
     <script src="//code.highcharts.com/3.0.10/highcharts-more.js"></script>
     <script src="//code.highcharts.com/3.0.10/modules/exporting.js"></script>
     <script src="/assets/js/vendor/highcharts-export_csv.js"></script>
-
-
     <script>
         var ckan_endpoint = "<%= ENV["CKAN_HOST"] %>/api"
         var dataset_keys = <%= META.keys.to_json %>
@@ -185,10 +157,6 @@
         ga('send', 'pageview');
       </script>
     <% end %>
-
     <%= erb :_embed_modal if @embeddable %>
-
-
 </body>
-
 </html>
