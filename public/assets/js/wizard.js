@@ -1,7 +1,6 @@
 var aceEditor, mapView
 
 $(function() { 
-
   // highly based on rgrp's ckan data explorer
   var ckan = new CKAN.Client(ckan_endpoint)
   var ace_sql_editor;
@@ -322,7 +321,6 @@ $(function() {
     $('.wizardify').bootstrapWizard({
       tabClass: 'bwizard-steps',
       onTabShow: function(tab, navigation, index) {
-        // console.log('onTabShow',index)
         if(index == 0){
           if(getURLParameterByKey("datasets",true) != ""){
             prechosen_dataset_keys = getURLParameterByKey("datasets",true).split(",")
@@ -387,7 +385,7 @@ $(function() {
             aceEditor.getSession().setMode("ace/mode/sql");
             aceEditor.getSession().setWrapLimitRange(80,120);
             aceEditor.getSession().setUseWrapMode(true);     
-          }, 1000); // TODO - figure out why this has to wait 1 second
+          }, 1500); // TODO - figure out why this has to wait 1 second
 
         }
       }
