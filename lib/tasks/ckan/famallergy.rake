@@ -48,10 +48,10 @@ namespace :ckan do
             {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
           create_results = JSON.parse(create_raw)
           resource_id = create_results["result"]["resource_id"]
-          puts "Created a new resource named '#{ENV['CKAN_FAMALLERGY_SITE_RESOURCE_NAME']}'"
+          puts "Created a new resource named '#{ENV['CKAN_FAMALLERGY_DATA_RESOURCE_NAME']}'"
         else
           resource_id = resource["id"]
-          puts "Resource named '#{ENV['CKAN_FAMALLERGY_SITE_RESOURCE_NAME']}' already existed"
+          puts "Resource named '#{ENV['CKAN_FAMALLERGY_DATA_RESOURCE_NAME']}' already existed"
         end
         puts "Resource ID = #{resource_id}"
         # invoke upsert rake task
