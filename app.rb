@@ -190,27 +190,53 @@ class AirQualityEgg < Sinatra::Base
     redirect '/#12/42.3593/-71.1315'
   end
 
-  get '/ckan_proxy/:key.geojson' do
-    key = params[:key]
+  route :get, :post, '/ckan_proxy/:key.geojson' do
     content_type :json
-    cache_key = "ckan_proxy/#{key}.geojson"
-    cached_data = settings.cache.fetch(cache_key) do
-      all_aqe_sites = sql_search_ckan(sql_for_all_sites_by_key(key))
-      geojson = []
-      all_aqe_sites.each do |feature|
-        geojson << {
-            :"type" => "Feature",
-            :"properties" => feature.merge("type" => key, "id" => feature[META[key]["extras_hash"]["field_containing_site_id"]]),
-            :"geometry" => {
-                "type" =>  "Point",
-                "coordinates" => [feature[META[key]["extras_hash"]["field_containing_site_longitude"]], feature[META[key]["extras_hash"]["field_containing_site_latitude"]]]
-            }
-        }
+    key = params[:key]
+    puts params
+    if key == "bike"
+      # BEGIN BIKE HACK
+      cache_key = "ckan_proxy/#{key}-#{params[:bike_id]}-#{params[:parameter]}.geojson"
+      cached_data = settings.cache.fetch(cache_key) do
+        datas = sql_search_ckan(sql_for_all_sites_by_key(key)+" WHERE bike_id = '#{params[:bike_id]}' and parameter = '#{params[:parameter]}'")
+        geojson = []
+        datas.each do |feature|
+          geojson << {
+              :"type" => "Feature",
+              :"properties" => feature.merge("type" => key, "id" => feature[META[key]["extras_hash"]["field_containing_site_id"]]),
+              :"geometry" => {
+                  "type" =>  "Point",
+                  "coordinates" => [feature[META[key]["extras_hash"]["field_containing_site_longitude"]], feature[META[key]["extras_hash"]["field_containing_site_latitude"]]]
+              }
+          }
+        end
+        geojson = geojson.to_json
+        # store in cache and return
+        settings.cache.set(cache_key, geojson, settings.cache_time)
+        geojson
       end
-      geojson = geojson.to_json
-      # store in cache and return
-      settings.cache.set(cache_key, geojson, settings.cache_time)
-      geojson
+      # END BIKE HACK
+
+    else
+      cache_key = "ckan_proxy/#{key}.geojson"
+      cached_data = settings.cache.fetch(cache_key) do
+        all_sites = sql_search_ckan(sql_for_all_sites_by_key(key))
+        geojson = []
+        all_sites.each do |feature|
+          geojson << {
+              :"type" => "Feature",
+              :"properties" => feature.merge("type" => key, "id" => feature[META[key]["extras_hash"]["field_containing_site_id"]]),
+              :"geometry" => {
+                  "type" =>  "Point",
+                  "coordinates" => [feature[META[key]["extras_hash"]["field_containing_site_longitude"]], feature[META[key]["extras_hash"]["field_containing_site_latitude"]]]
+              }
+          }
+        end
+        geojson = geojson.to_json
+        # store in cache and return
+        settings.cache.set(cache_key, geojson, settings.cache_time)
+        geojson
+      end
     end
     return cached_data
   end
@@ -421,7 +447,6 @@ class AirQualityEgg < Sinatra::Base
       "http://shjs.sourceforge.net/sh_style.css"
     ]
     @custom_js = [
-      "/vendor/recline/vendor/underscore/1.4.4/underscore.js",
       "/vendor/recline/vendor/backbone/1.0.0/backbone.js",
       "/vendor/recline/vendor/mustache/0.5.0-dev/mustache.js",
       "/vendor/recline/vendor/slickgrid/2.0.1/jquery-ui-1.8.16.custom.min.js",

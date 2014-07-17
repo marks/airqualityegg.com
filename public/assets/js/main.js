@@ -190,7 +190,7 @@ var AQE = (function ( $ ) {
     // loop through datasets
     $.each(dataset_keys, function(n,key){
       if($(".filter-"+key+":checked").length > 0){
-        $.getJSON("/ckan_proxy/"+key+".geojson", function(data){
+        $.post("/ckan_proxy/"+key+".geojson", function(data){
           layersData[key] = data
           update_map(key)
         })        
@@ -227,10 +227,12 @@ var AQE = (function ( $ ) {
     $( ".submit-map-filters" ).on('click',function( event ) {
       event.preventDefault();
       authenticateAndLoadAsthmaHeatLayer($('input.filter-asthmaheat-user').val(),$('input.filter-asthmaheat-pass').val())
+      layersData.bike = undefined // BIKE HACK
       $.each(dataset_keys, function(n,key){
-        if($(".filter-"+key+":checked").length > 0){
+        if($(".filter-"+key+":checked").length > 0 || filter_selections[key] == true){
           if(layersData[key] == undefined){
-            $.getJSON("/ckan_proxy/"+key+".geojson", function(data){
+            var post_data = choose_post_data(key)
+            $.post("/ckan_proxy/"+key+".geojson", post_data, function(data){
               layersData[key] = data
               update_map(key)
             })
@@ -364,20 +366,13 @@ var AQE = (function ( $ ) {
       var html = "<div><h4>Bike Sensor Details</h4>"
       html += "<table class='table table-striped' data-bike_id='"+item.bike_id+"'>"
       html += "<tr><td>Bike ID</td><td>"+item.bike_id+" </td></tr>"
-      // html += "<tr><td>Time</td><td>"+item.datetime+" </td></tr>"
-      // html += "<tr><td>Sensor </td><td>"+item.parameter+"</td></tr>"
-      // html += "<tr><td>Value </td><td>"+item.value+"</td></tr>"
-      // html += "<tr><td>Units </td><td>"+item.unit+"</td></tr>"
-
-      // Julienne 6/22/14 "Route1" special format
-      html += "<tr><td>Speed (m/s) </td><td>"+item.SPEED_ms+"</td></tr>"
-      html += "<tr><td>Ozone (PPB) </td><td>"+item.O3_PPB+"</td></tr>"
-      html += "<tr><td>Volatile Organics (PPM) </td><td>"+item.VOC_PPM+"</td></tr>"
-      html += "<tr><td>Particulate (UG/M3) </td><td>"+item.PART_UGM3+"</td></tr>"
-      html += "<tr><td>Nitrogen Dioxide (PPB) </td><td>"+item.NO2_PPB+"</td></tr>"
-      html += "<tr><td>Carbon Monoxide (PPM) </td><td>"+item.CO_PPM+"</td></tr>"
-      html += "<tr><td>Temperature (F) </td><td>"+item.TEMP_F+"</td></tr>"
-      html += "<tr><td>Humidity (%) </td><td>"+item.RHUM+"</td></tr>"
+      html += "<tr><td>Time</td><td>"+item.datetime+" </td></tr>"
+      html += "<tr><td>Sensor </td><td>"+item.parameter+"</td></tr>"
+      html += "<tr><td>Value </td><td>"+item.value+"</td></tr>"
+      html += "<tr><td>Units </td><td>"+item.unit+"</td></tr>"
+      if(item.computed_aqi){
+        html += "<tr><td>Computed AQI </td><td>"+item.computed_aqi+"</td></tr>"
+      }
       html += "<tr><td>Coordinates </td><td>"+item.lat+", "+item.lon+"</td></tr>"
       html += "</table>" 
       html += "</div>"
@@ -386,7 +381,7 @@ var AQE = (function ( $ ) {
     else if(item.type == "parks"){
       layer.setIcon(defaultIcon)
       var html = "<div><h4>Park Details</h4>"
-      html += "<table class='table table-striped' data-bike_id='"+item.ParkKey+"'>"
+      html += "<table class='table table-striped' data-parks_id='"+item.ParkKey+"'>"
       html += "<tr><td>Park Key</td><td>"+item.ParkKey+" </td></tr>"
       html += "<tr><td>Name</td><td><a href='"+item.Url+"' target='blank'>"+item.DisplayName+"</a> </td></tr>"
       html += "<tr><td>Amenities</td><td>"+item.Amenities.join(", ")+" </td></tr>"
@@ -402,7 +397,7 @@ var AQE = (function ( $ ) {
     else if(item.type == "food"){
       layer.setIcon(defaultIcon)
       var html = "<div><h4>Inspected Establishment Details</h4>"
-      html += "<table class='table table-striped' data-bike_id='"+item.EstablishmentID+"'>"
+      html += "<table class='table table-striped' data-food_id='"+item.EstablishmentID+"'>"
       html += "<tr><td>Establishment ID</td><td>"+item.EstablishmentID+" </td></tr>"
       html += "<tr><td>Name</td><td>"+item.EstablishmentName+"</a> </td></tr>"
       html += "<tr><td>Inspection Scores</td><td>"+item.Inspections.join(", ")+" </td></tr>"
@@ -499,13 +494,16 @@ var AQE = (function ( $ ) {
       else if(filter_selections["propaqe-group-3"] == "true" && item.group_code == "3"){ show = true }
       else{ show = false }
     }
-    else if(item.type == "bike"){
-      if(filter_selections["bike-test-06222014"] == "true"){ show = true }
+    else if(item.type == "bike" && filter_selections["bike-bike_id"] != "" && filter_selections["bike-parameter" != ""]){
+      if(filter_selections["bike-bike_id"] == item.bike_id && filter_selections["bike-parameter"] == item.parameter){
+        show = true
+      }
       // if(filter_selections["bike-O3"] == "true" && item.parameter == "O3"){ show = true }
       // else if(filter_selections["bike-CO"] == "true" && item.parameter == "CO"){ show = true }
       // else if(filter_selections["bike-NO2"] == "true" && item.parameter == "NO2"){ show = true }
+      // else if(filter_selections["bike-O3"] == "true" && item.parameter == "O3"){ show = true }
       // else if(filter_selections["bike-VOC"] == "true" && item.parameter == "VOC"){ show = true }
-      // else if(filter_selections["bike-Particulate"] == "true" && item.parameter == "PARTICULATE"){ show = true }
+      // else if(filter_selections["bike-PARTICULATE"] == "true" && item.parameter == "PARTICULATE"){ show = true }
       // else if(filter_selections["bike-RHUM"] == "true" && item.parameter == "RHUM"){ show = true }
       // else if(filter_selections["bike-TEMP"] == "true" && item.parameter == "TEMP"){ show = true }
       else{ show = false }
@@ -536,12 +534,19 @@ var AQE = (function ( $ ) {
     filter_selections["food"] = $('input.filter-food:checked').val()
     filter_selections["parks"] = $('input.filter-parks:checked').val()
     // durham labs
-    filter_selections["bike-test-06222014"] = $('input.filter-bike-test-06222014:checked').val()
+    filter_selections["bike-bike_id"] = $('select.filter-bike-bike_id').val()
+    filter_selections["bike-parameter"] = $('select.filter-bike-parameter').val()
+    if(filter_selections["bike-bike_id"] != "" && filter_selections["bike-parameter"] != ""){
+      filter_selections["bike"] = true
+    } else {
+      filter_selections["bike"] = false
+    }
+
     // filter_selections["bike-O3"] = $('input.filter-bike-O3:checked').val()
     // filter_selections["bike-CO"] = $('input.filter-bike-CO:checked').val()
     // filter_selections["bike-NO2"] = $('input.filter-bike-NO2:checked').val()
     // filter_selections["bike-VOC"] = $('input.filter-bike-VOC:checked').val()
-    // filter_selections["bike-Particulate"] = $('input.filter-bike-Particulate:checked').val()
+    // filter_selections["bike-PARTICULATE"] = $('input.filter-bike-Particulate:checked').val()
     // filter_selections["bike-TEMP"] = $('input.filter-bike-TEMP:checked').val()
     // filter_selections["bike-RHUM"] = $('input.filter-bike-RHUM:checked').val()
   }
@@ -681,6 +686,15 @@ var AQE = (function ( $ ) {
         map.addLayer(propellerhealth_layer)
       });
     }
+  }
+
+  function choose_post_data(key){
+    var post_data = {}
+    if(key == "bike"){ // BIKE HACK
+      post_data['bike_id'] = filter_selections["bike-bike_id"]
+      post_data['parameter'] = filter_selections["bike-parameter"]
+    }
+    return post_data
   }
 
 

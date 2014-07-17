@@ -92,30 +92,49 @@
             <i class="fa fa-bars"></i> Durham Labs
             <a target="blank" href="/wizard#datasets=bike" title="data visualization wizard for this dataset"><i class="fa fa-magic fa-fw"></i></a>
           </label>
-          <div class="checkbox">
-              <label><input class='filter-bike-test-06222014 filter-bike' type="checkbox" value="true">06/22/2014 Test Bike Ride</label>
+          <div style="margin-left:8px;">
+            <label style="font-weight:normal;"> Bike
+            <select class='filter-bike-bike_id filter-bike form-control'>
+              <option value=""></option>
+              <% ["A4","A5","A8","A9","A10","A11","A12","A13","A17","A18","A19","A20","A21","A22"].each do |bike_id| %>
+                <option value="<%= bike_id %>">Bike <%= bike_id %></option>
+              <% end %>
+            </select>
+            </label>
           </div>
 
-<!--           <div class="checkbox">
-              <label><input class='filter-bike-O3 filter-bike' type="checkbox" value="true" disabled>Bike O3 Sensor</label>
+          <div style="margin-left:8px;">
+            <label style="font-weight:normal;"> Sensor
+            <select class='filter-bike-parameter filter-bike form-control'>
+              <option value=""></option>
+              <% ["CO","NO2","O3","VOC","TEMP","RHUM","PARTICULATE"].each do |parameter| %>
+                <option value="<%= parameter %>"><%= parameter %></option>
+              <% end %>
+            </select>
+            </label>
+          </div>
+
+
+<!--          <div class="checkbox">
+              <label><input class='filter-bike-CO filter-bike' type="checkbox" value="true">Carbon Monoxide (CO)</label>
+              </div>
+          <div class="checkbox">
+              <label><input class='filter-bike-NO2 filter-bike' type="checkbox" value="true">Nitrogen Dioxide (NO2)</label>
           </div>
           <div class="checkbox">
-              <label><input class='filter-bike-CO filter-bike' type="checkbox" value="true" disabled>Bike CO Sensor</label>
+              <label><input class='filter-bike-O3 filter-bike' type="checkbox" value="true">Ozone Sensor</label>
           </div>
           <div class="checkbox">
-              <label><input class='filter-bike-NO2 filter-bike' type="checkbox" value="true" disabled>Bike NO2 Sensor</label>
+              <label><input class='filter-bike-VOC filter-bike' type="checkbox" value="true">Volatile Organic Compounds (VOC)</label>
           </div>
           <div class="checkbox">
-              <label><input class='filter-bike-VOC filter-bike' type="checkbox" value="true" disabled>Bike VOC Sensor</label>
+              <label><input class='filter-bike-PARTICULATE filter-bike' type="checkbox" value="true">Particulates</label>
           </div>
           <div class="checkbox">
-              <label><input class='filter-bike-Particulate filter-bike' type="checkbox" value="true" disabled>Bike Particulate Sensor</label>
+              <label><input class='filter-bike-TEMP filter-bike' type="checkbox" value="true">Temperature (TEMP)</label>
           </div>
           <div class="checkbox">
-              <label><input class='filter-bike-TEMP filter-bike' type="checkbox" value="true" disabled>Bike Temperature Sensor</label>
-          </div>
-          <div class="checkbox">
-              <label><input class='filter-bike-RHUM filter-bike' type="checkbox" value="true" disabled>Bike Humidity Sensor</label>
+              <label><input class='filter-bike-RHUM filter-bike' type="checkbox" value="true">Relative Humidity (RHUM)</label>
           </div>
  -->      </div>
       <div class="form-group">
