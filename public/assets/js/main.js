@@ -31,6 +31,18 @@ var AQE = (function ( $ ) {
       iconUrl: nursinghomeIconURL,
       iconSize: [30, 30], // size of the icon
   });
+  var foodIconURL = '/assets/img/fastfood_icon.png'
+  var foodIcon = L.icon({
+      iconUrl: foodIconURL,
+      iconSize: [30, 30], // size of the icon
+  });
+  var parkIconURL = '/assets/img/urbanpark_icon.png'
+  var parkIcon = L.icon({
+      iconUrl: parkIconURL,
+      iconSize: [30, 30], // size of the icon
+  });
+
+
 
   var defaultIconURL = '/vendor/leaflet-0.8-dev-06062014/images/marker-icon.png'
   var defaultIcon = L.icon({
@@ -384,12 +396,12 @@ var AQE = (function ( $ ) {
       layer.bindPopup(html)
     }
     else if(item.type == "parks"){
-      layer.setIcon(defaultIcon)
+      layer.setIcon(parkIcon)
       var html = "<div><h4>Park Details</h4>"
       html += "<table class='table table-striped' data-parks_id='"+item.ParkKey+"'>"
       html += "<tr><td>Park Key</td><td>"+item.ParkKey+" </td></tr>"
       html += "<tr><td>Name</td><td><a href='"+item.Url+"' target='blank'>"+item.DisplayName+"</a> </td></tr>"
-      html += "<tr><td>Amenities</td><td>"+item.Amenities.join(", ")+" </td></tr>"
+      html += "<tr><td>Amenities</td><td>"+item.Amenities.join("<br />")+" </td></tr>"
       html += "<tr><td>Telephone</td><td>"+item.Telephone+" </td></tr>"
       html += "<tr><td>Address</td><td>"+item.StreetAddr+" </td></tr>"
       html += "<tr><td>City</td><td>"+item.City+" </td></tr>"
@@ -400,12 +412,12 @@ var AQE = (function ( $ ) {
       layer.bindPopup(html)
     }
     else if(item.type == "food"){
-      layer.setIcon(defaultIcon)
+      layer.setIcon(foodIcon)
       var html = "<div><h4>Inspected Establishment Details</h4>"
       html += "<table class='table table-striped' data-food_id='"+item.EstablishmentID+"'>"
       html += "<tr><td>Establishment ID</td><td>"+item.EstablishmentID+" </td></tr>"
       html += "<tr><td>Name</td><td>"+item.EstablishmentName+"</a> </td></tr>"
-      html += "<tr><td>Inspection Scores</td><td>"+item.Inspections.join(", ")+" </td></tr>"
+      html += "<tr><td>Inspection Scores</td><td>"+item.Inspections.join("<br />")+" </td></tr>"
       html += "<tr><td>Address</td><td>"+item.Address+" </td></tr>"
       html += "<tr><td>City</td><td>"+item.City+" </td></tr>"
       html += "<tr><td>State</td><td>"+item.State+" </td></tr>"
