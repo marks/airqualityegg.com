@@ -28,13 +28,13 @@ namespace :ckan do
         {:id => "number_of_substantiated_complaints", :type => "int"},
         {:id => "number_of_certified_beds", :type => "int"},
         {:id => "number_of_residents_in_certified_beds", :type => "int"},
-        {:id => "total_weighted_health_survey_score", :type => "int"},
+        {:id => "total_weighted_health_survey_score", :type => "float"},
         {:id => "overall_rating", :type => "int"},
         {:id => "rn_staffing_rating", :type => "int"},
         {:id => "qm_rating", :type => "int"},
         {:id => "staffing_rating", :type => "int"},
-        {:id => "health_inspection_rating", :type => "int"}
-        {:id => "processing_date", :type => "timestamp"},
+        {:id => "health_inspection_rating", :type => "int"},
+        {:id => "processing_date", :type => "timestamp"}
       ]
 
       desc "Create CKAN resource for sites (if it doesn't exist) and then upsert CKAN with site data"
@@ -80,8 +80,8 @@ namespace :ckan do
           site_data = {}
 					site_data["federal_provider_number"] = home["federal_provider_number"]
 					site_data["provider_name"] = home["provider_name"]
-					site_data["lat"] = home["location"]["latitude"]
-					site_data["lon"] = home["location"]["longitude"]
+					site_data["lat"] = home["location"]["latitude"] if home["location"]
+					site_data["lon"] = home["location"]["longitude"] if home["location"]
 					site_data["provider_type"] = home["provider_type"]
 					site_data["provider_county_name"] = home["provider_county_name"]
 					site_data["provider_city"] = home["provider_city"]
