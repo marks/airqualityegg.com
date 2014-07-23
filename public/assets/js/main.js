@@ -422,7 +422,7 @@ var AQE = (function ( $ ) {
       html += "<br /><strong>Grass:</strong> "+item.grass
       html += "<br /><strong>Mold:</strong> "+item.mold+" </td></tr>"
       html += "</table>" 
-      html += "<p style='font-size:80%'>From <a href='http://www.familyallergy.com/' target='blank'>Family Allergy and Asthma</a>, 'a group of board-certified allergy and asthma specialists practicing at more than 20 locations throughout Kentucky and Southern Indiana.'"
+      html += "<p style='font-size:80%'>From <a href='http://www.familyallergy.com/' target='blank'>Family Allergy and Asthma</a> (a group of board-certified allergy and asthma specialists practicing at more than 20 locations throughout Kentucky and Southern Indiana)"
       html += "</div>"
       layer.bindPopup(html)
     } else {
