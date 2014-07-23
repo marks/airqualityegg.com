@@ -26,6 +26,11 @@ var AQE = (function ( $ ) {
       iconUrl: famallergyIconURL,
       iconSize: [17, 17], // size of the icon
   });
+  var nursinghomeIconURL = '/assets/img/nursing_home_icon.png'
+  var nursinghomeIcon = L.icon({
+      iconUrl: nursinghomeIconURL,
+      iconSize: [30, 30], // size of the icon
+  });
 
   var defaultIconURL = '/vendor/leaflet-0.8-dev-06062014/images/marker-icon.png'
   var defaultIcon = L.icon({
@@ -337,7 +342,7 @@ var AQE = (function ( $ ) {
       html += "<table class='table table-striped' data-school_id='"+item.NCESSchoolID+"'>"
       html += "<tr><td>School Name </td><td>"+item.SchoolName+" </td></tr>"
       html += "<tr><td>Grades </td><td>"+item.LowGrade+" through "+item.HighGrade+" </td></tr>"
-      html += "<tr><td>Phone Number </td><td>"+item.Phone+" </td></tr>"
+      html += "<tr><td>Phone # </td><td>"+item.Phone+" </td></tr>"
       html += "<tr><td># Students </td><td>"+item["Students*"]+" </td></tr>"
       html += "<tr><td>Student-Teacher Ratio </td><td>"+item["StudentTeacherRatio*"]+" </td></tr>"
       html += "<tr><td>Title I School (Wide)? </td><td>"+item["TitleISchool*"]+" ("+item["Title1SchoolWide*"]+") </td></tr>"
@@ -425,6 +430,33 @@ var AQE = (function ( $ ) {
       html += "<p style='font-size:80%'>From <a href='http://www.familyallergy.com/' target='blank'>Family Allergy and Asthma</a> (a group of board-certified allergy and asthma specialists practicing at more than 20 locations throughout Kentucky and Southern Indiana)"
       html += "</div>"
       layer.bindPopup(html)
+    }
+    else if(item.type == "nursinghome"){
+      layer.setIcon(nursinghomeIcon)
+      var html = "<div><h4>"+item.provider_name+"</h4>"
+      html += "<table class='table table-striped' data-nursinghome_id='"+item.id+"'>"
+      html += "<tr><td>Legal Business Name</td><td>"+item.legal_business_name+" </td></tr>"
+      html += "<tr><td>Federal Provider #</td><td><a href='http://www.medicare.gov/nursinghomecompare/profile.html#profTab=0&ID="+item.federal_provider_number+"' target='blank'>"+item.federal_provider_number+"</a></td></tr>"
+      html += "<tr><td>Provider Address</td><td>"+item.provider_name+" </td></tr>"
+      html += "<tr><td>Provider City, State, Zip</td><td>"+item.provider_city+", "+item.provider_state+" "+item.provider_zip_code+" </td></tr>"
+      html += "<tr><td>Provider County Name</td><td>"+item.provider_county_name+" </td></tr>"
+      html += "<tr><td>Provider Phone</td><td>"+item.provider_phone_number+" </td></tr>"
+      html += "<tr><td>Ownership Type</td><td>"+item.ownership_type+" </td></tr>"
+      html += "<tr><td>Provider Type</td><td>"+item.provider_type+" </td></tr>"
+      html += "<tr><td>Ratings</td><td>"
+      html += "<strong>Staffing:</strong> "+item.staffing_rating+"/5"
+      html += "<br /><strong>RN Staffing:</strong> "+item.rn_taffing_rating+"/5"
+      html += "<br /><strong>Quality Measure:</strong> "+item.qm_rating+"/5"
+      html += "<br /><strong>Health Inspection:</strong> "+item.health_inspection_rating+"/5"
+      html += "</td></tr>"
+      html += "<tr><td>Total Weighted Health Survey Score</td><td>"+item.total_weighted_health_survey_score+" </td></tr>"
+      html += "<tr><td>Total # of Penalties</td><td>"+item.total_number_of_penalties+" </td></tr>"
+      html += "<tr><td># of Facility Reported Incidents</td><td>"+item.number_of_facility_reported_incidents+" </td></tr>"
+      html += "<tr><td># of Certified Beds</td><td>"+item.number_of_certified_beds+" </td></tr>"
+      html += "</table>" 
+      html += "<p style='font-size:80%'>From <a href='https://data.medicare.gov/data/nursing-home-compare' target='blank'>CMS Nursing Home Compare</a>. This provider was last processed "+moment(item.processing_date).fromNow()+" on "+moment(item.processing_date).calendar()+"."
+      html += "</div>"
+      layer.bindPopup(html)
     } else {
       var html = "<div><h4>"+item.type.toUpperCase()+" ID #"+item.id+"</h4></div>"
       layer.bindPopup(html)
@@ -476,6 +508,10 @@ var AQE = (function ( $ ) {
       if(filter_selections["jeffschools"] == "true" && item.District == "JEFFERSONCOUNTY"){ show = true }
       else{ show = false }
     }
+    else if(item.type == "nursinghome"){
+      if(filter_selections["nursinghome"] == "true"){ show = true }
+      else{ show = false }
+    }
     else if(item.type == "famallergy"){
       if(filter_selections["famallergy"] == "true"){ show = true }
       else{ show = false }
@@ -498,14 +534,6 @@ var AQE = (function ( $ ) {
       if(filter_selections["bike-bike_id"] == item.bike_id && filter_selections["bike-parameter"] == item.parameter){
         show = true
       }
-      // if(filter_selections["bike-O3"] == "true" && item.parameter == "O3"){ show = true }
-      // else if(filter_selections["bike-CO"] == "true" && item.parameter == "CO"){ show = true }
-      // else if(filter_selections["bike-NO2"] == "true" && item.parameter == "NO2"){ show = true }
-      // else if(filter_selections["bike-O3"] == "true" && item.parameter == "O3"){ show = true }
-      // else if(filter_selections["bike-VOC"] == "true" && item.parameter == "VOC"){ show = true }
-      // else if(filter_selections["bike-PARTICULATE"] == "true" && item.parameter == "PARTICULATE"){ show = true }
-      // else if(filter_selections["bike-RHUM"] == "true" && item.parameter == "RHUM"){ show = true }
-      // else if(filter_selections["bike-TEMP"] == "true" && item.parameter == "TEMP"){ show = true }
       else{ show = false }
     }
     return show
@@ -528,6 +556,8 @@ var AQE = (function ( $ ) {
     filter_selections["active-sites"] = $('input.filter-active-sites:checked').val()
     // jeffschools specific
     filter_selections["jeffschools"] = $('input.filter-jeffschools:checked').val()
+    // nursing home specific
+    filter_selections["nursinghome"] = $('input.filter-nursinghome:checked').val()
     // famallergy specific
     filter_selections["famallergy"] = $('input.filter-famallergy:checked').val()
     // portal.louisvilleky.gov
