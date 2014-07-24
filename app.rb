@@ -130,11 +130,26 @@ class AirQualityEgg < Sinatra::Base
 
   end
 
-
   # Render css from scss
-  get '/style.css' do
-    scss :style
+  # get '/style.css' do
+  #   scss :style
+  # end
+
+  get '/aqe/dashboard' do
+    dataset_key = "aqe"
+    focus_ids = META[dataset_key]["extras_hash"]["Focus IDs"]
+    @sql = <<-EOS
+      SELECT site_table.id, site_table.created, site_table.description, site_table.feed, site_table.location_domain, site_table.location_ele, site_table.location_exposure, site_table.location_lat, site_table.location_lon, site_table.status, site_table.title,
+      ( SELECT data_table.datetime FROM \"#{META[dataset_key]["data_resource_id"]}\" data_table WHERE data_table.feed_id = site_table. ID ORDER BY datetime DESC LIMIT 1 )
+      AS last_datapoint FROM \"#{META[dataset_key]["site_resource_id"]}\" site_table
+      WHERE id IN(#{focus_ids})
+      ORDER BY last_datapoint ASC NULLS FIRST
+    EOS
+    @focus_ids = focus_ids.split(",")
+    @results = sql_search_ckan(@sql)
+    erb :dashboard_aqe
   end
+
 
   # Home page
   get '/' do
