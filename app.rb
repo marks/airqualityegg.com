@@ -18,35 +18,9 @@ include AppHelpers
 require "sinatra/activerecord"
 ActiveRecord::Base.logger = Logger.new(STDOUT)
 
-
+# set META with the latest data
 META = {}
-# set some metadata # todo - cleanup
-ENV["CKAN_DATASET_KEYS"].split(",").each do |key|
-  META[key] = get_ckan_package_by_slug(ENV["CKAN_#{key.upcase}_DATASET_ID"])
-  META[key]["site_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"]
-  META[key]["data_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"]
-end
-
-ENV["CKAN_DATASET_KEYS_SITES_JOINABLE"].split(",").each do |dataset_key|
-  fields = {}
-  META[dataset_key]["extras_hash"].select{|k,v| k.match("field_containing_site_")}.sort.each do |k,v|
-    field_as = k.gsub("field_containing_site_","")
-    field_key = v
-    fields[field_as] = field_key
-  end
-  # puts fields.inspect
-  sql = "SELECT '#{dataset_key}' AS site_type, "
-  sql += fields.map { |as,key|
-    if ["latitude","longitude"].include?(as)
-      cast_as = "float"
-    else 
-      cast_as = "VARCHAR(255)"
-    end
-    "#{key}::#{cast_as} AS #{as}"
-  }.join(", ")
-  sql += " FROM \"#{META[dataset_key]["site_resource_id"]}\" #{dataset_key}"
-  META[dataset_key]["site_join_sql"] = sql
-end
+set_ckan_metadata! 
 
 class AirQualityEgg < Sinatra::Base
   register Sinatra::MultiRoute
@@ -476,6 +450,7 @@ class AirQualityEgg < Sinatra::Base
   end
 
   get '/cache/flush' do
+    set_ckan_metadata!
     return settings.cache.flush.to_s
   end
 

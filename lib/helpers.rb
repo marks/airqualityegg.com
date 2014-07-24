@@ -420,23 +420,52 @@ module AppHelpers
     end
   end
 
-def fetch_whole_socrata_dataset(endpoint, per_page = 1000, where_clause = nil, token = ENV['SOCRATA_APP_TOKEN'])
-  all_results = []
-  page = 0
-  request_url = "#{endpoint}&$limit=#{per_page}&$offset=#{per_page*page}"
-  request_url += "&$where=#{URI.encode(where_clause)}" if where_clause
-  puts "Fetching all results from #{request_url}"
-  page_results = JSON.parse(RestClient.get(request_url), {"X-App-Token" => token})
-  until page_results.empty?
-    all_results = all_results + page_results
-    puts "Added #{page_results.size} results from page #{page+1} for a total of #{all_results.size}"
-    page = page + 1
-    request_url = "#{endpoint}&$limit=#{per_page}&$offset=#{per_page*(page)}"
+  def fetch_whole_socrata_dataset(endpoint, per_page = 1000, where_clause = nil, token = ENV['SOCRATA_APP_TOKEN'])
+    all_results = []
+    page = 0
+    request_url = "#{endpoint}&$limit=#{per_page}&$offset=#{per_page*page}"
+    request_url += "&$where=#{URI.encode(where_clause)}" if where_clause
+    puts "Fetching all results from #{request_url}"
     page_results = JSON.parse(RestClient.get(request_url), {"X-App-Token" => token})
+    until page_results.empty?
+      all_results = all_results + page_results
+      puts "Added #{page_results.size} results from page #{page+1} for a total of #{all_results.size}"
+      page = page + 1
+      request_url = "#{endpoint}&$limit=#{per_page}&$offset=#{per_page*(page)}"
+      page_results = JSON.parse(RestClient.get(request_url), {"X-App-Token" => token})
+    end
+    puts "Collected a total of #{all_results.size} records"
+    return all_results
   end
-  puts "Collected a total of #{all_results.size} records"
-  return all_results
-end
+
+  def set_ckan_metadata!
+    ENV["CKAN_DATASET_KEYS"].split(",").each do |key|
+      META[key] = get_ckan_package_by_slug(ENV["CKAN_#{key.upcase}_DATASET_ID"])
+      META[key]["site_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"]
+      META[key]["data_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"]
+    end
+
+    ENV["CKAN_DATASET_KEYS_SITES_JOINABLE"].split(",").each do |dataset_key|
+      fields = {}
+      META[dataset_key]["extras_hash"].select{|k,v| k.match("field_containing_site_")}.sort.each do |k,v|
+        field_as = k.gsub("field_containing_site_","")
+        field_key = v
+        fields[field_as] = field_key
+      end
+      # puts fields.inspect
+      sql = "SELECT '#{dataset_key}' AS site_type, "
+      sql += fields.map { |as,key|
+        if ["latitude","longitude"].include?(as)
+          cast_as = "float"
+        else 
+          cast_as = "VARCHAR(255)"
+        end
+        "#{key}::#{cast_as} AS #{as}"
+      }.join(", ")
+      sql += " FROM \"#{META[dataset_key]["site_resource_id"]}\" #{dataset_key}"
+      META[dataset_key]["site_join_sql"] = sql
+    end
+  end
 
 
 end
