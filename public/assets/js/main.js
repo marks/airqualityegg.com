@@ -167,10 +167,6 @@ var AQE = (function ( $ ) {
 
       map.on('draw:created', compareFeatures)
 
-
-
-
-
     }
 
     // if on an site's page, zoom in close to the site
@@ -743,6 +739,7 @@ var AQE = (function ( $ ) {
     })
     if(count > 100){form.method = "post"}
     else { form.method = "get" }
+    console.log(count,form)
     document.body.appendChild(form);
     form.submit();
     map.addLayer(layer);
