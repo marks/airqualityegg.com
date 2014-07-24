@@ -165,38 +165,12 @@ var AQE = (function ( $ ) {
       })
       map.fireEvent('moveend')
 
-      map.on('draw:created', function (e) {
-        if(typeof(drawn) != "undefined"){map.removeLayer(drawn)} // remove previously drawn item
-        in_bounds = {} // reset in_bounds away
+      map.on('draw:created', compareFeatures)
 
-        var type = e.layerType, layer = e.layer;          
-        drawn = layer
 
-        $.each(Object.keys(geoJsonLayers), function(n,type){
-          $.each(geoJsonLayers[type].getLayers(), function(n,item){
-            var layer_in_bounds = drawn.getBounds().contains(item.getLatLng())
-            if(layer_in_bounds){ 
-              if(typeof(in_bounds[item.ref.type]) == "undefined"){ in_bounds[item.ref.type] = [] }
-              in_bounds[item.ref.type].push(item.ref.id)
-            }
-          })
-        })
 
-        var form = document.createElement("form");
-        form.action = "/compare";
-        form.method = "post"
-        form.target = "_blank"
-        $.each(in_bounds, function(type,ids){
-          var input = document.createElement("input");
-          input.name = type;
-          input.value = ids.join(",");
-          form.appendChild(input);
-        })
-        document.body.appendChild(form);
-        form.submit();
 
-        map.addLayer(layer);
-      });
+
     }
 
     // if on an site's page, zoom in close to the site
@@ -737,6 +711,41 @@ var AQE = (function ( $ ) {
       post_data['parameter'] = filter_selections["bike-parameter"]
     }
     return post_data
+  }
+
+  function compareFeatures(e){
+    if(typeof(drawn) != "undefined"){map.removeLayer(drawn)} // remove previously drawn item
+    in_bounds = {} // reset in_bounds away
+
+    var type = e.layerType, layer = e.layer;          
+    drawn = layer
+
+    $.each(Object.keys(geoJsonLayers), function(n,type){
+      $.each(geoJsonLayers[type].getLayers(), function(n,item){
+        var layer_in_bounds = drawn.getBounds().contains(item.getLatLng())
+        if(layer_in_bounds){ 
+          if(typeof(in_bounds[item.ref.type]) == "undefined"){ in_bounds[item.ref.type] = [] }
+          in_bounds[item.ref.type].push(item.ref.id)
+        }
+      })
+    })
+
+    var form = document.createElement("form");
+    form.action = "/compare";
+    form.target = "_blank"
+    var count = 0;
+    $.each(in_bounds, function(type,ids){
+      var input = document.createElement("input");
+      input.name = type;
+      input.value = ids.join(",");
+      count += ids.length
+      form.appendChild(input);
+    })
+    if(count > 100){form.method = "post"}
+    else { form.method = "get" }
+    document.body.appendChild(form);
+    form.submit();
+    map.addLayer(layer);
   }
 
 
