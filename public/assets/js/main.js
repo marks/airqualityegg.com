@@ -201,9 +201,11 @@ var AQE = (function ( $ ) {
       $.getJSON("/"+type+"/"+id+".json", function(data,status){
 
         if(data.status == "not_found"){
+          $(row).find(".sensor-status").html("not_found")
           $(row).addClass("danger")
           $(row).children('td').last().html("No data for this site")
           move_row_to_top(row)
+          $(".num-sensors-not_found").html(parseInt($(".num-sensors-not_found").html()) + 1)
         }
         else {
           $(row).find(".sensor-title").html(data.site_name || data.title)
@@ -211,7 +213,11 @@ var AQE = (function ( $ ) {
           if(detail == "dashboard"){
             if(data.status == "frozen"){
               $(row).addClass("warning")
+              $(".num-sensors-frozen").html(parseInt($(".num-sensors-frozen").html()) + 1)
               move_row_to_top(row)
+            } else {
+              $(row).addClass("success")
+              $(".num-sensors-live").html(parseInt($(".num-sensors-live").html()) + 1)
             }
             $(row).find(".sensor-status").html(data.status)
             $(row).find(".sensor-created_at").html(moment(data.created).fromNow()+" ("+moment(data.created).calendar()+")")
