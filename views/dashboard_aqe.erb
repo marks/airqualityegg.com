@@ -4,11 +4,39 @@
 
     <h1>Focus Air Quality Egg Dashboard</h1>
 
-	<a class='btn btn-outline btn-primary' target='blank' href='/wizard?#&amp;datasets=aqe&amp;sql=<%= URI.encode(@sql) %>&amp;viewName=grid'>Shortcut to Data Viz Wizard for this Focus Eggs</a>
 
 	<hr />
 
-	<%= @results.inspect %>
+	<div class="pull-right">
+		<a class='btn btn-outline btn-primary' target='blank' href='/wizard?#&amp;datasets=aqe&amp;sql=<%= URI.encode(@sql) %>&amp;viewName=grid'>Shortcut to Data Viz Wizard for these Eggs</a>
+	</div>
+
+	<h2>Focus Air Quality Eggs</h2>	
+
+	<div class="table-responsive">
+		<table class="dataTableify table table-striped table-bordered table-hover">
+			<thead>
+			  <tr>
+			    <th>Sensor ID</th>
+			    <th>Sensor Name/Description</th>
+			    <th>Sensor Status</th>
+			    <th>Sensor Created</th>
+			    <th>Latest Data</th>
+			  </tr>
+		  </thead>
+		  <tbody>
+			  <% @focus_ids.each do |focus_id| %>
+			    <tr data-sensor-id="<%= focus_id %>" data-sensor-type="aqe" data-detail-level="dashboard" >
+			      <td><a href='/aqe/<%= focus_id %>'>AQE #<%= focus_id %><i class="fa fa-external-link fa-fw"></i></a></td>
+			      <td><strong class="sensor-title"></strong><br /><span class="sensor-description"></span></td>
+			      <td><span class="sensor-status"></span></td>
+			      <td><span class="sensor-created_at"></span></td>
+			      <td>Loading data for this sensor</td>
+			    </tr>
+			  <% end %>
+		  </tbody>
+		</table>
+	</div>
 
   </div>
 </div>

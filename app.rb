@@ -321,38 +321,42 @@ class AirQualityEgg < Sinatra::Base
 
     data = sql_search_ckan(sql_for_aqe_site(params[:id])).first
 
-    data[:datastreams] = {}
-    datastreams_sql = sql_for_aqe_datastreams(params[:id]) 
-    datastreams_data = sql_search_ckan(datastreams_sql)
-    datastreams_data.each do |datastream|
-      data[:datastreams][datastream["parameter"].to_sym] = datastream if datastream
-    end    
+    if data.nil?
+      data = {:id => params[:id].to_i, :status => "not_found"}
+    else
+      data[:datastreams] = {}
+      datastreams_sql = sql_for_aqe_datastreams(params[:id]) 
+      datastreams_data = sql_search_ckan(datastreams_sql)
+      datastreams_data.each do |datastream|
+        data[:datastreams][datastream["parameter"].to_sym] = datastream if datastream
+      end    
 
-    datastreams_aqi_asc = data[:datastreams].sort_by{|key,hash| hash["computed_aqi"].to_i}.last
-    data[:prevailing_aqi] = datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
+      datastreams_aqi_asc = data[:datastreams].sort_by{|key,hash| hash["computed_aqi"].to_i}.last
+      data[:prevailing_aqi] = datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
 
-    if params[:include_recent_history]
-      series = []
-      recent_history_sql = "SELECT feed_id,parameter,datetime,value,unit from \"#{META["aqe"]["data_resource_id"]}\" WHERE feed_id = #{params[:id]} and datetime > current_date - 45 and parameter != 'CO' order by datetime "
-      recent_history = sql_search_ckan(recent_history_sql).compact
-      series_names = recent_history.map{|x| x["parameter"]}.uniq
-      series_names.each do |series_name|
-        series_datapoints = recent_history.select{|x| x["parameter"] == series_name}
-        series << {
-          :data => series_datapoints.map {|x| [x["datetime"].to_time.utc.change(:zone_offset => '0').to_i*1000,x["value"].to_f] },
-          :name => "#{series_name} (#{series_datapoints.first["unit"]})" # assumption: all are the same for a given parameter
-        } 
+      if params[:include_recent_history]
+        series = []
+        recent_history_sql = "SELECT feed_id,parameter,datetime,value,unit from \"#{META["aqe"]["data_resource_id"]}\" WHERE feed_id = #{params[:id]} and datetime > current_date - 45 and parameter != 'CO' order by datetime "
+        recent_history = sql_search_ckan(recent_history_sql).compact
+        series_names = recent_history.map{|x| x["parameter"]}.uniq
+        series_names.each do |series_name|
+          series_datapoints = recent_history.select{|x| x["parameter"] == series_name}
+          series << {
+            :data => series_datapoints.map {|x| [x["datetime"].to_time.utc.change(:zone_offset => '0').to_i*1000,x["value"].to_f] },
+            :name => "#{series_name} (#{series_datapoints.first["unit"]})" # assumption: all are the same for a given parameter
+          } 
+        end
+        data[:recent_history] = series
       end
-      data[:recent_history] = series
-    end
 
-    if params[:include_averages]
-      data[:averages] = {}
-      [0, 3, 7, 28].each do |days|
-        data[:averages][days] = {}
-        results = sql_search_ckan(sql_for_average_over_days("aqe",params[:id], days))
-        results.each do |result|
-          data[:averages][days][result["parameter"].to_sym] = result
+      if params[:include_averages]
+        data[:averages] = {}
+        [0, 3, 7, 28].each do |days|
+          data[:averages][days] = {}
+          results = sql_search_ckan(sql_for_average_over_days("aqe",params[:id], days))
+          results.each do |result|
+            data[:averages][days][result["parameter"].to_sym] = result
+          end
         end
       end
     end

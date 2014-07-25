@@ -197,11 +197,30 @@ var AQE = (function ( $ ) {
     $("tr[data-sensor-id]").each(function(n,row){
       var type = $(row).data("sensor-type")
       var id = $(row).data("sensor-id")
-      $.getJSON("/"+type+"/"+id+".json", function(data){
-        $(row).find(".sensor-title").html(data.site_name || data.title)
-        $(row).find(".sensor-description").html(data.msa_name || data.cmsa_name || data.description)
-        var html = formatSensorDetails(data)
-        $(row).children('td').last().html(html)
+      var detail = $(row).data("detail-level")
+      $.getJSON("/"+type+"/"+id+".json", function(data,status){
+
+        if(data.status == "not_found"){
+          $(row).addClass("danger")
+          $(row).children('td').last().html("No data for this site")
+          move_row_to_top(row)
+        }
+        else {
+          $(row).find(".sensor-title").html(data.site_name || data.title)
+          $(row).find(".sensor-description").html(data.msa_name || data.cmsa_name || data.description)
+          if(detail == "dashboard"){
+            if(data.status == "frozen"){
+              $(row).addClass("warning")
+              move_row_to_top(row)
+            }
+            $(row).find(".sensor-status").html(data.status)
+            $(row).find(".sensor-created_at").html(data.created)
+          }
+          var html = formatSensorDetails(data)
+          $(row).children('td').last().html(html)
+        } 
+
+
       })
     })
 
@@ -211,7 +230,7 @@ var AQE = (function ( $ ) {
       $(item).html("<abbr title='"+original+"'>"+from_now+"</abbr>")
     })
 
-    $( ".submit-map-filters" ).on('click',function( event ) {
+    $(".submit-map-filters").on('click',function( event ) {
       event.preventDefault();
       authenticateAndLoadAsthmaHeatLayer($('input.filter-asthmaheat-user').val(),$('input.filter-asthmaheat-pass').val())
       layersData.bike = undefined // BIKE HACK
@@ -743,6 +762,10 @@ var AQE = (function ( $ ) {
     document.body.appendChild(form);
     form.submit();
     map.addLayer(layer);
+  }
+
+  function move_row_to_top(row){
+    $(row).parent().prepend($(row));
   }
 
 
