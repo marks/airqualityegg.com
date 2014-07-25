@@ -214,7 +214,7 @@ var AQE = (function ( $ ) {
               move_row_to_top(row)
             }
             $(row).find(".sensor-status").html(data.status)
-            $(row).find(".sensor-created_at").html(data.created)
+            $(row).find(".sensor-created_at").html(moment(data.created).fromNow()+" ("+moment(data.created).calendar()+")")
           }
           var html = formatSensorDetails(data)
           $(row).children('td').last().html(html)
