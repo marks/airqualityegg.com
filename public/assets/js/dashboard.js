@@ -53,7 +53,10 @@ $(function() {
         }
         var html = formatDashboardSensorDetails(data)
         $(row).children('td').last().html(html)
-        $(".inlinesparkline").sparkline();
+        $(".inlinesparkline").sparkline(
+          'html',
+          { tooltipFormatter: function (sparkline, options, fields) {return fields.y + " @ " + moment(fields.x+72000000).format("MM/DD/YY [at] h:mm a ([GMT] Z)")  ;}}
+        );
         $(".inlinesparkline").show()
       } 
     })
