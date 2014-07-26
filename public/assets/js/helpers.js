@@ -67,7 +67,7 @@ function formatSensorDetails(data){
       if(item.datetime){ html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  }
       else if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
       else {html += " (" + moment(item.date ).fromNow() +  ")" }
-        html += "</td>"
+      html += "</td>"
       html += "</tr>"
     }        
   })

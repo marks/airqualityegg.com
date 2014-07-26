@@ -3,7 +3,7 @@ $(function() {
     var type = $(row).data("sensor-type")
     var id = $(row).data("sensor-id")
     var detail = $(row).data("detail-level")
-    $.getJSON("/"+type+"/"+id+".json", function(data,status){
+    $.getJSON("/"+type+"/"+id+".json?include_recent_history=1&include_recent_history_days=3", function(data,status){
 
       if(data.status == "not_found"){
         $(row).find(".sensor-status").html("not_found")
@@ -27,9 +27,48 @@ $(function() {
           $(row).find(".sensor-status").html(data.status)
           $(row).find(".sensor-created_at").html(moment(data.created).fromNow()+" ("+moment(data.created).calendar()+")")
         }
-        var html = formatSensorDetails(data)
+        var html = formatDashboardSensorDetails(data)
         $(row).children('td').last().html(html)
+        $(".inlinesparkline").sparkline();
+        $(".inlinesparkline").show()
       } 
     })
 	})
 })
+
+
+function formatDashboardSensorDetails(data){
+  var html = ""
+  if(data.prevailing_aqi){
+    html += " <div class='alert' style='padding: 5px; background-color:"+data.prevailing_aqi.aqi_cat.color+"; color:"+data.prevailing_aqi.aqi_cat.font+"'>This location's air is "+data.prevailing_aqi.aqi_cat.name+"</div> "
+  }
+  var sensor_table = "<table class='table table-striped'><tr><th>Sensor</th><th>Latest Reading</th></tr></tr>"
+  html += sensor_table
+  $.each(data.datastreams, function(name,item){
+    if(item){
+      html += "<tr>"
+      html += "<td>"+name+"</td>"
+      html += "<td>"
+      if(item.computed_aqi > 0){
+        html += " <span class='alert' style='padding: 2px; background-color:"+item.aqi_cat.color+"; color:"+item.aqi_cat.font+"'>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</span> "
+      }
+      html += " " + item.value + " " + item.unit
+      if(item.datetime){ html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  }
+      else if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
+      else {html += " (" + moment(item.date ).fromNow() +  ")" }
+
+      if(item.recent_history){
+        var values = $.map(item.recent_history,function(pair,i){return pair[0]+":"+pair[1]})
+        console.log(values)
+        html += "<span class=\"inlinesparkline\" values=\""+values.join(",")+"\"></span>"
+      }
+
+
+      html += "</td>"
+      html += "</tr>"
+    }        
+  })
+  html += "</table>"
+  if(html == sensor_table+"</table>"){html = "<em>No recent data available</em>"}
+  return html
+}

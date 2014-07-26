@@ -333,8 +333,9 @@ class AirQualityEgg < Sinatra::Base
       data[:prevailing_aqi] = datastreams_aqi_asc.last if datastreams_aqi_asc && !datastreams_aqi_asc.last["computed_aqi"].nil?
 
       if params[:include_recent_history]
+        n_days = params[:include_recent_history_days].nil? ? 45 : params[:include_recent_history_days].to_i
         series = []
-        recent_history_sql = "SELECT feed_id,parameter,datetime,value,unit from \"#{META["aqe"]["data_resource_id"]}\" WHERE feed_id = #{params[:id]} and datetime > current_date - 45 and parameter != 'CO' order by datetime "
+        recent_history_sql = "SELECT feed_id,parameter,datetime,value,unit from \"#{META["aqe"]["data_resource_id"]}\" WHERE feed_id = #{params[:id]} and datetime > current_date - #{n_days} and parameter != 'CO' order by datetime "
         recent_history = sql_search_ckan(recent_history_sql).compact
         series_names = recent_history.map{|x| x["parameter"]}.uniq
         series_names.each do |series_name|
