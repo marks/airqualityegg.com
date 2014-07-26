@@ -4,13 +4,6 @@ var geoJsonLayers = {}, layersData = {}
 var AQE = (function ( $ ) {
   "use strict";
 
-  // set up icons for map
-  var eggIconURL = '/assets/img/egg-icon.png';
-  var eggIcon = L.icon({
-      iconUrl: eggIconURL,
-      iconSize: [19, 20], // size of the icon
-      className: 'egg-icon'
-  });
   var aqsIconURL = '/assets/img/blue-dot_15.png'
   var aqsIcon = L.icon({
       iconUrl: aqsIconURL,
@@ -141,9 +134,7 @@ var AQE = (function ( $ ) {
           var name = $.trim($(item).parent().text())
           div_html += "<img src='/assets/img/map_legends/"+name+".png' alt='legend for "+name+"'/>"
         })
-        // div_html += "<table class=''>"
-        // div_html += "<tr><td align='center'><img style='width:19px; height:19px;' src='' alt='school'> </td><td> Schools from Dept of Education</td></tr>";
-        // div_html += "</table>"
+
         div_html += "</div></div></div>"
         div.innerHTML = div_html
         return div;

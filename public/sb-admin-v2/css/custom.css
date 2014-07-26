@@ -145,12 +145,26 @@ a:hover {cursor:pointer;}
   -moz-box-shadow: 0px 0px 10px 1px #4C0026;
 }
 
-
 .aqi-bg-000000{
-  background-color: #CCC !important;
+  background-color: #FFFF00 !important;
   box-shadow: 0px 0px 10px 1px #CCC;
   -webkit-box-shadow: 0px 0px 10px 1px #CCC;
   -moz-box-shadow: 0px 0px 10px 1px #CCC;
+}
+
+.leaflet-icon-egg{
+  border-radius: 10px !important;
+  width: 10px !important;
+  height: 14px !important;
+  border: #CCC 1px;
+}
+
+.leaflet-icon-egg-live{
+  background-color: #008000 !important;
+}
+
+.leaflet-icon-egg-frozen{
+  background-color: #FFFF00 !important;
 }
 
 .egg-icon {

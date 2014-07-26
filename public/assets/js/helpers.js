@@ -1,3 +1,12 @@
+// set up icons for map
+var eggIconURL = '/assets/img/egg-icon.png';
+var eggIcon = L.icon({
+    iconUrl: eggIconURL,
+    iconSize: [19, 20], // size of the icon
+    className: 'egg-icon'
+});
+
+
 function getURLParameterByKey(name,hash) {
   name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
   if(hash == true){
