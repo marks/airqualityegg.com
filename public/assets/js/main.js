@@ -585,7 +585,11 @@ var AQE = (function ( $ ) {
 
     $.getJSON(location.pathname+".json?include_recent_history=1", function(data){
 
-      $.each(data.recent_history, function(i,series){
+      var recent_history = $.map(data.datastreams,function(data2,name){return {data: data2.recent_history, name: name+" ("+data2.unit+")"} })
+
+      console.log(recent_history)
+
+      $.each(recent_history, function(i,series){
         if(series.name.match(/ppb/gi)){
           series.yAxis = 0
         } else {
@@ -613,7 +617,7 @@ var AQE = (function ( $ ) {
               return ''+time.format("MMM D, YYYY [at] h:mm a ([GMT] Z)")+' ('+time.fromNow()+')<br />'+'<b>'+ series_label +':</b> '+this.y+' '+series_unit;
             }
           },
-          series: data.recent_history
+          series: recent_history
       });
 
     })
@@ -625,7 +629,9 @@ var AQE = (function ( $ ) {
 
     $.getJSON(location.pathname+".json?include_recent_history=1", function(data){
 
-      $.each(data.recent_history, function(i,series){
+      var recent_history = $.map(data.datastreams,function(data2,name){return {data: data2.recent_history, name: name+" ("+data2.unit+")"} })
+
+      $.each(recent_history, function(i,series){
         if(series.name.match(/ppb/gi)){
           series.yAxis = 0
         } else {
@@ -653,7 +659,7 @@ var AQE = (function ( $ ) {
               return ''+time.format("MMM D, YYYY [at] h:mm a ([GMT] Z)")+' ('+time.fromNow()+')<br />'+'<b>'+ series_label +':</b> '+this.y+' '+series_unit;
             }
           },
-          series: data.recent_history
+          series: recent_history
       });
 
     })

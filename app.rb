@@ -148,7 +148,7 @@ class AirQualityEgg < Sinatra::Base
     @focus_ids = focus_ids.split(",")
     @results = sql_search_ckan(@sql)
 
-    @custom_js = ["/assets/js/dashboard.js" ]
+    @custom_js = ["//cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.min.js", "/assets/js/dashboard.js" ]
     erb :dashboard_aqe
   end
 
@@ -279,12 +279,8 @@ class AirQualityEgg < Sinatra::Base
       series_names = recent_history.map{|x| x["parameter"]}.uniq
       series_names.each do |series_name|
         series_datapoints = recent_history.select{|x| x["parameter"] == series_name}
-        series << {
-          :data => series_datapoints.map {|x| [x["date"].to_time.utc.change(:hour => x["time"], :zone_offset => '0').to_i*1000,x["value"].to_f] },
-          :name => "#{series_name} (#{series_datapoints.first["unit"]})" # assumption: all are the same for a given parameter
-        }
+        data[:datastreams][series_name.to_sym][:recent_history] = series_datapoints.map {|x| [x["date"].to_time.utc.change(:hour => x["time"], :zone_offset => '0').to_i*1000,x["value"].to_f] }
       end
-      data[:recent_history] = series
     end
     return data.to_json
   end
@@ -343,12 +339,8 @@ class AirQualityEgg < Sinatra::Base
         series_names = recent_history.map{|x| x["parameter"]}.uniq
         series_names.each do |series_name|
           series_datapoints = recent_history.select{|x| x["parameter"] == series_name}
-          series << {
-            :data => series_datapoints.map {|x| [x["datetime"].to_time.utc.change(:zone_offset => '0').to_i*1000,x["value"].to_f] },
-            :name => "#{series_name} (#{series_datapoints.first["unit"]})" # assumption: all are the same for a given parameter
-          } 
+          data[:datastreams][series_name.to_sym][:recent_history] = series_datapoints.map {|x| [x["datetime"].to_time.utc.change(:zone_offset => '0').to_i*1000,x["value"].to_f] }
         end
-        data[:recent_history] = series
       end
 
       if params[:include_averages]
