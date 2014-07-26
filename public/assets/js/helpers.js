@@ -43,3 +43,35 @@ function aqiToColor(aqi){
   else { color = "#000000"}
   return color;
 }
+
+function move_row_to_top(row){
+  $(row).parent().prepend($(row));
+}
+
+function formatSensorDetails(data){
+  var html = ""
+  if(data.prevailing_aqi){
+    html += " <div class='alert' style='padding: 5px; background-color:"+data.prevailing_aqi.aqi_cat.color+"; color:"+data.prevailing_aqi.aqi_cat.font+"'>This location's air is "+data.prevailing_aqi.aqi_cat.name+"</div> "
+  }
+  var sensor_table = "<table class='table table-striped'><tr><th>Sensor</th><th>Latest Reading</th></tr></tr>"
+  html += sensor_table
+  $.each(data.datastreams, function(name,item){
+    if(item){
+      html += "<tr>"
+      html += "<td>"+name+"</td>"
+      html += "<td>"
+      if(item.computed_aqi > 0){
+        html += " <span class='alert' style='padding: 2px; background-color:"+item.aqi_cat.color+"; color:"+item.aqi_cat.font+"'>"+item.aqi_cat.name+" (AQI = "+item.computed_aqi+")</span> "
+      }
+      html += " " + item.value + " " + item.unit
+      if(item.datetime){ html += " (" + moment(item.datetime+"Z").fromNow() +  ")"  }
+      else if(item.time){ html += " (" + moment(item.date + " " + item.time).fromNow() +  ")" }
+      else {html += " (" + moment(item.date ).fromNow() +  ")" }
+        html += "</td>"
+      html += "</tr>"
+    }        
+  })
+  html += "</table>"
+  if(html == sensor_table+"</table>"){html = "<em>No recent data available</em>"}
+  return html
+}

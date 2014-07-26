@@ -147,6 +147,8 @@ class AirQualityEgg < Sinatra::Base
     EOS
     @focus_ids = focus_ids.split(",")
     @results = sql_search_ckan(@sql)
+
+    @custom_js = ["/assets/js/dashboard.js" ]
     erb :dashboard_aqe
   end
 
