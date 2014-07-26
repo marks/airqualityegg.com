@@ -157,6 +157,7 @@ a:hover {cursor:pointer;}
   width: 10px !important;
   height: 14px !important;
   border: #CCC 1px;
+  opacity:0.75;
 }
 
 .leaflet-icon-egg-live{
