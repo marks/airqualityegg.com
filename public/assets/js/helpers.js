@@ -84,3 +84,31 @@ function formatSensorDetails(data){
   if(html == sensor_table+"</table>"){html = "<em>No recent data available</em>"}
   return html
 }
+
+function onEachEggFeature(item,layer){
+  layer.setIcon(eggIcon)
+  var html = "<div><h4>Air Quality Egg Details</h4><table class='table table-striped' data-feed_id='"+item.id+"'>"
+  html += "<tr><td>Name </td><td> <a href='/egg/"+item.id+"'><strong>"+item.title+"<strong></a></td></tr>"
+  html += "<tr><td>Description </td><td> "+item.description+"</td></tr>"
+  html += "<tr><td>Position </td><td> "+item.location_exposure+" @ "+item.location_ele+" elevation</td></tr>"
+  html += "<tr><td>Status </td><td> "+item.status+"</td></tr>"
+  html += "<tr><td>Created </td><td> "+moment(item.created+"Z").fromNow()+"</td></tr>"
+  if(item.last_datapoint){html += "<tr><td>Last data point </td><td> "+moment(item.last_datapoint+"Z").fromNow()+" ("+item.last_datapoint+")</td></tr>"}
+  html += "</table>"
+  html += "<div id='egg_"+item.id+"'></div>"
+  html += "<p style='text-align: right'><a href='/egg/"+item.id+"'>More about this egg site including historical graphs →</a></p>"
+  html += "</div>"
+  layer.bindPopup(html)
+  if(location.pathname != "/aqe/dashboard"){ layer.on('click', onEggMapMarkerClick) }
+}
+
+function onEggMapMarkerClick(e){
+  var feed_id = $(".leaflet-popup-content .table").first().data("feed_id")
+  if(typeof(ga)!="undefined"){ ga('send', 'event', 'egg_'+feed_id, 'click', 'egg_on_map', 1); }
+  $.getJSON("/egg/"+feed_id+".json", function(data){
+    var html = ""
+    var html = formatSensorDetails(data)
+    $("#egg_"+feed_id).append(html)
+  })
+}
+

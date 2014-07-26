@@ -33,6 +33,7 @@ $(function() {
 
         // add to map
         var eggMarker = L.marker([data.location_lat, data.location_lon])
+        onEachEggFeature(data,eggMarker)
         eggMarker.setIcon(L.divIcon({className: 'leaflet-icon-egg-'+data.status+' leaflet-icon-egg'}))        
         eggMarker.addTo(map);
 
