@@ -21,6 +21,13 @@
 }
 .sharethis span span {margin-bottom: -11px;}
 
+.jqstooltip {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+
 a:hover {cursor:pointer;}
 .popup_metadata table,.popup_metadata th,.popup_metadata td { border:1px solid #ccc; }
 
