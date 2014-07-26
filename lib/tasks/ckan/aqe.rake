@@ -112,14 +112,18 @@ namespace :ckan do
           # modify indexes here because we have added custom ones through pgsql 
           create_resource_data[:indexes] = 'id,feed_id,datetime,parameter,unit'
           create_resource_data[:resource] = {:package_id => ENV['CKAN_AQE_DATASET_ID'], :name => ENV['CKAN_AQE_DATA_RESOURCE_NAME'] }
-        else # update existing resource
-          create_resource_data[:resource_id] = resource["id"]
-        end
+
         create_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_create", create_resource_data.to_json,
           {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
         create_results = JSON.parse(create_raw)
         resource_id = create_results["result"]["resource_id"]
         puts "Created or updated a new resource named '#{ENV['CKAN_AQE_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
+
+
+        else # update existing resource
+          resource_id = resource["id"]
+        end
+
         # invoke upsert rake tasks
         Rake.application.invoke_task("ckan:airqualityeggs:data:upsert[#{resource_id}]")
       end
@@ -147,6 +151,7 @@ namespace :ckan do
             # batch upload datastream_records 
             if datastream_records != []
               post_data = {:resource_id => args[:resource_id], :records => datastream_records, :method => 'upsert'}.to_json
+              puts post_data
               upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
               upsert_result = JSON.parse(upsert_raw)
               sleep 2
