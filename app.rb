@@ -340,7 +340,9 @@ class AirQualityEgg < Sinatra::Base
         series_names = recent_history.map{|x| x["parameter"]}.uniq
         series_names.each do |series_name|
           series_datapoints = recent_history.select{|x| x["parameter"] == series_name}
-          data[:datastreams][series_name.to_sym][:recent_history] = series_datapoints.map {|x| [x["datetime"].to_time.utc.change(:zone_offset => '0').to_i*1000,x["value"].to_f] }
+          if data[:datastreams][series_name.to_sym]
+            data[:datastreams][series_name.to_sym][:recent_history] = series_datapoints.map {|x| [x["datetime"].to_time.utc.change(:zone_offset => '0').to_i*1000,x["value"].to_f] }
+          end
         end
       end
 
