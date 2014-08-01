@@ -413,12 +413,12 @@ var AQE = (function ( $ ) {
     var show = true
 
     if(item.type == "aqe"){
-      // indoor/outdoor ===========
+      // AQE indoor/outdoor ===========
       if(filter_selections["outdoor-eggs"] == "true" && item.location_exposure == "outdoor"){ show = true }
       else if(filter_selections["indoor-eggs"] == "true" && item.location_exposure == "indoor"){ show = true }
       else{ show = false }
 
-      // time basis ===============
+      // AQE time basis ===============
       if(item.last_datapoint){ var last_datapoint = new Date(item.last_datapoint+"Z") }
       else { var last_datapoint = new Date(0,0,0) }
 
@@ -442,6 +442,11 @@ var AQE = (function ( $ ) {
         if(last_datapoint >= x_hours_ago){ show = true }
         else {show = false}
       }
+
+      if(filter_selections["last-datapoint-within-6-hours"] == "true" && filter_selections["last-datapoint-within-24-hours"] == "true" && filter_selections["last-datapoint-within-168-hours"] == "true" && filter_selections["last-datapoint-not-within-168-hours"] == "true"){
+        show = true
+      }
+
     }
     else if(item.type == "aqs"){
       if(filter_selections["active-sites"] == "true" && item.status == "Active"){ show = true }
