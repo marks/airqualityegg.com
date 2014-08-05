@@ -86,7 +86,12 @@ Be sure to restart heroku after this as the database socket connection will need
 # run airnow on even hours and airqualityeggs updates on odd hours
 30   */2     *   *  * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake ckan:airnow:update
 30    1-23/2    * * * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake ckan:airqualityeggs:update
+
 15   1  *	* * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake ckan:famallergy:update  >/dev/null 2>&1
+45   3  *	* * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake bundle exec foreman run rake ckan:wupws:update
+
+
+
 ```
 
 ## Sample CKAN (Datastore) SQL
