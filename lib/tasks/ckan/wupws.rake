@@ -83,20 +83,22 @@ namespace :ckan do
             wupws_site_details_raw = RestClient.get("http://api.wunderground.com/api/#{ENV['WEATHER_UNDERGROUND_API_KEY']}/geolookup/q/pws:#{site_data[:id]}.json")
             wupws_site_details = JSON.parse(wupws_site_details_raw)
 
-            # puts wupws_site_details["location"]
-            site_data[:country_iso3166] = wupws_site_details["location"]["country_iso3166"]
-            site_data[:city] = wupws_site_details["location"]["city"]
-            site_data[:tz_short] = wupws_site_details["location"]["tz_short"]
-            site_data[:lat] = wupws_site_details["location"]["lat"]
-            site_data[:lon] = wupws_site_details["location"]["lon"]
-            site_data[:zip] = wupws_site_details["location"]["zip"]
-            site_data[:magic] = wupws_site_details["location"]["magic"]
-            site_data[:wuiurl] = wupws_site_details["location"]["wuiurl"]
-            site_data[:last_scraped_at] = Time.now
+            if wupws_site_details["location"]
+              # puts wupws_site_details["location"]
+              site_data[:country_iso3166] = wupws_site_details["location"]["country_iso3166"]
+              site_data[:city] = wupws_site_details["location"]["city"]
+              site_data[:tz_short] = wupws_site_details["location"]["tz_short"]
+              site_data[:lat] = wupws_site_details["location"]["lat"]
+              site_data[:lon] = wupws_site_details["location"]["lon"]
+              site_data[:zip] = wupws_site_details["location"]["zip"]
+              site_data[:magic] = wupws_site_details["location"]["magic"]
+              site_data[:wuiurl] = wupws_site_details["location"]["wuiurl"]
+              site_data[:last_scraped_at] = Time.now
 
-            wupws_sites << site_data
+              wupws_sites << site_data
 
-            sleep 10
+              sleep 10
+            end
           else
             # do not save - we are only interested in focus city PWSs
           end
