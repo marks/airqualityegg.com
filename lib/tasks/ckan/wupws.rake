@@ -8,12 +8,21 @@ namespace :ckan do
 
     namespace :sites do
 
-      WUPWS_SITE_LIST_URL = "http://www.wunderground.com/weatherstation/ListStations.asp?selectedState=KY&selectedCountry=United+States"
+      WUPWS_SITE_LIST_URL = "http://www.wunderground.com/weatherstation/ListStations.asp?selectedState=#{ENV['FOCUS_CITY_STATE']}&selectedCountry=United+States"
 
       WUPWS_SITE_FIELDS = [
-      	{:id => "station_id", :type => "text"}, 
+      	{:id => "id", :type => "text"}, 
         {:id => "neighborhood", :type => "text"}, 
         {:id => "station_type", :type => "text"},
+        {:id => "country_iso3166", :type => "text"},
+        {:id => "city", :type => "text"},
+        {:id => "tz_short", :type => "text"},
+        {:id => "lat", :type => "float"},
+        {:id => "lon", :type => "float"},
+        {:id => "zip", :type => "text"},
+        {:id => "magic", :type => "text"},
+        {:id => "wuiurl", :type => "text"},
+        {:id => "last_scraped_at", :type => "timestamp"},
       ]
 
       desc "Create CKAN resource for sites (if it doesn't exist) and then upsert CKAN with site data"
@@ -31,8 +40,8 @@ namespace :ckan do
                 :package_id => ENV['CKAN_WUPWS_DATASET_ID'],
                 :name => ENV['CKAN_WUPWS_SITE_RESOURCE_NAME']
               },
-              :primary_key => 'station_id',
-              :indexes => WUPWS_SITE_FIELDS.map{|x| x[:id]}.join(","),
+              :primary_key => 'id',
+              # :indexes => WUPWS_SITE_FIELDS.map{|x| x[:id]}.join(","),
               :fields => WUPWS_SITE_FIELDS,
               :records => []
             }.to_json,
@@ -56,65 +65,47 @@ namespace :ckan do
 
         wupws_sites = []
 
+        puts "Getting list of all PWS sites in #{ENV['FOCUS_CITY_STATE']}"
         wupws_site_list_html = RestClient.get(WUPWS_SITE_LIST_URL)
         wupws_site_list_doc = Nokogiri::HTML(wupws_site_list_html)
         wupws_site_list = wupws_site_list_doc.xpath("//table[@id='pwsTable']/tbody/tr[td]")
         wupws_site_list.each do |site|
           site_data_array_from_html = site.children.map(&:text)
           site_data = {
-            :station_id => site_data_array_from_html[0],
+            :id => site_data_array_from_html[0],
             :neighborhood => site_data_array_from_html[2],
             :city => site_data_array_from_html[4],
             :station_type => site_data_array_from_html[6] 
           }
           
-          if site_data[:city].match(/louisville/i)
-            wupws_sites << site_data
-          else
-            # do not save - we are only interested in Louisville PWSs
-          end
+          if site_data[:city].match(/#{ENV['FOCUS_CITY']}/i)
+            puts "  Processing PWS ID #{site_data[:id]}"
+            wupws_site_details_raw = RestClient.get("http://api.wunderground.com/api/#{ENV['WEATHER_UNDERGROUND_API_KEY']}/geolookup/q/pws:#{site_data[:id]}.json")
+            wupws_site_details = JSON.parse(wupws_site_details_raw)
 
+            # puts wupws_site_details["location"]
+            site_data[:country_iso3166] = wupws_site_details["location"]["country_iso3166"]
+            site_data[:city] = wupws_site_details["location"]["city"]
+            site_data[:tz_short] = wupws_site_details["location"]["tz_short"]
+            site_data[:lat] = wupws_site_details["location"]["lat"]
+            site_data[:lon] = wupws_site_details["location"]["lon"]
+            site_data[:zip] = wupws_site_details["location"]["zip"]
+            site_data[:magic] = wupws_site_details["location"]["magic"]
+            site_data[:wuiurl] = wupws_site_details["location"]["wuiurl"]
+            site_data[:last_scraped_at] = Time.now
+
+            wupws_sites << site_data
+
+            sleep 10
+          else
+            # do not save - we are only interested in focus city PWSs
+          end
 
         end
 
-        puts wupws_sites
-        puts wupws_sites.size
-
-
-				# socrata_endpoint = "http://data.medicare.gov/resource/hq9i-23gr.json?provider_state=#{ENV['FOCUS_CITY_STATE']}"
-        # nursing_homes = fetch_whole_socrata_dataset(socrata_endpoint)
-        # nursing_homes.each do |home|
-        # site_data = {}
-				# 	site_data["federal_provider_number"] = home["federal_provider_number"]
-				# 	site_data["provider_name"] = home["provider_name"]
-				# 	site_data["lat"] = home["location"]["latitude"] if home["location"]
-				# 	site_data["lon"] = home["location"]["longitude"] if home["location"]
-				# 	site_data["provider_type"] = home["provider_type"]
-				# 	site_data["provider_county_name"] = home["provider_county_name"]
-				# 	site_data["provider_city"] = home["provider_city"]
-				# 	site_data["provider_phone_number"] = home["provider_phone_number"]["phone_number"]
-				# 	site_data["legal_business_name"] = home["legal_business_name"]
-				# 	site_data["ownership_type"] = home["ownership_type"]
-				# 	site_data["provider_state"] = home["provider_state"]
-				# 	site_data["provider_address"] = home["provider_address"]
-				# 	site_data["provider_zip_code"] = home["provider_zip_code"]
-				# 	site_data["number_of_fines"] = home["number_of_fines"]
-				# 	site_data["number_of_facility_reported_incidents"] = home["number_of_facility_reported_incidents"]
-				# 	site_data["total_number_of_penalties"] = home["total_number_of_penalties"]
-				# 	site_data["number_of_substantiated_complaints"] = home["number_of_substantiated_complaints"]
-				# 	site_data["number_of_certified_beds"] = home["number_of_certified_beds"]
-				# 	site_data["number_of_residents_in_certified_beds"] = home["number_of_residents_in_certified_beds"]
-				# 	site_data["total_weighted_health_survey_score"] = home["total_weighted_health_survey_score"]
-				# 	site_data["overall_rating"] = home["overall_rating"]
-				# 	site_data["rn_staffing_rating"] = home["rn_staffing_rating"]
-				# 	site_data["qm_rating"] = home["qm_rating"]
-				# 	site_data["staffing_rating"] = home["staffing_rating"]
-				# 	site_data["health_inspection_rating"] = home["health_inspection_rating"]
-				# 	site_data["processing_date"] = home["processing_date"]
-        #   post_data = {:resource_id => args[:resource_id], :records => [site_data], :method => 'upsert'}.to_json
-        #   upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
-        #   upsert_result = JSON.parse(upsert_raw)
-        # end
+        post_data = {:resource_id => args[:resource_id], :records => wupws_sites, :method => 'upsert'}.to_json
+        upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+        upsert_result = JSON.parse(upsert_raw)
         puts "\nSites upserts complete"
       end
     end

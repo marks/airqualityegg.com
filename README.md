@@ -33,7 +33,13 @@ CKAN_AQS_DATA_RESOURCE_NAME:  AirNow AQS Monitoring Data
 CKAN_AQE_DATASET_ID:          # URL slug of your CKAN data set (created through CKAN web GUI) for AQE data
 CKAN_AQE_SITE_RESOURCE_NAME:  Air Quality Egg Sites
 CKAN_AQE_DATA_RESOURCE_NAME:  Air Quality Egg Data
-
+WEATHER_UNDERGROUND_API_KEY:  # API key for Weather Underground
+FOCUS_CITY_NAME:			  Louisville, KY
+FOCUS_CITY_LAT:				  38.22847167526397
+FOCUS_CITY_LON:				  -85.76099395751953
+FOCUS_CITY_ZOOM:			  10
+FOCUS_CITY_STATE:			  KY
+FOCUS_CITY:					  Louisville
 ```
 
 The values in this file are required to interact with Xively, but some value
