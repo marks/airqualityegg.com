@@ -37,15 +37,7 @@ class AirQualityEgg < Sinatra::Base
 
     set :protection, :except => :frame_options
     set :session_secret, ENV['SESSION_SECRET'] || 'louisville_session_secret'
-    set :cache, Dalli::Client.new(ENV["MEMCACHIER_SERVERS"].split(","),
-                    {:username => ENV["MEMCACHIER_USERNAME"],
-                     :password => ENV["MEMCACHIER_PASSWORD"],
-                     :failover => true,
-                     :socket_timeout => 2,
-                     :socket_failure_delay => 0.5,
-                     :compress => true
-                    })
-
+    set :cache, Dalli::Client.new(ENV["MEMCACHEDCLOUD_SERVERS"].split(','), {:username => ENV["MEMCACHEDCLOUD_USERNAME"], :password => ENV["MEMCACHEDCLOUD_PASSWORD"], :compress => true})
     set :time_zone, ActiveSupport::TimeZone.new("Eastern Time (US & Canada)")
     settings.cache.flush
   end

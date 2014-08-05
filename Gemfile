@@ -9,7 +9,7 @@ gem 'newrelic_rpm'
 gem 'thin'
 gem 'rack-force_domain'
 
-gem 'memcachier'
+# gem 'memcachier'
 gem 'dalli'
 
 gem "pg"
