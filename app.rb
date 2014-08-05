@@ -37,7 +37,7 @@ class AirQualityEgg < Sinatra::Base
 
     set :protection, :except => :frame_options
     set :session_secret, ENV['SESSION_SECRET'] || 'louisville_session_secret'
-    set :cache, Dalli::Client.new
+    set :cache, Dalli::Client.new nil, {:compression => true}
     set :time_zone, ActiveSupport::TimeZone.new("Eastern Time (US & Canada)")
     settings.cache.flush
   end
