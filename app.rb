@@ -6,7 +6,6 @@ require "sinatra/multi_route"
 require 'sass'
 require 'xively-rb'
 require 'dalli'
-require 'memcachier'
 require 'json'
 require 'oboe-heroku'
 require 'rest-client'
