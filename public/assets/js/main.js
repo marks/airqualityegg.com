@@ -35,7 +35,11 @@ var AQE = (function ( $ ) {
       iconSize: [30, 30], // size of the icon
   });
 
-
+  var weatherStationIconURL = '/assets/img/weather_station_icon.png'
+  var weatherStationIcon = L.icon({
+      iconUrl: weatherStationIconURL,
+      iconSize: [30, 30], // size of the icon
+  });
 
   var defaultIconURL = '/vendor/leaflet-0.8-dev-06062014/images/marker-icon.png'
   var defaultIcon = L.icon({
@@ -400,6 +404,33 @@ var AQE = (function ( $ ) {
       html += "<p style='font-size:80%'>From <a href='https://data.medicare.gov/data/nursing-home-compare' target='blank'>CMS Nursing Home Compare</a>. This provider was last processed "+moment(item.processing_date).fromNow()+" on "+moment(item.processing_date).calendar()+"."
       html += "</div>"
       layer.bindPopup(html)
+    }
+    else if(item.type == "wupws"){
+      layer.setIcon(weatherStationIcon)
+      var html = "<div><h4>"+item.id+"</h4>"
+      // html += "<table class='table table-striped' data-nursinghome_id='"+item.id+"'>"
+      // html += "<tr><td>Legal Business Name</td><td>"+item.legal_business_name+" </td></tr>"
+      // html += "<tr><td>Federal Provider #</td><td><a href='http://www.medicare.gov/nursinghomecompare/profile.html#profTab=0&ID="+item.federal_provider_number+"' target='blank'>"+item.federal_provider_number+"</a></td></tr>"
+      // html += "<tr><td>Provider Address</td><td>"+item.provider_name+" </td></tr>"
+      // html += "<tr><td>Provider City, State, Zip</td><td>"+item.provider_city+", "+item.provider_state+" "+item.provider_zip_code+" </td></tr>"
+      // html += "<tr><td>Provider County Name</td><td>"+item.provider_county_name+" </td></tr>"
+      // html += "<tr><td>Provider Phone</td><td>"+item.provider_phone_number+" </td></tr>"
+      // html += "<tr><td>Ownership Type</td><td>"+item.ownership_type+" </td></tr>"
+      // html += "<tr><td>Provider Type</td><td>"+item.provider_type+" </td></tr>"
+      // html += "<tr><td>Ratings</td><td>"
+      // html += "<strong>Staffing:</strong> "+item.staffing_rating+"/5"
+      // html += "<br /><strong>RN Staffing:</strong> "+item.rn_staffing_rating+"/5"
+      // html += "<br /><strong>Quality Measure:</strong> "+item.qm_rating+"/5"
+      // html += "<br /><strong>Health Inspection:</strong> "+item.health_inspection_rating+"/5"
+      // html += "</td></tr>"
+      // html += "<tr><td>Total Weighted Health Survey Score</td><td>"+item.total_weighted_health_survey_score+" </td></tr>"
+      // html += "<tr><td>Total # of Penalties</td><td>"+item.total_number_of_penalties+" </td></tr>"
+      // html += "<tr><td># of Facility Reported Incidents</td><td>"+item.number_of_facility_reported_incidents+" </td></tr>"
+      // html += "<tr><td># of Certified Beds</td><td>"+item.number_of_certified_beds+" </td></tr>"
+      // html += "</table>" 
+      // html += "<p style='font-size:80%'>From <a href='https://data.medicare.gov/data/nursing-home-compare' target='blank'>CMS Nursing Home Compare</a>. This provider was last processed "+moment(item.processing_date).fromNow()+" on "+moment(item.processing_date).calendar()+"."
+      html += "</div>"
+      layer.bindPopup(html)
     } else {
       var html = "<div><h4>"+item.type.toUpperCase()+" ID #"+item.id+"</h4></div>"
       layer.bindPopup(html)
@@ -460,6 +491,10 @@ var AQE = (function ( $ ) {
       if(filter_selections["nursinghome"] == "true"){ show = true }
       else{ show = false }
     }
+    else if(item.type == "wupws"){
+      if(filter_selections["wupws"] == "true"){ show = true }
+      else{ show = false }
+    }
     else if(item.type == "famallergy"){
       if(filter_selections["famallergy"] == "true"){ show = true }
       else{ show = false }
@@ -506,6 +541,8 @@ var AQE = (function ( $ ) {
     filter_selections["jeffschools"] = $('input.filter-jeffschools:checked').val()
     // nursing home specific
     filter_selections["nursinghome"] = $('input.filter-nursinghome:checked').val()
+    // weather station (wupws) specific 
+    filter_selections["wupws"] = $('input.filter-wupws:checked').val()
     // famallergy specific
     filter_selections["famallergy"] = $('input.filter-famallergy:checked').val()
     // portal.louisvilleky.gov
@@ -519,14 +556,6 @@ var AQE = (function ( $ ) {
     } else {
       filter_selections["bike"] = false
     }
-
-    // filter_selections["bike-O3"] = $('input.filter-bike-O3:checked').val()
-    // filter_selections["bike-CO"] = $('input.filter-bike-CO:checked').val()
-    // filter_selections["bike-NO2"] = $('input.filter-bike-NO2:checked').val()
-    // filter_selections["bike-VOC"] = $('input.filter-bike-VOC:checked').val()
-    // filter_selections["bike-PARTICULATE"] = $('input.filter-bike-Particulate:checked').val()
-    // filter_selections["bike-TEMP"] = $('input.filter-bike-TEMP:checked').val()
-    // filter_selections["bike-RHUM"] = $('input.filter-bike-RHUM:checked').val()
   }
 
   function update_map(key){
@@ -538,20 +567,7 @@ var AQE = (function ( $ ) {
       filter: filterFeatures
     }).addTo(map);
 
-    // console.log(key+' - updated map')
-    // map.fireEvent('dataload')
-
   }
-
-  // function onEggMapMarkerClick(e){
-  //   var feed_id = $(".leaflet-popup-content .table").first().data("feed_id")
-  //   if(typeof(ga)!="undefined"){ ga('send', 'event', 'egg_'+feed_id, 'click', 'egg_on_map', 1); }
-  //   $.getJSON("/egg/"+feed_id+".json", function(data){
-  //     var html = ""
-  //     var html = formatSensorDetails(data)
-  //     $("#egg_"+feed_id).append(html)
-  //   })
-  // }
 
   function onAQSSiteMapMarkerClick(e){
     var aqs_id = $(".leaflet-popup-content .table").first().data("aqs_id")
