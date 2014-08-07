@@ -93,7 +93,7 @@ namespace :ckan do
               site_data[:zip] = wupws_site_details["location"]["zip"]
               site_data[:magic] = wupws_site_details["location"]["magic"]
               site_data[:wuiurl] = wupws_site_details["location"]["wuiurl"]
-              site_data[:last_scraped_at] = Time.now
+              site_data[:last_scraped_at] = Time.now.utc.iso8601
               wupws_sites << site_data
               sleep 10
             end
