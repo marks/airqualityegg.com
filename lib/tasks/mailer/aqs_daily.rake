@@ -49,8 +49,8 @@ namespace :mailer do
 				#{format_forecasts_html(tomorrows_forecasts)}
 			<br /><table><tr><td class="padding">
 				<!-- <p style="text-align:center;"><a class="btn-primary" href= "http://louisvilleairmap.com">LouisvilleAirMap.com</a></p> -->
-			</td></tr></table><br /><p>
-				#{egg_message}
+			</td></tr></table><p>
+				#{egg_message}<br />
 			<br /></p>
 				<p>Have a happy and healthy day,</p>
 				<p> The Institute for Healthy Air, Water, and Soil
