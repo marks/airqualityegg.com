@@ -503,4 +503,7 @@ module AppHelpers
     return action_day_boolean == true ? "** Today is an air quality action day. ** The EPA has more information about what an action day is at http://www.airnow.gov/index.cfm?action=airnow.actiondays\n" : ""
   end
 
+  # def format_eggs_message_html(total, active)
+  # end
+
 end

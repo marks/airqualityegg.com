@@ -21,6 +21,15 @@ namespace :mailer do
 	  today_is_an_action_day = todays_forecasts.select{|x| x["ActionDay"] == true}.count > 1
 	  tomorrow_is_an_action_day = tomorrows_forecasts.select{|x| x["ActionDay"] == true}.count > 1
 
+	  # Count the number of AQEs that have been deployed by the Institute
+	  egg_ids = META["aqe"]["extras_hash"]["Focus IDs"]
+	  n_eggs = egg_ids.split(",").count
+	  eggs_last_updated_sql = "SELECT site_table.id, (SELECT EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - data_table.datetime)) FROM \"7d618c44-1098-4348-9f57-8d32d4b159b6\" data_table WHERE data_table.feed_id = site_table. ID ORDER BY datetime DESC LIMIT 1	) AS last_updated_seconds_ago FROM \"7c0608e3-fb4d-4fb3-928c-5351e5b9b122\" site_table WHERE site_table.id IN (#{META["aqe"]["extras_hash"]["Focus IDs"]})"
+	  eggs_last_updated_result = sql_search_ckan(eggs_last_updated_sql)
+	  eggs_last_updated_within_a_week = eggs_last_updated_result.select{|e| e["last_updated_seconds_ago"] != nil && e["last_updated_seconds_ago"] < 7*24*60*60}
+	  n_eggs_last_updated_within_a_week = eggs_last_updated_within_a_week.count
+	  egg_message = "The Institute is in the process of deploying Air Quality Eggs. To date, #{n_eggs} have been deployed and #{n_eggs_last_updated_within_a_week} have sent us data in the past 7 days. You can explore the data they collect alongside other community data at http://LouisvilleAirMap.com"
+
 		message_html = <<-EOS
 			<!DOCTYPE html>
 			<html>
@@ -40,7 +49,9 @@ namespace :mailer do
 				#{format_forecasts_html(tomorrows_forecasts)}
 			<br /><table><tr><td class="padding">
 				<!-- <p style="text-align:center;"><a class="btn-primary" href= "http://louisvilleairmap.com">LouisvilleAirMap.com</a></p> -->
-			</td></tr></table><br />
+			</td></tr></table><br /><p>
+				#{egg_message}
+			<br /></p>
 				<p>Have a happy and healthy day,</p>
 				<p> The Institute for Healthy Air, Water, and Soil
 				<br /><a href="mailto:louisville@instituteforhealthyairwaterandsoil.org">louisville@instituteforhealthyairwaterandsoil.org</a>
@@ -59,10 +70,9 @@ This is your daily air quality update from the Institute for Healthy Air, Water,
 
 ## Today's Forecast ##
 #{format_action_day_text(today_is_an_action_day)}#{format_forecasts_text(todays_forecasts)}
-
 ## Tomorrow's Forecast ##
 #{format_action_day_text(today_is_an_action_day)}#{format_forecasts_text(tomorrows_forecasts)}
-
+#{egg_message}
 
 Have a happy and healthy day,</p>
 
@@ -71,9 +81,10 @@ louisville@instituteforhealthyairwaterandsoil.org
 Follow us on Twitter (http://twitter.com/healthyaws) and
   Facebook (http://facebook.com/Instituteforhealthyairwaterandsoil)
 
-
 Together let's preserve our World's Sacred Air, Water, and Soil, so as to
 create the healthy communities that are essential for the survival of all of life!
+
+
 EOS
 
 		# Now that we've got the HTML and text versions of the email crafted, it's time to make API calls to Constant Contact
