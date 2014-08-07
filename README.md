@@ -21,6 +21,7 @@ XIVELY_PRODUCT_ID:            # get this by logging into Xively.com and creating
 XIVELY_API_KEY:               # get this by logging into Xively.com and creating a master key (Settings > Master Keys > Add Master Key
 AIRNOW_USER:                  # get this from airnowapi.org - required for fetching EPA air quality data
 AIRNOW_PASS:                  # same as AIRNOW_USER
+AIRNOW_API_KEY:               # API key from airnowapi.org
 GOOGLE_ANALYTICS_TRACKING_ID: # get from analytics.google.com or don't include and google analytics wont be used
 GOOGLE_ANALYTICS_DOMAIN:      # same as GOOGLE_ANALYTICS_TRACKING_ID
 HTTP_BASIC_USER:              # username to protect some pages with
@@ -34,15 +35,15 @@ CKAN_AQE_DATASET_ID:          # URL slug of your CKAN data set (created through 
 CKAN_AQE_SITE_RESOURCE_NAME:  Air Quality Egg Sites
 CKAN_AQE_DATA_RESOURCE_NAME:  Air Quality Egg Data
 WEATHER_UNDERGROUND_API_KEY:  # API key for Weather Underground
-FOCUS_CITY_NAME:			  Louisville, KY
-FOCUS_CITY_LAT:				  38.22847167526397
-FOCUS_CITY_LON:				  -85.76099395751953
-FOCUS_CITY_ZOOM:			  10
-FOCUS_CITY_STATE:			  KY
-FOCUS_CITY:					  Louisville
 CONSTANTCONTACT_API_KEY:	  # Mashery API key
 CONSTANTCONTACT_ACCESS_TOKEN: # Access token granting access to CC account
 CONSTANTCONTACT_LIST_ID:      # ID of contact list emails should go to
+FOCUS_CITY:							Louisville
+FOCUS_CITY_NAME:					Louisville, KY
+FOCUS_CITY_LAT:						38.22847167526397
+FOCUS_CITY_LON:						-85.76099395751953
+FOCUS_CITY_ZOOM:					10
+FOCUS_CITY_STATE:					KY
 ```
 
 The values in this file are required to interact with Xively, but some value
