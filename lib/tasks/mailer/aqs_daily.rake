@@ -46,12 +46,12 @@ namespace :mailer do
 				<br /><a href="mailto:louisville@instituteforhealthyairwaterandsoil.org">louisville@instituteforhealthyairwaterandsoil.org</a>
 				<br />Follow us on <a href= "http://twitter.com/healthyaws">Twitter</a> and <a href="http://facebook.com/Instituteforhealthyairwaterandsoil">Facebook</a></p>
 			</p>
-				<p><em>Together let's preserve our World's Sacred Air, Water, and Soil, so as to create the healthy communities that are essential for the survival of all of life!</em></p>
+				<p><em>Together let's preserve our World's Sacred Air, Water, and Soil, so as tocreate the healthy communities that are essential for the survival of all of life!</em></p>
 			</td></tr></table></div></td><td></td></tr></table></body></html>
 		EOS
 
 		message_text = <<-EOS
-
+.
 
 <Greeting />
 
@@ -68,10 +68,12 @@ Have a happy and healthy day,</p>
 
 The Institute for Healthy Air, Water, and Soil
 louisville@instituteforhealthyairwaterandsoil.org
-Follow us on Twitter (http://twitter.com/healthyaws) and Facebook (http://facebook.com/Instituteforhealthyairwaterandsoil)
+Follow us on Twitter (http://twitter.com/healthyaws) and
+  Facebook (http://facebook.com/Instituteforhealthyairwaterandsoil)
 
 
-Together let's preserve our World's Sacred Air, Water, and Soil, so as to create the healthy communities that are essential for the survival of all of life!
+Together let's preserve our World's Sacred Air, Water, and Soil, so as to
+create the healthy communities that are essential for the survival of all of life!
 EOS
 
 		# Now that we've got the HTML and text versions of the email crafted, it's time to make API calls to Constant Contact
@@ -126,7 +128,7 @@ EOS
 			raise StandardError, "Campaign could not be created"
 		end
 
-		puts "\n Send daily AQS rake task complete."
+		puts "\nSend daily AQS rake task complete."
 
   end
 
