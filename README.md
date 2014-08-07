@@ -40,6 +40,9 @@ FOCUS_CITY_LON:				  -85.76099395751953
 FOCUS_CITY_ZOOM:			  10
 FOCUS_CITY_STATE:			  KY
 FOCUS_CITY:					  Louisville
+CONSTANTCONTACT_API_KEY:	  # Mashery API key
+CONSTANTCONTACT_ACCESS_TOKEN: # Access token granting access to CC account
+CONSTANTCONTACT_LIST_ID:      # ID of contact list emails should go to
 ```
 
 The values in this file are required to interact with Xively, but some value
