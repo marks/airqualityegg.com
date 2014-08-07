@@ -467,5 +467,40 @@ module AppHelpers
     end
   end
 
+  def format_forecasts_html(forecasts_array)
+    html = ""
+    if forecasts_array.empty?
+      html += "<p>Sorry, no forecasts were available.</p>"
+    else
+      html += "<ul>"
+      forecasts_array.each do |forecast|
+        # text += " - #{forecast["Category"]["Name"]} air quality (AQI of #{forecast["AQI"]}) from #{forecast["ParameterName"]}\n"
+        html += "<li><strong style='padding: 3px; line-height: 30px; color:#{forecast["aqi_cat"][:font]};background-color:#{forecast["aqi_cat"][:color]};'>#{forecast["Category"]["Name"]} air quality from #{forecast["ParameterName"]}</strong> (AQI of #{forecast["AQI"]})</li>"
+      end
+      html += "</ul>"
+    end
+    return html
+  end
+
+
+  def format_forecasts_text(forecasts_array)
+    text = ""
+    if forecasts_array.empty?
+      text += "Sorry, no forecasts were available.\n"
+    else
+      forecasts_array.each do |forecast|
+        text += " - #{forecast["Category"]["Name"]} air quality from #{forecast["ParameterName"]} (AQI of #{forecast["AQI"]})\n"
+      end
+    end
+    return text
+  end
+
+  def format_action_day_html(action_day_boolean)
+    return action_day_boolean == true ? "<p><strong style='color: red;'>Today is an air quality action day.</strong> Read more about <a href='http://www.airnow.gov/index.cfm?action=airnow.actiondays'>what an action day is from the EPA.</a></p>" : ""
+  end
+
+  def format_action_day_text(action_day_boolean)
+    return action_day_boolean == true ? "** Today is an air quality action day. ** The EPA has more information about what an action day is at http://www.airnow.gov/index.cfm?action=airnow.actiondays\n" : ""
+  end
 
 end
