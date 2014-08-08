@@ -1,6 +1,3 @@
-TODAY = Date.today.strftime("%Y-%m-%d")
-TOMORROW = (Date.today+1).strftime("%Y-%m-%d")
-
 namespace :mailer do 
 
   task :aqs_daily do
@@ -15,8 +12,8 @@ namespace :mailer do
 	  end
 
 	  # Create two arrays of forecasts (one for today and tomorrow) sorted descending by AQI
-	  todays_forecasts = forecasts.select{|x| x["DateForecast"].strip == TODAY}.sort_by{|x| -x["AQI"]}
-	  tomorrows_forecasts = forecasts.select{|x| x["DateForecast"].strip == TOMORROW}.sort_by{|x| -x["AQI"]}
+	  todays_forecasts = forecasts.select{|x| x["DateForecast"].strip == Date.today.strftime("%Y-%m-%d")}.sort_by{|x| -x["AQI"]}
+	  tomorrows_forecasts = forecasts.select{|x| x["DateForecast"].strip == (Date.today+1).strftime("%Y-%m-%d")}.sort_by{|x| -x["AQI"]}
 
 	  # See if today or tomorrow are action days
 	  today_is_an_action_day = todays_forecasts.select{|x| x["ActionDay"] == true}.count > 1
@@ -96,7 +93,7 @@ EOS
 
 		# Now that we've got the HTML and text versions of the email crafted, it's time to make API calls to Constant Contact
 		create_campaign_data = {
-			"name" => "Daily Air Quality Email - #{TODAY} - #{Time.now.utc.iso8601}",
+			"name" => "Daily Air Quality Email - #{Time.now.utc.iso8601}",
 			"subject" => "#{Date.today.strftime("%m/%d/%Y")} Air Quality Update from Institute for Healthy Air, Water, and Soil",
 			"sent_to_contact_lists" => [{"id" => ENV['CONSTANTCONTACT_LIST_ID'].to_s}],
 			"from_name" => "Institute for Healthy Air, Water, and Soil",
