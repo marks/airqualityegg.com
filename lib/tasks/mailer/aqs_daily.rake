@@ -93,7 +93,6 @@ EOS
 
 		puts message_text
 		puts message_html
-		exit
 
 		# Now that we've got the HTML and text versions of the email crafted, it's time to make API calls to Constant Contact
 		create_campaign_data = {
