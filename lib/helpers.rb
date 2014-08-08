@@ -97,7 +97,6 @@ module AppHelpers
       when "SO2-24HR"
         row["name"] = "Sulfur dioxide, 24-hr average (midnight to midnight)"
         row["more_info_url"] = "http://www.epa.gov/airquality/sulfurdioxide/"
-     
       when "PM2.5"
         row["name"] = "Particulate matter < 2.5 micrometers"
         row["more_info_url"] = "http://www.epa.gov/pmdesignations/"
@@ -110,9 +109,6 @@ module AppHelpers
       when "PM10-24HR"
         row["name"] = "Particulate matter < 2.5 micrometers 24-hr average (midnight to midnight)"
         row["more_info_url"] = "http://www.epa.gov/airtrends/aqtrnd95/pm10.html"
-
-
-
     end
 
     # row["value"] = nil if row["value"].to_i < -1
