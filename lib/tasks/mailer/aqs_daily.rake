@@ -7,6 +7,7 @@ namespace :mailer do
 
 		# First, let's get the forecast from AirNow APIs
 	  forecasts_url = "http://www.airnowapi.org/aq/forecast/latLong/?format=application/json&latitude=#{ENV['FOCUS_CITY_LAT']}&longitude=#{ENV['FOCUS_CITY_LON']}&distance=25&API_KEY=#{ENV["AIRNOW_API_KEY"]}"
+	  puts forecasts_url
 	  forecasts_data = JSON.parse(RestClient.get(forecasts_url))
 	  forecasts = forecasts_data.map do |result|
 	    result["aqi_cat"] = category_number_to_category(result["Category"]["Number"])
@@ -37,7 +38,10 @@ namespace :mailer do
 			<meta content="width=device-width" name="viewport">
 			<!-- major credit goes to https://github.com/leemunroe/html-email-template for the HTML email template -->
 			<title>Newsletter from the Institute for Healthy Air, Water, and Soil</title>
-			<style>*{margin:0;padding:0;font-family:"Helvetica Neue",Helvetica,Helvetica,Arial,sans-serif;font-size:100%;line-height:1.6}img{max-width:100%}body{-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:none;width:100%!important;height:100%}a{color:#348eda}.btn-primary{text-decoration:none;color:#FFF;background-color:#348eda;border:solid #348eda;border-width:10px 20px;line-height:2;font-weight:700;margin-right:10px;text-align:center;cursor:pointer;display:inline-block;border-radius:25px}.btn-secondary{text-decoration:none;color:#FFF;background-color:#aaa;border:solid #aaa;border-width:10px 20px;line-height:2;font-weight:700;margin-right:10px;text-align:center;cursor:pointer;display:inline-block;border-radius:25px}.last{margin-bottom:0}.first{margin-top:0}.padding{padding:10px 0}table.body-wrap{width:100%;padding:20px}table.body-wrap .container{border:1px solid #f0f0f0}table.footer-wrap{width:100%;clear:both!important}.footer-wrap .container p{font-size:12px;color:#666}table.footer-wrap a{color:#999}h1,h2,h3{font-family:"Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;color:#000;margin:40px 0 10px;line-height:1.2;font-weight:200}h1{font-size:36px}h2{font-size:28px}h3{font-size:22px}ol,p,ul{margin-bottom:10px;font-weight:400;font-size:14px}ol li,ul li{margin-left:5px;list-style-position:inside}.container{display:block!important;max-width:600px!important;margin:0 auto!important;clear:both!important}.body-wrap .container{padding:20px}.content{max-width:600px;margin:0 auto;display:block}.content table{width:100%}</style>
+			<style>
+				*{margin:0;padding:0;font-family:"Helvetica Neue",Helvetica,Helvetica,Arial,sans-serif;font-size:100%;line-height:1.6}img{max-width:100%}body{-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:none;width:100%!important;height:100%}a{color:#348eda}.btn-primary{text-decoration:none;color:#FFF;background-color:#348eda;border:solid #348eda;border-width:10px 20px;line-height:2;font-weight:700;margin-right:10px;text-align:center;cursor:pointer;display:inline-block;border-radius:25px}.btn-secondary{text-decoration:none;color:#FFF;background-color:#aaa;border:solid #aaa;border-width:10px 20px;line-height:2;font-weight:700;margin-right:10px;text-align:center;cursor:pointer;display:inline-block;border-radius:25px}.last{margin-bottom:0}.first{margin-top:0}.padding{padding:10px 0}table.body-wrap{width:100%;padding:20px}table.body-wrap .container{border:1px solid #f0f0f0}table.footer-wrap{width:100%;clear:both!important}.footer-wrap .container p{font-size:12px;color:#666}table.footer-wrap a{color:#999}h1,h2,h3{font-family:"Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;color:#000;margin:40px 0 10px;line-height:1.2;font-weight:200}h1{font-size:36px}h2{font-size:28px}h3{font-size:22px}ol,p,ul{margin-bottom:10px;font-weight:400;font-size:14px}ol li,ul li{margin-left:5px;list-style-position:inside}.container{display:block!important;max-width:600px!important;margin:0 auto!important;clear:both!important}.body-wrap .container{padding:20px}.content{max-width:600px;margin:0 auto;display:block}.content table{width:100%}
+				table[width="595"] {width: 300px !important;}
+			</style>
 			</head><body bgcolor="#F6F6F6"><table class="body-wrap"><tr><td></td><td class="container" style="background-color: #FFFFFF"><div class="content"><table><tr><td>
 				<p><Greeting /></p>
 				<p>This is your daily air quality update from the Institute for Healthy Air, Water, and Soil.</p>
@@ -87,6 +91,10 @@ create the healthy communities that are essential for the survival of all of lif
 
 EOS
 
+		puts message_text
+		puts message_html
+		exit
+
 		# Now that we've got the HTML and text versions of the email crafted, it's time to make API calls to Constant Contact
 		create_campaign_data = {
 			"name" => "Daily Air Quality Email - #{TODAY} - #{Time.now.utc.iso8601}",
@@ -96,9 +104,9 @@ EOS
 			"from_email" => "louisville@instituteforhealthyairwaterandsoil.org",
 			"reply_to_email" => "louisville@instituteforhealthyairwaterandsoil.org",
 			"is_permission_reminder_enabled" => false,
-			"is_view_as_webpage_enabled" => true,
-			"view_as_web_page_text" => "To view this message as a web page,",
-			"view_as_web_page_link_text" => "click here",
+			"is_view_as_webpage_enabled" => false,
+			# "view_as_web_page_text" => "To view this message as a web page,",
+			# "view_as_web_page_link_text" => "click here",
 			"greeting_salutations" => "Hi",
 			"greeting_name" => "FIRST_NAME",
 			"greeting_string" => "Hi",

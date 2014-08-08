@@ -475,7 +475,9 @@ module AppHelpers
       html += "<ul>"
       forecasts_array.each do |forecast|
         # text += " - #{forecast["Category"]["Name"]} air quality (AQI of #{forecast["AQI"]}) from #{forecast["ParameterName"]}\n"
-        html += "<li><strong style='padding: 3px; line-height: 30px; color:#{forecast["aqi_cat"][:font]};background-color:#{forecast["aqi_cat"][:color]};'>#{forecast["Category"]["Name"]} air quality from #{forecast["ParameterName"]}</strong> (AQI of #{forecast["AQI"]})</li>"
+        html += "<li><strong style='padding: 3px; line-height: 30px; color:#{forecast["aqi_cat"][:font]};background-color:#{forecast["aqi_cat"][:color]};'>#{forecast["Category"]["Name"]} air quality from #{forecast["ParameterName"]}</strong>"
+        html += " (AQI of #{forecast["AQI"]})" if forecast["AQI"] > 0
+        html += "</li>"
       end
       html += "</ul>"
     end
@@ -489,7 +491,9 @@ module AppHelpers
       text += "Sorry, no forecasts were available.\n"
     else
       forecasts_array.each do |forecast|
-        text += " - #{forecast["Category"]["Name"]} air quality from #{forecast["ParameterName"]} (AQI of #{forecast["AQI"]})\n"
+        text += " - #{forecast["Category"]["Name"]} air quality from #{forecast["ParameterName"]}"
+        text += " (AQI of #{forecast["AQI"]})" if forecast["AQI"] > 0
+        text += "\n"
       end
     end
     return text
