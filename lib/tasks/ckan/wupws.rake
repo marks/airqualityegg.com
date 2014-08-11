@@ -78,7 +78,7 @@ namespace :ckan do
             :station_type => site_data_array_from_html[6] 
           }
           
-          if site_data[:city].match(/#{ENV['FOCUS_CITY']}/i)
+          if site_data[:city].match(/#{ENV['FOCUS_CITY']}/)
             puts "  Processing PWS ID #{site_data[:id]}"
             wupws_site_details_raw = RestClient.get("http://api.wunderground.com/api/#{ENV['WEATHER_UNDERGROUND_API_KEY']}/geolookup/q/pws:#{site_data[:id]}.json")
             wupws_site_details = JSON.parse(wupws_site_details_raw)
