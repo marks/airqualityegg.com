@@ -95,8 +95,8 @@ namespace :ckan do
               site_data[:wuiurl] = wupws_site_details["location"]["wuiurl"]
               site_data[:last_scraped_at] = Time.now.utc.iso8601
               wupws_sites << site_data
-              sleep 11
             end
+            sleep 15
           else
             # do not save - we are only interested in focus city PWSs
           end
