@@ -98,7 +98,9 @@ Be sure to restart heroku after this as the database socket connection will need
 45   3  *	* * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake bundle exec foreman run rake ckan:wupws:update >/dev/null 2>&1
 
 # send daily email to subscribers at 6am each day
-0   10  *	* * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake bundle exec foreman run rake mailer:institute_messages:daily >/dev/null 2>&1
+0   10  *	* * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake mailer:institute_messages:daily >/dev/null 2>&1
+# check for notifcation-worthy observations
+0   *  *	* * ec2-user        source /home/ec2-user/.rvm/environments/ruby-2.0.0-p451 && cd /home/ec2-user/airqualityegg.com && foreman run bundle exec rake mailer:institute_messages:breaking >/dev/null 2>&1
 
 
 
