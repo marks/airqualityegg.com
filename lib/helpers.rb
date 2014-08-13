@@ -503,7 +503,15 @@ module AppHelpers
     return action_day_boolean == true ? "** Today is an air quality action day. ** The EPA has more information about what an action day is at http://www.airnow.gov/index.cfm?action=airnow.actiondays\n" : ""
   end
 
-  # def format_eggs_message_html(total, active)
-  # end
+  def upload_data_to_ckan_resource(resource_id, data, method = "upsert")
+    post_data = {
+      :resource_id => resource_id,
+      :records => data,
+      :method => method.to_s
+    }.to_json
+    raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+    result = JSON.parse(raw)
+    return result
+  end
 
 end

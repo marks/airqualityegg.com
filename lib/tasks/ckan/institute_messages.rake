@@ -5,25 +5,22 @@ namespace :ckan do
     namespace :data do
 
       INSTITUTE_MESSAGES_DATA_FIELDS = [
-      	{:id => "ctct_id", :type => "int"}, 
-        {:id => "ctct_list_id", :type => "int"}, 
+      	{:id => "ctct_id", :type => "text"}, 
+        {:id => "ctct_list_id", :type => "text"}, 
         {:id => "ctct_draft_saved_at", :type => "timestamp"},
-
         {:id => "message_type", :type => "text"},  # daily or alert
-
         {:id => "message_html", :type => "text"}, 
         {:id => "message_text", :type => "text"}, 
-
         {:id => "today_action_day", :type => "int"}, # 0 = no, 1 = yes
         {:id => "today_forecast_prevailing_aqi", :type => "int"}, 
-        {:id => "today_forecast_prevailing_param", :type => "text"}, 
-
+        {:id => "today_forecast_prevailing_aqi_cat", :type => "text"}, 
+        {:id => "today_forecast_prevailing_aqi_param", :type => "text"}, 
         {:id => "tomorrow_action_day", :type => "int"}, # 0 = no, 1 = yes
         {:id => "tomorrow_forecast_prevailing_aqi", :type => "int"}, 
-        {:id => "tomorrow_forecast_prevailing_param", :type => "text"}, 
-
+        {:id => "tomorrow_forecast_prevailing_aqi_cat", :type => "text"}, 
+        {:id => "tomorrow_forecast_prevailing_aqi_param", :type => "text"}, 
         {:id => "institute_total_eggs", :type => "int"},
-        {:id => "institute_lice_eggs", :type => "int"}
+        {:id => "institute_live_eggs", :type => "int"}
       ]
 
       desc "Create CKAN resource for sites (if it doesn't exist) and then upsert CKAN with site data"

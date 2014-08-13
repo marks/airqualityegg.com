@@ -2,7 +2,10 @@ namespace :mailer do
 
   namespace :institute_messages do
 
+
   	task :daily do
+			CKAN_INSTITUTE_MESSAGES_RESOURCE_ID = META["institute_messages"]["resources"].first["id"]
+			CTCT_LIST_ID = ENV['CONSTANTCONTACT_LIST_ID']
 
 			# First, let's get the forecast from AirNow APIs
 		  forecasts_url = "http://www.airnowapi.org/aq/forecast/latLong/?format=application/json&latitude=#{ENV['FOCUS_CITY_LAT']}&longitude=#{ENV['FOCUS_CITY_LON']}&distance=25&API_KEY=#{ENV["AIRNOW_API_KEY"]}"
@@ -94,17 +97,16 @@ namespace :mailer do
 			puts message_html
 
 			# Now that we've got the HTML and text versions of the email crafted, it's time to make API calls to Constant Contact
+			time_sent = Time.now.utc.iso8601
 			create_campaign_data = {
-				"name" => "Daily Air Quality Email - #{Time.now.utc.iso8601}",
+				"name" => "Daily Air Quality Email - #{time_sent}",
 				"subject" => "#{Date.today.strftime("%m/%d/%Y")} Air Quality Update from Institute for Healthy Air, Water, and Soil",
-				"sent_to_contact_lists" => [{"id" => ENV['CONSTANTCONTACT_LIST_ID'].to_s}],
+				"sent_to_contact_lists" => [{"id" => CTCT_LIST_ID}],
 				"from_name" => "Institute for Healthy Air, Water, and Soil",
 				"from_email" => "louisville@instituteforhealthyairwaterandsoil.org",
 				"reply_to_email" => "louisville@instituteforhealthyairwaterandsoil.org",
 				"is_permission_reminder_enabled" => false,
 				"is_view_as_webpage_enabled" => false,
-				# "view_as_web_page_text" => "To view this message as a web page,",
-				# "view_as_web_page_link_text" => "click here",
 				"greeting_salutations" => "Hi",
 				"greeting_name" => "FIRST_NAME",
 				"greeting_string" => "Hi",
@@ -136,7 +138,37 @@ namespace :mailer do
 
 				schedule_campaign_response = RestClient.post("https://api.constantcontact.com/v2/emailmarketing/campaigns/#{campaign_id}/schedules?api_key=#{ENV['CONSTANTCONTACT_API_KEY']}", {}.to_json, :content_type => :json, :accept => :json, 'Authorization' => "Bearer #{ENV['CONSTANTCONTACT_ACCESS_TOKEN']}")
 				if schedule_campaign_response.code == 201
-					puts "Campaign scheduled! Will go out ASAP"
+
+					data_to_record = {
+						:ctct_id => campaign_id.to_s,
+						:ctct_list_id => CTCT_LIST_ID.to_s,
+						:ctct_draft_saved_at => time_sent,
+						:message_type => "daily",
+						:message_html => create_campaign_data["email_content"],
+						:message_text => create_campaign_data["text_content"],
+						:today_action_day => (today_is_an_action_day ? 1 : 0),
+						:tomorrow_action_day => (tomorrow_is_an_action_day ? 1 : 0),
+						:institute_live_eggs => n_eggs_last_updated_within_a_week,
+						:institute_total_eggs => n_eggs
+					}
+
+					unless tomorrows_forecasts.empty?
+						data_to_record[:tomorrow_forecast_prevailing_aqi] = tomorrows_forecasts.first["AQI"],
+						data_to_record[:tomorrow_forecast_prevailing_aqi_cat] = tomorrows_forecasts.first["Category"]["Name"]
+						data_to_record[:tomorrow_forecast_prevailing_aqi_param] = tomorrows_forecasts.first["ParameterName"]
+					end
+
+					unless todays_forecasts.empty?
+						data_to_record[:today_forecast_prevailing_aqi] = todays_forecasts.first["AQI"]
+						data_to_record[:today_forecast_prevailing_aqi_cat] = todays_forecasts.first["Category"]["Name"]
+						data_to_record[:today_forecast_prevailing_aqi_param] = todays_forecasts.first["ParameterName"]
+					end
+
+					puts data_to_record
+
+					upload_data_to_ckan_resource(CKAN_INSTITUTE_MESSAGES_RESOURCE_ID, [data_to_record], 'upsert')
+
+					puts "Campaign scheduled and logged! It will go out in about 5 minutes"
 				else
 					raise StandardError, "Campaign ##{campaign_id} could not be scheduled"
 				end
