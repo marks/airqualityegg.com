@@ -27,7 +27,7 @@ namespace :mailer do
 		  	# if there are observations more severe than moderate, check to see if we have sent an email within the past 4 hours
 		  	last_email_sent_sql = "SELECT EXTRACT(EPOCH FROM current_timestamp - ctct_draft_saved_at )/3600 as hours_since_last_email FROM \"#{CKAN_INSTITUTE_MESSAGES_RESOURCE_ID}\" ORDER BY ctct_draft_saved_at asc limit 1"
 		  	last_email_sent_result = sql_search_ckan(last_email_sent_sql)
-		  	if last_email_sent_result.first["hours_since_last_email"] > 4
+		  	if last_email_sent_result.first["hours_since_last_email"] > 6
 		  		# if the last email communication was more than four hours ago, send an alert about the latest observation
 
 			  	message_introduction = "This is an air quality notification from the Institute for Healthy Air, Water, and Soil."
