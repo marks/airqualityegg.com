@@ -20,7 +20,11 @@ namespace :ckan do
         {:id => "tomorrow_forecast_prevailing_aqi_cat", :type => "text"}, 
         {:id => "tomorrow_forecast_prevailing_aqi_param", :type => "text"}, 
         {:id => "institute_total_eggs", :type => "int"},
-        {:id => "institute_live_eggs", :type => "int"}
+        {:id => "institute_live_eggs", :type => "int"},
+        {:id => "highest_observation_at", :type => "timestamp"}, 
+        {:id => "highest_observation_aqi", :type => "int"}, 
+        {:id => "highest_observation_aqi_cat", :type => "text"}, 
+        {:id => "highest_observation_aqi_param", :type => "text"}
       ]
 
       desc "Create CKAN resource for sites (if it doesn't exist) and then upsert CKAN with site data"

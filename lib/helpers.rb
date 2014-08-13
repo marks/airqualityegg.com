@@ -470,7 +470,6 @@ module AppHelpers
     else
       html += "<ul>"
       forecasts_array.each do |forecast|
-        # text += " - #{forecast["Category"]["Name"]} air quality (AQI of #{forecast["AQI"]}) from #{forecast["ParameterName"]}\n"
         html += "<li><strong style='padding: 3px; line-height: 30px; color:#{forecast["aqi_cat"][:font]};background-color:#{forecast["aqi_cat"][:color]};'>#{forecast["Category"]["Name"]} air quality from #{forecast["ParameterName"]}</strong>"
         html += " (AQI of #{forecast["AQI"]})" if forecast["AQI"] > 0
         html += "</li>"
@@ -479,7 +478,6 @@ module AppHelpers
     end
     return html
   end
-
 
   def format_forecasts_text(forecasts_array)
     text = ""
@@ -491,6 +489,27 @@ module AppHelpers
         text += " (AQI of #{forecast["AQI"]})" if forecast["AQI"] > 0
         text += "\n"
       end
+    end
+    return text
+  end
+
+  def format_observations_html(observations_array)
+    html = "<ul>"
+    observations_array.each do |observation|
+      html += "<li><strong style='padding: 3px; line-height: 30px; color:#{observation["aqi_cat"][:font]};background-color:#{observation["aqi_cat"][:color]};'>#{observation["Category"]["Name"]} air quality from #{observation["ParameterName"]}</strong>"
+      html += " (AQI of #{observation["AQI"]})" if observation["AQI"] > 0
+      html += "</li>"
+    end
+    html += "</ul>"
+    return html
+  end
+
+  def format_observations_text(observations_array)
+    text = ""
+    observations_array.each do |observation|
+      text += " - #{observation["Category"]["Name"]} air quality from #{observation["ParameterName"]}"
+      text += " (AQI of #{observation["AQI"]})" if observation["AQI"] > 0
+      text += "\n"
     end
     return text
   end
