@@ -533,4 +533,12 @@ module AppHelpers
     return result
   end
 
+  def random_fact_from_wordpress
+    raw = JSON.parse(RestClient.get(ENV['WORDPRESS_BASE']+'/wp-json/pages/'+ENV['WORDPRESS_FACTS_PAGE_SLUG']))
+    doc = Nokogiri::HTML(raw["content"])
+    slides = doc.css("div.cycloneslider-slide-custom")
+    slides_text = slides.map {|slide| slide.text.strip}
+    slides_text.shuffle.first
+  end
+
 end

@@ -47,7 +47,9 @@ namespace :mailer do
               <p>#{message_introduction}</p>
               <h1>Latest Observations</h1>
               #{format_observations_html(observations)}
-            <br /><table><tr><td class="padding">
+              <p><strong>Fact For You: </strong>
+               #{random_fact_from_wordpress} (Visit <a href='#{ENV['WORDPRESS_BASE']}/#{ENV['WORDPRESS_FACTS_PAGE_SLUG']}'>#{ENV['WORDPRESS_BASE']}/#{ENV['WORDPRESS_FACTS_PAGE_SLUG']}</a> for more facts and complete attribution)</p>
+            <br /><table><tr><td class="">
             </td></tr></table><p>
             <br /></p>
               <p>Have a happy and healthy day,</p>
@@ -68,6 +70,9 @@ namespace :mailer do
 
       ## Latest Observations ##
       #{format_observations_text(observations)}
+
+      ## Fact For You ##
+      #{random_fact_from_wordpress} (Visit #{ENV['WORDPRESS_BASE']} for more facts and complete attribution)
 
       Have a happy and healthy day,</p>
 
@@ -206,9 +211,12 @@ namespace :mailer do
           <h2>Tomorrow's Forecast</h2>
           #{format_action_day_html(tomorrow_is_an_action_day)}
           #{format_forecasts_html(tomorrows_forecasts)}
-        <br /><table><tr><td class="padding">
+        <br /><table><tr><td class="">
           <!-- <p style="text-align:center;"><a class="btn-primary" href= "http://louisvilleairmap.com">LouisvilleAirMap.com</a></p> -->
-        </td></tr></table><p>
+        </td></tr></table>
+          <p><strong>Fact For You: </strong>
+           #{random_fact_from_wordpress} (Visit <a href='#{ENV['WORDPRESS_BASE']}/#{ENV['WORDPRESS_FACTS_PAGE_SLUG']}'>#{ENV['WORDPRESS_BASE']}/#{ENV['WORDPRESS_FACTS_PAGE_SLUG']}</a> for more facts and complete attribution)</p>
+        <p>
           #{egg_message}<br />
         <br /></p>
           <p>Have a happy and healthy day,</p>
@@ -231,6 +239,11 @@ namespace :mailer do
   #{format_action_day_text(today_is_an_action_day)}#{format_forecasts_text(todays_forecasts)}
   ## Tomorrow's Forecast ##
   #{format_action_day_text(today_is_an_action_day)}#{format_forecasts_text(tomorrows_forecasts)}
+
+
+  ## Fact For You ##
+  #{random_fact_from_wordpress} (Visit #{ENV['WORDPRESS_BASE']} for more facts and complete attribution)
+
   #{egg_message}
 
   Have a happy and healthy day,</p>
