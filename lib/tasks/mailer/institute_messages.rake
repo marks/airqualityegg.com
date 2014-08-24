@@ -94,7 +94,7 @@ namespace :mailer do
           time_sent = Time.now.utc.iso8601
           create_campaign_data = {
             "name" => "Breaking Air Quality Email - #{time_sent}",
-            "subject" => "AIR QUALITY NOTIFICATION from the Institute for Healthy Air, Water, and Soil",
+            "subject" => "AIR QUALITY NOTIFICATION for #{ENV['FOCUS_CITY_NAME']} from the Institute for Healthy Air, Water, and Soil",
             "sent_to_contact_lists" => [{"id" => CTCT_LIST_ID}],
             "from_name" => "Institute for Healthy Air, Water, and Soil",
             "from_email" => "louisville@instituteforhealthyairwaterandsoil.org",
@@ -266,7 +266,7 @@ namespace :mailer do
       time_sent = Time.now.utc.iso8601
       create_campaign_data = {
         "name" => "Daily Air Quality Email - #{time_sent}",
-        "subject" => "#{Date.today.strftime("%m/%d/%Y")} Air Quality Update from the Institute for Healthy Air, Water, and Soil",
+        "subject" => "#{Date.today.strftime("%m/%d/%Y")} Air Quality Update for #{ENV['FOCUS_CITY_NAME']} from the Institute for Healthy Air, Water, and Soil",
         "sent_to_contact_lists" => [{"id" => CTCT_LIST_ID}],
         "from_name" => "Institute for Healthy Air, Water, and Soil",
         "from_email" => "louisville@instituteforhealthyairwaterandsoil.org",
