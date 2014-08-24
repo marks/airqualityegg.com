@@ -30,7 +30,7 @@ namespace :mailer do
         if last_email_sent_result.first["hours_since_last_email"] > 6
           # if the last email communication was more than four hours ago, send an alert about the latest observation
 
-          message_introduction = "This is an air quality notification from the Institute for Healthy Air, Water, and Soil."
+          message_introduction = "This is an air quality notification for #{ENV['FOCUS_CITY_NAME']} from the Institute for Healthy Air, Water, and Soil."
           message_html = <<-EOS
             <!DOCTYPE html>
             <html>
@@ -190,7 +190,7 @@ namespace :mailer do
       n_eggs_last_updated_within_a_week = eggs_last_updated_within_a_week.count
       egg_message = "The Institute is in the process of deploying Air Quality Eggs. To date, #{n_eggs} have been deployed and #{n_eggs_last_updated_within_a_week} have sent us data in the past 7 days. You can explore the data they collect alongside other community data at http://LouisvilleAirMap.com"
 
-      message_introduction = "This is your daily air quality update from the Institute for Healthy Air, Water, and Soil."
+      message_introduction = "This is your daily air quality update for #{ENV['FOCUS_CITY_NAME']} from the Institute for Healthy Air, Water, and Soil."
       message_html = <<-EOS
         <!DOCTYPE html>
         <html>
