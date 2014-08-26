@@ -5,6 +5,47 @@ namespace :mailer do
     CKAN_INSTITUTE_MESSAGES_RESOURCE_ID = META["institute_messages"]["resources"].first["id"]
     CTCT_LIST_ID = ENV['CONSTANTCONTACT_LIST_ID']
 
+    EPA_HOW_YOU_CAN_HELP_HTML = <<-EOS
+      <p><strong><a href='http://www.airnow.gov/index.cfm?action=resources.whatyoucando'>How You Can Help Keep the Air Cleaner (from the EPA)</a></strong>
+       <br />Air pollution can affect your health and the environment.  There are actions every one of us can take to reduce air pollution and keep the air cleaner, and precautionary measures you can take to protect your health.</p>
+      <ul>
+        <li>Days when ozone is expected to be high:
+          <ul>
+            <li>Conserve electricity and set your air conditioner at a higher temperature.</li>
+            <li>Choose a cleaner commute-share a ride to work or use public transportation. Bicycle or walk to errands when possible.</li>
+            <li>Refuel cars and trucks after dusk.</li>
+            <li>Combine errands and reduce trips.</li>
+            <li>Limit engine idling.</li>
+            <li>Use household, workshop,and garden chemicals in ways that keep evaporation to a minimum, or try to delay using them when poor air quality is forecast.</li>
+          </ul>
+        </li>
+        <li>Days when particle pollution is expected to be high:
+          <ul>
+            <li>Reduce or eliminate fireplace and wood stove use.</li>
+            <li>Avoid using gas-powered lawn and garden equipment.</li>
+            <li>Avoid burning leaves, trash and other materials.</li>
+          </ul>
+        </li>
+      </ul>
+    EOS
+
+    EPA_HOW_YOU_CAN_HELP_TEXT = <<-EOS
+## How You Can Help Keep the Air Cleaner (from EPA at http://www.airnow.gov/index.cfm?action=resources.whatyoucando) ##
+
+Air pollution can affect your health and the environment. There are actions every one of us can take to reduce air pollution and keep the air cleaner, and precautionary measures you can take to protect your health.
+* Days when ozone is expected to be high:
+  - Conserve electricity and set your air conditioner at a higher temperature.
+  - Choose a cleaner commute-share a ride to work or use public transportation. Bicycle or walk to errands when possible.
+  - Refuel cars and trucks after dusk.
+  - Combine errands and reduce trips.
+  - Limit engine idling.
+  - Use household, workshop,and garden chemicals in ways that keep evaporation to a minimum, or try to delay using them when poor air quality is forecast.
+* Days when particle pollution is expected to be high:
+  - Reduce or eliminate fireplace and wood stove use.
+  - Avoid using gas-powered lawn and garden equipment.
+  - Avoid burning leaves, trash and other materials.
+
+EOS
 
     task :breaking do
 
@@ -32,7 +73,6 @@ namespace :mailer do
 
           message_introduction = "This is an air quality notification for #{ENV['FOCUS_CITY_NAME']} from the Institute for Healthy Air, Water, and Soil."
           message_html = <<-EOS
-            <!DOCTYPE html>
             <html>
             <head>
             <meta content="width=device-width" name="viewport">
@@ -42,12 +82,15 @@ namespace :mailer do
               *{margin:0;padding:0;font-family:"Helvetica Neue",Helvetica,Helvetica,Arial,sans-serif;font-size:100%;line-height:1.6}img{max-width:100%}body{-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:none;width:100%!important;height:100%}a{color:#348eda}.btn-primary{text-decoration:none;color:#FFF;background-color:#348eda;border:solid #348eda;border-width:10px 20px;line-height:2;font-weight:700;margin-right:10px;text-align:center;cursor:pointer;display:inline-block;border-radius:25px}.btn-secondary{text-decoration:none;color:#FFF;background-color:#aaa;border:solid #aaa;border-width:10px 20px;line-height:2;font-weight:700;margin-right:10px;text-align:center;cursor:pointer;display:inline-block;border-radius:25px}.last{margin-bottom:0}.first{margin-top:0}.padding{padding:10px 0}table.body-wrap{width:100%;padding:20px}table.body-wrap .container{border:1px solid #f0f0f0}table.footer-wrap{width:100%;clear:both!important}.footer-wrap .container p{font-size:12px;color:#666}table.footer-wrap a{color:#999}h1,h2,h3{font-family:"Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;color:#000;margin:40px 0 10px;line-height:1.2;font-weight:200}h1{font-size:36px}h2{font-size:28px}h3{font-size:22px}ol,p,ul{margin-bottom:10px;font-weight:400;font-size:14px}ol li,ul li{margin-left:5px;list-style-position:inside}.container{display:block!important;max-width:600px!important;margin:0 auto!important;clear:both!important}.body-wrap .container{padding:20px}.content{max-width:600px;margin:0 auto;display:block}.content table{width:100%}
               table[width="595"] {width: 300px !important;}
             </style>
-            </head><body bgcolor="#F6F6F6"><table class="body-wrap"><tr><td></td><td class="container" style="background-color: #FFFFFF"><div class="content"><table><tr><td>
+            </head><body style="background-color: #F6F6F6;"><table class="body-wrap"><tr><td></td><td class="container" style="background-color: #FFFFFF"><div class="content"><table><tr><td>
               <p><Greeting /></p>
               <p>#{message_introduction}</p>
               <h1>Latest Observations</h1>
               #{format_observations_html(observations)}
-              <p><strong>Fact For You: </strong>
+
+              #{EPA_HOW_YOU_CAN_HELP_HTML}
+              <br />
+              <p><br /><strong>Fact For You: </strong>
                #{random_fact_from_wordpress} (Visit <a href='#{ENV['WORDPRESS_BASE']}/#{ENV['WORDPRESS_FACTS_PAGE_SLUG']}'>#{ENV['WORDPRESS_BASE']}/#{ENV['WORDPRESS_FACTS_PAGE_SLUG']}</a> for more facts and complete attribution)</p>
             <br /><table><tr><td class="">
             </td></tr></table><p>
@@ -56,7 +99,6 @@ namespace :mailer do
               <p> The Institute for Healthy Air, Water, and Soil
               <br /><a href="mailto:louisville@instituteforhealthyairwaterandsoil.org">louisville@instituteforhealthyairwaterandsoil.org</a>
               <br />Follow us on <a href= "http://twitter.com/healthyaws">Twitter</a> and <a href="http://facebook.com/Instituteforhealthyairwaterandsoil">Facebook</a></p>
-            </p>
               <p><em>Together let's preserve our World's Sacred Air, Water, and Soil, so as tocreate the healthy communities that are essential for the survival of all of life!</em></p>
             </td></tr></table></div></td><td></td></tr></table></body></html>
           EOS
@@ -73,6 +115,8 @@ namespace :mailer do
 
       ## Fact For You ##
       #{random_fact_from_wordpress} (Visit #{ENV['WORDPRESS_BASE']} for more facts and complete attribution)
+
+      #{EPA_HOW_YOU_CAN_HELP_TEXT}
 
       Have a happy and healthy day,</p>
 
@@ -192,7 +236,6 @@ namespace :mailer do
 
       message_introduction = "This is your daily air quality update for #{ENV['FOCUS_CITY_NAME']} from the Institute for Healthy Air, Water, and Soil."
       message_html = <<-EOS
-        <!DOCTYPE html>
         <html>
         <head>
         <meta content="width=device-width" name="viewport">
@@ -202,7 +245,7 @@ namespace :mailer do
           *{margin:0;padding:0;font-family:"Helvetica Neue",Helvetica,Helvetica,Arial,sans-serif;font-size:100%;line-height:1.6}img{max-width:100%}body{-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:none;width:100%!important;height:100%}a{color:#348eda}.btn-primary{text-decoration:none;color:#FFF;background-color:#348eda;border:solid #348eda;border-width:10px 20px;line-height:2;font-weight:700;margin-right:10px;text-align:center;cursor:pointer;display:inline-block;border-radius:25px}.btn-secondary{text-decoration:none;color:#FFF;background-color:#aaa;border:solid #aaa;border-width:10px 20px;line-height:2;font-weight:700;margin-right:10px;text-align:center;cursor:pointer;display:inline-block;border-radius:25px}.last{margin-bottom:0}.first{margin-top:0}.padding{padding:10px 0}table.body-wrap{width:100%;padding:20px}table.body-wrap .container{border:1px solid #f0f0f0}table.footer-wrap{width:100%;clear:both!important}.footer-wrap .container p{font-size:12px;color:#666}table.footer-wrap a{color:#999}h1,h2,h3{font-family:"Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;color:#000;margin:40px 0 10px;line-height:1.2;font-weight:200}h1{font-size:36px}h2{font-size:28px}h3{font-size:22px}ol,p,ul{margin-bottom:10px;font-weight:400;font-size:14px}ol li,ul li{margin-left:5px;list-style-position:inside}.container{display:block!important;max-width:600px!important;margin:0 auto!important;clear:both!important}.body-wrap .container{padding:20px}.content{max-width:600px;margin:0 auto;display:block}.content table{width:100%}
           table[width="595"] {width: 300px !important;}
         </style>
-        </head><body bgcolor="#F6F6F6"><table class="body-wrap"><tr><td></td><td class="container" style="background-color: #FFFFFF"><div class="content"><table><tr><td>
+        </head><body style="background-color: #F6F6F6;"><table class="body-wrap"><tr><td></td><td class="container" style="background-color: #FFFFFF"><div class="content"><table><tr><td>
           <p><Greeting /></p>
           <p>#{message_introduction}</p>
           <h1>Today's Forecast</h1>
@@ -214,8 +257,12 @@ namespace :mailer do
         <br /><table><tr><td class="">
           <!-- <p style="text-align:center;"><a class="btn-primary" href= "http://louisvilleairmap.com">LouisvilleAirMap.com</a></p> -->
         </td></tr></table>
-          <p><strong>Fact For You: </strong>
-           #{random_fact_from_wordpress} (Visit <a href='#{ENV['WORDPRESS_BASE']}/#{ENV['WORDPRESS_FACTS_PAGE_SLUG']}'>#{ENV['WORDPRESS_BASE']}/#{ENV['WORDPRESS_FACTS_PAGE_SLUG']}</a> for more facts and complete attribution)</p>
+        #{EPA_HOW_YOU_CAN_HELP_HTML}
+        <br />
+        <p><strong>Fact For You: </strong>
+           #{random_fact_from_wordpress} (Visit <a href='#{ENV['WORDPRESS_BASE']}/#{ENV['WORDPRESS_FACTS_PAGE_SLUG']}'>#{ENV['WORDPRESS_BASE']}/#{ENV['WORDPRESS_FACTS_PAGE_SLUG']}</a> for more facts and complete attribution)
+        </p>
+        <br />
         <p>
           #{egg_message}<br />
         <br /></p>
@@ -223,7 +270,6 @@ namespace :mailer do
           <p> The Institute for Healthy Air, Water, and Soil
           <br /><a href="mailto:louisville@instituteforhealthyairwaterandsoil.org">louisville@instituteforhealthyairwaterandsoil.org</a>
           <br />Follow us on <a href= "http://twitter.com/healthyaws">Twitter</a> and <a href="http://facebook.com/Instituteforhealthyairwaterandsoil">Facebook</a></p>
-        </p>
           <p><em>Together let's preserve our World's Sacred Air, Water, and Soil, so as tocreate the healthy communities that are essential for the survival of all of life!</em></p>
         </td></tr></table></div></td><td></td></tr></table></body></html>
       EOS
@@ -243,6 +289,8 @@ namespace :mailer do
 
   ## Fact For You ##
   #{random_fact_from_wordpress} (Visit #{ENV['WORDPRESS_BASE']} for more facts and complete attribution)
+
+  #{EPA_HOW_YOU_CAN_HELP_TEXT}
 
   #{egg_message}
 
@@ -266,7 +314,7 @@ namespace :mailer do
       time_sent = Time.now.utc.iso8601
       create_campaign_data = {
         "name" => "Daily Air Quality Email - #{time_sent}",
-        "subject" => "#{Date.today.strftime("%m/%d/%Y")} Air Quality Update for #{ENV['FOCUS_CITY_NAME']} from the Institute for Healthy Air, Water, and Soil",
+        "subject" => "Air Quality Update for #{ENV['FOCUS_CITY_NAME']} from the Institute for Healthy Air, Water, and Soil",
         "sent_to_contact_lists" => [{"id" => CTCT_LIST_ID}],
         "from_name" => "Institute for Healthy Air, Water, and Soil",
         "from_email" => "louisville@instituteforhealthyairwaterandsoil.org",
@@ -297,6 +345,9 @@ namespace :mailer do
         }
       }
 
+      puts create_campaign_data.to_json
+
+      
       create_campaign_response = RestClient.post("https://api.constantcontact.com/v2/emailmarketing/campaigns?api_key=#{ENV['CONSTANTCONTACT_API_KEY']}", create_campaign_data.to_json, :content_type => :json, :accept => :json, 'Authorization' => "Bearer #{ENV['CONSTANTCONTACT_ACCESS_TOKEN']}")
       if create_campaign_response.code == 201
         create_campaign_result = JSON.parse(create_campaign_response)

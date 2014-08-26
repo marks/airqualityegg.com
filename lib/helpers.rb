@@ -538,7 +538,7 @@ module AppHelpers
     doc = Nokogiri::HTML(raw["content"])
     slides = doc.css("div.cycloneslider-slide-custom")
     slides_text = slides.map {|slide| slide.text.strip}
-    slides_text.shuffle.first
+    slides_text.shuffle.first.force_encoding("ISO-8859-1")
   end
 
 end
