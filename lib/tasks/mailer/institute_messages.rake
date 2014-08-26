@@ -30,7 +30,7 @@ namespace :mailer do
     EOS
 
     EPA_HOW_YOU_CAN_HELP_TEXT = <<-EOS
-  ## How You Can Help Keep the Air Cleaner (from EPA at http://www.airnow.gov/index.cfm?action=resources.whatyoucando) ##
+## How You Can Help Keep the Air Cleaner (from EPA at http://www.airnow.gov/index.cfm?action=resources.whatyoucando) ##
 
   Air pollution can affect your health and the environment. There are actions every one of us can take to reduce air pollution and keep the air cleaner, and precautionary measures you can take to protect your health.
   * Days when ozone is expected to be high:
