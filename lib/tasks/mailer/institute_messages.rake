@@ -30,20 +30,20 @@ namespace :mailer do
     EOS
 
     EPA_HOW_YOU_CAN_HELP_TEXT = <<-EOS
-## How You Can Help Keep the Air Cleaner (from EPA at http://www.airnow.gov/index.cfm?action=resources.whatyoucando) ##
+  ## How You Can Help Keep the Air Cleaner (from EPA at http://www.airnow.gov/index.cfm?action=resources.whatyoucando) ##
 
-Air pollution can affect your health and the environment. There are actions every one of us can take to reduce air pollution and keep the air cleaner, and precautionary measures you can take to protect your health.
-* Days when ozone is expected to be high:
-  - Conserve electricity and set your air conditioner at a higher temperature.
-  - Choose a cleaner commute-share a ride to work or use public transportation. Bicycle or walk to errands when possible.
-  - Refuel cars and trucks after dusk.
-  - Combine errands and reduce trips.
-  - Limit engine idling.
-  - Use household, workshop,and garden chemicals in ways that keep evaporation to a minimum, or try to delay using them when poor air quality is forecast.
-* Days when particle pollution is expected to be high:
-  - Reduce or eliminate fireplace and wood stove use.
-  - Avoid using gas-powered lawn and garden equipment.
-  - Avoid burning leaves, trash and other materials.
+  Air pollution can affect your health and the environment. There are actions every one of us can take to reduce air pollution and keep the air cleaner, and precautionary measures you can take to protect your health.
+  * Days when ozone is expected to be high:
+    - Conserve electricity and set your air conditioner at a higher temperature.
+    - Choose a cleaner commute-share a ride to work or use public transportation. Bicycle or walk to errands when possible.
+    - Refuel cars and trucks after dusk.
+    - Combine errands and reduce trips.
+    - Limit engine idling.
+    - Use household, workshop,and garden chemicals in ways that keep evaporation to a minimum, or try to delay using them when poor air quality is forecast.
+  * Days when particle pollution is expected to be high:
+    - Reduce or eliminate fireplace and wood stove use.
+    - Avoid using gas-powered lawn and garden equipment.
+    - Avoid burning leaves, trash and other materials.
 
 EOS
 
@@ -282,9 +282,9 @@ EOS
   #{message_introduction}
 
   ## Today's Forecast ##
-  #{format_action_day_text(today_is_an_action_day)}#{format_forecasts_text(todays_forecasts)}
+#{format_action_day_text(today_is_an_action_day)}#{format_forecasts_text(todays_forecasts)}
   ## Tomorrow's Forecast ##
-  #{format_action_day_text(today_is_an_action_day)}#{format_forecasts_text(tomorrows_forecasts)}
+#{format_action_day_text(today_is_an_action_day)}#{format_forecasts_text(tomorrows_forecasts)}
 
 
   ## Fact For You ##

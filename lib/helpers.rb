@@ -507,7 +507,7 @@ module AppHelpers
   def format_observations_text(observations_array)
     text = ""
     observations_array.each do |observation|
-      text += " - #{observation["Category"]["Name"]} air quality from #{observation["ParameterName"]}"
+      text += "   - #{observation["Category"]["Name"]} air quality from #{observation["ParameterName"]}"
       text += " (AQI of #{observation["AQI"]})" if observation["AQI"] > 0
       text += "\n"
     end
