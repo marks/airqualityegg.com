@@ -1,6 +1,7 @@
+var map;
+
 $(function() {
 
-  var map;
 
   // map stuff
   map = L.map('map_canvas', {scrollWheelZoom: false, loadingControl: true, layers: []}) // propellerhealth_layer

@@ -141,7 +141,13 @@ class AirQualityEgg < Sinatra::Base
 
   get '/aqe/dashboard' do
     dataset_key = "aqe"
-    focus_ids = META[dataset_key]["extras_hash"]["Focus IDs"]
+
+    if params["focus_ids"] 
+      focus_ids = params["focus_ids"]
+    else
+      focus_ids = META[dataset_key]["extras_hash"]["Focus IDs"]
+    end
+    
     @sql = <<-EOS
       SELECT site_table.id, site_table.created, site_table.description, site_table.feed, site_table.location_domain, site_table.location_ele, site_table.location_exposure, site_table.location_lat, site_table.location_lon, site_table.status, site_table.title,
       ( SELECT data_table.datetime FROM \"#{META[dataset_key]["data_resource_id"]}\" data_table WHERE data_table.feed_id = site_table. ID ORDER BY datetime DESC LIMIT 1 )
