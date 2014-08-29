@@ -47,6 +47,7 @@ var AQE = (function ( $ ) {
     iconSize: [12, 20], // size of the icon
   });
 
+  var healthEquity2014NeighborhoodStyle = {color: "#dbb67a",opacity: 0.7,fillOpacity:0.2,weight:3}
   var heatmapIconURL = '/assets/img/heatmap_legend.png'
 
   // OpenWeatherMap Layers
@@ -417,6 +418,24 @@ var AQE = (function ( $ ) {
       html += "</table>" 
       html += "<p style='text-align: right'><a target='blank' href='"+item.wuiurl+"?apiref=8839d23d1235ce5f'>More about this weather station including historical graphs →</a></p>"
       html += "<p style='font-size:80%'>From <a href='http://www.wunderground.com/?apiref=8839d23d1235ce5f' target='blank' title='weather underground'><img src='/assets/img/wunderground.jpg'></a>."
+      html += "</div>"
+      layer.bindPopup(html)
+    }
+    else if(item.type == "he2014neighborhoodgeojson"){
+      layer.setStyle(healthEquity2014NeighborhoodStyle)
+      var html = "<div><h4>"+item.Neighbor+" Neighborhood</h4>"
+      html += "<table class='table table-striped' data-he2014neighborhoodgeojson_id='"+item.OBJECTID+"'>"
+      html += "<tr><td>Life Expectancy</td><td>"+item.LifeExpect+" </td></tr>"
+      html += "<tr><td>Heart Disease*</td><td>"+item.HeartDisea+" </td></tr>"
+      html += "<tr><td>Homicide*</td><td>"+item.Homicide+" </td></tr>"
+      html += "<tr><td>Suicide*</td><td>"+item.Suicide+" </td></tr>"
+      html += "<tr><td>HIV*</td><td>"+item.HIV+" </td></tr>"
+      html += "<tr><td>Diabetes*</td><td>"+item.Diabetes+" </td></tr>"
+      html += "<tr><td>Unintentional Injury*</td><td>"+item.Unintended+" </td></tr>"
+      html += "<tr><td>Alcohol or other drugs*</td><td>"+item.AlcoholDru+" </td></tr>"
+      html += "</table>" 
+      html += "<p>* Age Adjusted death rate per 100,000 population</p>"
+      html += "<p style='font-size:80%'>From <a href='www.louisvilleky.gov/health/equity/' target='blank'>Louisville, KY Health Equity Report 2014 edition (updated July 2014)</a>."
       html += "</div>"
       layer.bindPopup(html)
     } else {
