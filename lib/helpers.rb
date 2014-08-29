@@ -22,6 +22,12 @@ module AppHelpers
     end
   end
 
+  def raw_resource_from_ckan(full_url)
+    raw = RestClient.get(full_url,{"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
+    return raw
+  end
+
+
   def sql_search_ckan(sql_query)
     results = []
     uri = "#{ENV['CKAN_HOST']}/api/3/action/datastore_search_sql?sql=#{URI.escape(sql_query)}"
@@ -437,8 +443,14 @@ module AppHelpers
   def set_ckan_metadata!
     ENV["CKAN_DATASET_KEYS"].split(",").each do |key|
       META[key] = get_ckan_package_by_slug(ENV["CKAN_#{key.upcase}_DATASET_ID"])
-      META[key]["site_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"]
-      META[key]["data_resource_id"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"])["id"] if ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"]
+      if ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"]
+        META[key]["site_resource"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_SITE_RESOURCE_NAME"])
+        META[key]["site_resource_id"] = META[key]["site_resource"]["id"]
+      end
+      if ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"]
+        META[key]["data_resource"] = get_ckan_resource_by_name(ENV["CKAN_#{key.upcase}_DATA_RESOURCE_NAME"])
+        META[key]["data_resource_id"] = META[key]["data_resource"]["id"]
+      end
     end
 
     ENV["CKAN_DATASET_KEYS_SITES_JOINABLE"].split(",").each do |dataset_key|

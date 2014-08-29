@@ -217,21 +217,28 @@ class AirQualityEgg < Sinatra::Base
         geojson
       end
       # END BIKE HACK
-
     else
       cache_key = "ckan_proxy/#{key}.geojson"
       cached_data = settings.cache.fetch(cache_key) do
-        all_sites = sql_search_ckan(sql_for_all_sites_by_key(key))
-        geojson = []
-        all_sites.each do |feature|
-          geojson << {
-              :"type" => "Feature",
-              :"properties" => feature.merge("type" => key, "id" => feature[META[key]["extras_hash"]["field_containing_site_id"]]),
-              :"geometry" => {
-                  "type" =>  "Point",
-                  "coordinates" => [feature[META[key]["extras_hash"]["field_containing_site_longitude"]], feature[META[key]["extras_hash"]["field_containing_site_latitude"]]]
-              }
-          }
+        if key.match("geojson")
+          geojson = JSON.parse(raw_resource_from_ckan(META[key]["site_resource"]["url"]))
+          # add important type property to each feature
+          geojson['features'].each do |feature| 
+            feature['properties']['type'] = key
+          end
+        else
+          all_sites = sql_search_ckan(sql_for_all_sites_by_key(key))
+          geojson = []
+          all_sites.each do |feature|
+            geojson << {
+                :"type" => "Feature",
+                :"properties" => feature.merge("type" => key, "id" => feature[META[key]["extras_hash"]["field_containing_site_id"]]),
+                :"geometry" => {
+                    "type" =>  "Point",
+                    "coordinates" => [feature[META[key]["extras_hash"]["field_containing_site_longitude"]], feature[META[key]["extras_hash"]["field_containing_site_latitude"]]]
+                }
+            }
+          end
         end
         geojson = geojson.to_json
         # store in cache and return

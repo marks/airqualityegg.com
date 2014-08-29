@@ -420,8 +420,10 @@ var AQE = (function ( $ ) {
       html += "</div>"
       layer.bindPopup(html)
     } else {
-      var html = "<div><h4>"+item.type.toUpperCase()+" ID #"+item.id+"</h4></div>"
-      layer.bindPopup(html)
+      if(item.type){
+        var html = "<div><h4>"+item.type.toUpperCase()+" ID #"+item.id+"</h4></div>"        
+        layer.bindPopup(html)
+      }      
     }
 
 
@@ -507,6 +509,10 @@ var AQE = (function ( $ ) {
       }
       else{ show = false }
     }
+    else if(item.type == "he2014neighborhoodgeojson"){
+      if(filter_selections["he2014neighborhoodgeojson"] == "true"){ show = true}
+      else { show = false }
+    }
     return show
   }
 
@@ -544,6 +550,8 @@ var AQE = (function ( $ ) {
     } else {
       filter_selections["bike"] = false
     }
+    // health equity report 2014
+    filter_selections["he2014neighborhoodgeojson"] = $('input.filter-he2014neighborhoodgeojson').val()
   }
 
   function update_map(key){
