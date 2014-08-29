@@ -433,6 +433,8 @@ var AQE = (function ( $ ) {
       html += "<tr><td>Diabetes*</td><td>"+item.Diabetes+" </td></tr>"
       html += "<tr><td>Unintentional Injury*</td><td>"+item.Unintended+" </td></tr>"
       html += "<tr><td>Alcohol or other drugs*</td><td>"+item.AlcoholDru+" </td></tr>"
+      html += "<tr><td>Stroke*</td><td>"+item.Stroke+" </td></tr>"
+      html += "<tr><td>Cancer*</td><td>"+item.Cancer+" </td></tr>"
       html += "</table>" 
       html += "<p>* Age Adjusted death rate per 100,000 population</p>"
       html += "<p style='font-size:80%'>From <a href='www.louisvilleky.gov/health/equity/' target='blank'>Louisville, KY Health Equity Report 2014 edition (updated July 2014)</a>."
