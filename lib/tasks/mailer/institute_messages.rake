@@ -226,13 +226,17 @@ EOS
       tomorrow_is_an_action_day = tomorrows_forecasts.select{|x| x["ActionDay"] == true}.count > 1
 
       # Count the number of AQEs that have been deployed by the Institute
-      egg_ids = META["aqe"]["extras_hash"]["Focus IDs"]
-      n_eggs = egg_ids.split(",").count
+      # egg_ids = META["aqe"]["extras_hash"]["Focus IDs"]
+      # n_eggs = egg_ids.split(",").count
+      # Count the number of AQEs in the area
+      n_eggs = JSON.parse(fetch_all_feeds("&lat=38.1935&lon=-85.7121&distance=25&distance_units=kms")).count
+
+
       eggs_last_updated_sql = "SELECT site_table.id, (SELECT EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - data_table.datetime)) FROM \"7d618c44-1098-4348-9f57-8d32d4b159b6\" data_table WHERE data_table.feed_id = site_table. ID ORDER BY datetime DESC LIMIT 1  ) AS last_updated_seconds_ago FROM \"7c0608e3-fb4d-4fb3-928c-5351e5b9b122\" site_table WHERE site_table.id IN (#{META["aqe"]["extras_hash"]["Focus IDs"]})"
       eggs_last_updated_result = sql_search_ckan(eggs_last_updated_sql)
       eggs_last_updated_within_a_week = eggs_last_updated_result.select{|e| e["last_updated_seconds_ago"] != nil && e["last_updated_seconds_ago"] < 7*24*60*60}
       n_eggs_last_updated_within_a_week = eggs_last_updated_within_a_week.count
-      egg_message = "The Institute is in the process of deploying Air Quality Eggs. To date, #{n_eggs} have been deployed and #{n_eggs_last_updated_within_a_week} have sent us data in the past 7 days. You can explore the data they collect alongside other community data at http://LouisvilleAirMap.com"
+      egg_message = "The Institute is in the process of deploying Air Quality Eggs. To date, #{n_eggs} have been deployed and #{n_eggs_last_updated_within_a_week} tested. You can explore the data they collect alongside other community data at http://LouisvilleAirMap.com"
 
       message_introduction = "This is your daily air quality update for #{ENV['FOCUS_CITY_NAME']} from the Institute for Healthy Air, Water, and Soil."
       message_html = <<-EOS

@@ -125,10 +125,10 @@ module AppHelpers
     return row
   end
 
-  def fetch_all_feeds
+  def fetch_all_feeds(additional_http_params = "")
     page = 1
     all_feeds = []
-    base_url = "#{$api_url}/v2/feeds.json?user=airqualityegg&mapped=true&content=summary&per_page=100"
+    base_url = "#{$api_url}/v2/feeds.json?user=airqualityegg&mapped=true&content=summary&per_page=100#{additional_http_params}"
     page_response = fetch_xively_url("#{base_url}&page=#{page}")
     while page_response.code == 200 && page_response["results"].size > 0
       page_results = Xively::SearchResult.new(page_response.body).results
