@@ -1,4 +1,4 @@
-var map, in_bounds, drawn, filter_selections = {}, loaded_at = new Date();
+var map, in_bounds, drawn, filter_selections = {}, loaded_at = new Date(), breakpoints = [];
 var geoJsonLayers = {}, layersData = {}
 
 var AQE = (function ( $ ) {
@@ -46,6 +46,14 @@ var AQE = (function ( $ ) {
     iconUrl: defaultIconURL,
     iconSize: [12, 20], // size of the icon
   });
+
+  var breakpointColors = [
+    '#2c7bb6', // 80% and higher
+    '#abd9e9', // 60% and higher
+    '#ffffbf', // 40% and hight
+    '#fdae61', // 20% and higher
+    '#d7191c' // anything else (below 20%)
+  ]
 
   var healthEquity2014NeighborhoodStyle = {color: "#dbb67a",opacity: 0.7,fillOpacity:0.2,weight:3}
   var heatmapIconURL = '/assets/img/heatmap_legend.png'
@@ -135,7 +143,7 @@ var AQE = (function ( $ ) {
         var div_html = "";
         div_html += "<div id='legend' class='leaflet-control-layers leaflet-control leaflet-control-legend leaflet-control-layers-expanded'><div class='leaflet-control-layers-base'></div><div class='leaflet-control-layers-separator' style='display: none;'></div><div class='leaflet-control-layers-overlays'><div class='leaflet-control-layers-group' id='leaflet-control-layers-group-2'><span class='leaflet-control-layers-group-name'>Legend</span>";
 
-        var activeLayers = $.each($(".leaflet-control-layers-overlays").find("input:checked"), function(n,item){
+        var activeLayers = $.each($(".leaflet-control-layers").find("input:checked"), function(n,item){
           var name = $.trim($(item).parent().text())
           div_html += "<img src='/assets/img/map_legends/"+name+".png' alt='legend for "+name+"'/>"
         })
@@ -221,7 +229,7 @@ var AQE = (function ( $ ) {
     $(".submit-map-filters").on('click',function( event ) {
       event.preventDefault();
       authenticateAndLoadAsthmaHeatLayer($('input.filter-asthmaheat-user').val(),$('input.filter-asthmaheat-pass').val())
-      layersData.bike = undefined // BIKE HACK
+      // layersData.bike = undefined // BIKE HACK
       $.each(dataset_keys, function(n,key){
         if($(".filter-"+key+":checked").length > 0 || filter_selections[key] == true){
           if(layersData[key] == undefined){
@@ -422,7 +430,7 @@ var AQE = (function ( $ ) {
       layer.bindPopup(html)
     }
     else if(item.type == "he2014neighborhoodgeojson"){
-      layer.setStyle(healthEquity2014NeighborhoodStyle)
+      // layer.setStyle(healthEquity2014NeighborhoodStyle)
       var html = "<div><h4>"+item.Neighbor+" Neighborhood</h4>"
       html += "<table class='table table-striped' data-he2014neighborhoodgeojson_id='"+item.OBJECTID+"'>"
       html += "<tr><td>Life Expectancy</td><td>"+item.LifeExpect+" </td></tr>"
@@ -572,19 +580,54 @@ var AQE = (function ( $ ) {
       filter_selections["bike"] = false
     }
     // health equity report 2014
-    filter_selections["he2014neighborhoodgeojson"] = $('input.filter-he2014neighborhoodgeojson').val()
+    filter_selections["he2014neighborhoodgeojson"] = $('input.filter-he2014neighborhoodgeojson:checked').val()
+    filter_selections["he2014neighborhoodgeojson_colorBy"] = $('select.filter-he2014neighborhoodgeojson-colorBy').val()
   }
 
   function update_map(key){
     if(typeof(geoJsonLayers[key]) != "undefined"){map.removeLayer(geoJsonLayers[key]);}    // clear all markers
     update_filters()
 
+
+    if(key == "he2014neighborhoodgeojson" && filter_selections["he2014neighborhoodgeojson"] == "true" && filter_selections["he2014neighborhoodgeojson_colorBy"] != undefined){
+      var array_of_values = layersData[key].features.map(function(i){
+        return i.properties[filter_selections["he2014neighborhoodgeojson_colorBy"]]
+      })
+      var s1 = new Stats().push(array_of_values);
+      breakpoints = [s1.percentile(80), s1.percentile(60), s1.percentile(40), s1.percentile(20), s1.percentile(0)]
+    } 
+
     geoJsonLayers[key] = L.geoJson(layersData[key], {
       onEachFeature: onEachFeature,
-      filter: filterFeatures
+      filter: filterFeatures,
+      style: polygonStyle
     }).addTo(map);
 
+    breakpoints = [] // reset breakpoints to null
   }
+
+  function getColorByBreakpoint(value) {
+      return value > breakpoints[0] ? breakpointColors[0]: 
+             value > breakpoints[1] ? breakpointColors[1]: 
+             value > breakpoints[2] ? breakpointColors[2]: 
+             value > breakpoints[3] ? breakpointColors[3]: 
+                                      breakpointColors[4]; 
+  }
+
+
+  function polygonStyle(feature) {
+    var style = {}
+    if(breakpoints.length != 0){
+      style.fillColor = getColorByBreakpoint(feature.properties[filter_selections["he2014neighborhoodgeojson_colorBy"]])
+      style.weight = 2
+      style.opacity = 1
+      style.color = 'white'
+      style.dashArray = '3'
+      style.fillOpacity = 0.7
+    }
+    return style;
+  }
+
 
   function onAQSSiteMapMarkerClick(e){
     var aqs_id = $(".leaflet-popup-content .table").first().data("aqs_id")

@@ -168,7 +168,7 @@ class AirQualityEgg < Sinatra::Base
     @local_feed_path = '/all_eggs.geojson'
     @error = session.delete(:error)
 
-    @custom_js = [ "/assets/js/embed.js", "/assets/js/main.js" ]
+    @custom_js = [ "/assets/js/embed.js", "/assets/js/main.js","/vendor/node-faststats/faststats.js" ]
     @embeddable = true
 
     if params[:embed] == "true"
