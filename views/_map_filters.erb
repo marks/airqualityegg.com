@@ -87,29 +87,31 @@
       </div>
             <hr />
       <div class="form-group">
-          <div class="checkbox">
+          <div class="checkbox leaflet-layer-with-legend">
               <label>
                 <input class='filter-he2014neighborhoodgeojson' type="checkbox" value="true">
                   <img style='width:19px; height:20px; margin-top: -4px;' src='/assets/img/louisvillekygov.png' alt='louisville ky'/> 
-                  City of Louisville Health Equity 2014
+                  Neighborhood Health Equity 2014
 <!--                   <a target="blank" href="/wizard#datasets=jeffschools" title="data visualization wizard for this dataset"><i class="fa fa-magic fa-fw"></i></a>
  -->                </label>
-         <div style="margin-left:35px;">
-          <label style="font-weight:normal;"><em>Color neighborhoods by:</em>
-          <select class='form-control filter-he2014neighborhoodgeojson-colorBy'>
-            <option value="LifeExpect">Life Expectancy</option>
-            <option value="AlcoholDru">Alcohol or other drugs*</option>
-            <option value="HeartDisea">Heart disease*</option>
-            <option value="Homicide">Homicide*</option>
-            <option value="Suicide">Suicide*</option>
-            <option value="HIV">HIV*</option>
-            <option value="Diabetes">Diabetes*</option>
-            <option value="Unintended">Unintentional injury*</option>
-            <option value="Cancer">Cancer*</option>
-            <option value="Stroke">Stroke*</option>
-          </select>
-          </label>
-        </div>
+             <div style="margin-left:35px;">
+              <label style="font-weight:normal;"><em>Color areas by:</em>
+              <select class='form-control filter-he2014neighborhoodgeojson-colorBy'>
+                <option data-higherbetter="true" value="LifeExpect">Life Expectancy</option>
+                <option data-higherbetter="false" value="AlcoholDru">Alcohol or other drugs*</option>
+                <option data-higherbetter="false" value="HeartDisea">Heart disease*</option>
+                <option data-higherbetter="false" value="Homicide">Homicide*</option>
+                <option data-higherbetter="false" value="Suicide">Suicide*</option>
+                <option data-higherbetter="false" value="HIV">HIV*</option>
+                <option data-higherbetter="false" value="Diabetes">Diabetes*</option>
+                <option data-higherbetter="false" value="Unintended">Unintentional injury*</option>
+                <option data-higherbetter="false" value="Cancer">Cancer*</option>
+                <option data-higherbetter="false" value="Stroke">Stroke*</option>
+              </select>
+              </label>
+              <p>* Age Adjusted death rate per 100,000 population</p>
+
+            </div>
 
           </div>
           <div class="checkbox">
