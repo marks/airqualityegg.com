@@ -448,7 +448,6 @@ var AQE = (function ( $ ) {
       layer.bindPopup(html)
     }
     else if(item.type == "he2014neighborhoodgeojson"){
-      // layer.setStyle(healthEquity2014NeighborhoodStyle)
       var html = "<div><h4>"+item.Neighbor+" Neighborhood</h4>"
       html += "<table class='table table-striped' data-he2014neighborhoodgeojson_id='"+item.OBJECTID+"'>"
       html += "<tr><td>Life Expectancy</td><td>"+item.LifeExpect+" </td></tr>"
