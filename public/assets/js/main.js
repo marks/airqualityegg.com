@@ -71,7 +71,7 @@ var AQE = (function ( $ ) {
     "Census Data from JusticeMap.org":{},
     "Open Weather Map": {
       "Clouds": clouds_layer,
-      "Precipiration": precipitation_layer,
+      "Precipitation": precipitation_layer,
       "Rain": rain_layer,
       "Snow": snow_layer,
       "Pressure": pressure_layer,
