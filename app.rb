@@ -225,6 +225,7 @@ class AirQualityEgg < Sinatra::Base
           # add important type property to each feature
           geojson['features'].each do |feature| 
             feature['properties']['type'] = key
+            feature['properties'].delete_if{|k,v| ["tract_lvl_","SUM_tract","Shape_Leng","Shape_Area"].include?(k) or k.match(/SUM_tra.+/)}
           end
         else
           all_sites = sql_search_ckan(sql_for_all_sites_by_key(key))
