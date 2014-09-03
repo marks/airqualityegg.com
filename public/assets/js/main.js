@@ -138,7 +138,7 @@ var AQE = (function ( $ ) {
       L.control.fullscreen().addTo(map);
 
       legend.onAdd = function (map) {
-        console.log(map)
+        // console.log(map)
         var div = L.DomUtil.create('div', 'info legend')
         var div_html = "";
         div_html += "<div id='legend' class='leaflet-control-layers leaflet-control leaflet-control-legend leaflet-control-layers-expanded'><div class='leaflet-control-layers-base'></div><div class='leaflet-control-layers-separator' style='display: none;'></div><div class='leaflet-control-layers-overlays'><div class='leaflet-control-layers-group' id='leaflet-control-layers-group-2'><span class='leaflet-control-layers-group-name'>Legend</span>";
@@ -646,7 +646,7 @@ var AQE = (function ( $ ) {
 
       var recent_history = $.map(data.datastreams,function(data2,name){return {data: data2.recent_history, name: name+" ("+data2.unit+")"} })
 
-      console.log(recent_history)
+      // console.log(recent_history)
 
       $.each(recent_history, function(i,series){
         if(series.name.match(/ppb/gi)){
@@ -787,7 +787,7 @@ var AQE = (function ( $ ) {
     })
     if(count > 100){form.method = "post"}
     else { form.method = "get" }
-    console.log(count,form)
+    // console.log(count,form)
     document.body.appendChild(form);
     form.submit();
     map.addLayer(layer);
