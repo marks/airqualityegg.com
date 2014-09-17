@@ -465,6 +465,25 @@ var AQE = (function ( $ ) {
       html += "<p style='font-size:80%'>From <a href='www.louisvilleky.gov/health/equity/' target='blank'>Louisville, KY Health Equity Report 2014 edition (updated July 2014)</a>."
       html += "</div>"
       layer.bindPopup(html)
+    }
+    else if(item.type == "trafficcountsgeojson"){
+      var html = "<div><h4>Route: "+item.RT_DESCR+"</h4>"
+      // html += "<table class='table table-striped' data-he2014neighborhoodgeojson_id='"+item.OBJECTID+"'>"
+      // html += "<tr><td>Life Expectancy</td><td>"+item.LifeExpect+" </td></tr>"
+      // html += "<tr><td>Heart Disease*</td><td>"+item.HeartDisea+" </td></tr>"
+      // html += "<tr><td>Homicide*</td><td>"+item.Homicide+" </td></tr>"
+      // html += "<tr><td>Suicide*</td><td>"+item.Suicide+" </td></tr>"
+      // html += "<tr><td>HIV*</td><td>"+item.HIV+" </td></tr>"
+      // html += "<tr><td>Diabetes*</td><td>"+item.Diabetes+" </td></tr>"
+      // html += "<tr><td>Unintentional Injury*</td><td>"+item.Unintended+" </td></tr>"
+      // html += "<tr><td>Alcohol or other drugs*</td><td>"+item.AlcoholDru+" </td></tr>"
+      // html += "<tr><td>Stroke*</td><td>"+item.Stroke+" </td></tr>"
+      // html += "<tr><td>Cancer*</td><td>"+item.Cancer+" </td></tr>"
+      // html += "</table>" 
+      // html += "<p>* Age Adjusted death rate per 100,000 population</p>"
+      // html += "<p style='font-size:80%'>From <a href='www.louisvilleky.gov/health/equity/' target='blank'>Louisville, KY Health Equity Report 2014 edition (updated July 2014)</a>."
+      html += "</div>"
+      layer.bindPopup(html)
     } else {
       if(item.type){
         var html = "<div><h4>"+item.type.toUpperCase()+" ID #"+item.id+"</h4></div>"        
@@ -559,6 +578,10 @@ var AQE = (function ( $ ) {
       if(filter_selections["he2014neighborhoodgeojson"] == "true"){ show = true}
       else { show = false }
     }
+    else if(item.type == "trafficcountsgeojson"){
+      if(filter_selections["trafficcountsgeojson"] == "true"){ show = true}
+      else { show = false }
+    }
     return show
   }
 
@@ -600,6 +623,10 @@ var AQE = (function ( $ ) {
     filter_selections["he2014neighborhoodgeojson"] = $('input.filter-he2014neighborhoodgeojson:checked').val()
     filter_selections["he2014neighborhoodgeojson_colorBy"] = $('select.filter-he2014neighborhoodgeojson-colorBy').val()
     filter_selections["he2014neighborhoodgeojson_higherBetter"] = $('select.filter-he2014neighborhoodgeojson-colorBy option:selected').data("higherbetter")
+    // traffic counts
+    filter_selections["trafficcountsgeojson"] = $('input.filter-trafficcountsgeojson:checked').val()
+    filter_selections["trafficcountsgeojson_colorBy"] = $('select.filter-trafficcountsgeojson-colorBy').val()
+    filter_selections["trafficcountsgeojson_higherBetter"] = $('select.filter-trafficcountsgeojson-colorBy option:selected').data("higherbetter")
   }
 
   function update_map(key){

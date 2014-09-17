@@ -79,21 +79,20 @@
         </div> -->
       </div>
       <div class="form-group">
-          <label class="header"><img src='/assets/img/heatmap_legend.png' style='width:20px;height:20px;margin-top:-5px;margin-right:5px;' alt='marker' />Propeller Health Asthma Heatmap</label>
-          <div style="margin-left:10px;">
-            <input class="filter-asthmaheat-user form-control2" placeholder="Username">
-            <input class="filter-asthmaheat-pass form-control2" type="password" placeholder="Password">
-          </div>
+        <label class="header"><img src='/assets/img/heatmap_legend.png' style='width:20px;height:20px;margin-top:-5px;margin-right:5px;' alt='marker' />Propeller Health Asthma Heatmap</label>
+        <div style="margin-left:10px;">
+          <input class="filter-asthmaheat-user form-control2" placeholder="Username">
+          <input class="filter-asthmaheat-pass form-control2" type="password" placeholder="Password">
+        </div>
       </div>
-            <hr />
+      <hr />
       <div class="form-group">
           <div class="checkbox leaflet-layer-with-legend">
-              <label>
-                <input class='filter-he2014neighborhoodgeojson' type="checkbox" value="true">
-                  <img style='width:19px; height:20px; margin-top: -4px;' src='/assets/img/louisvillekygov.png' alt='louisville ky'/> 
-                  Neighborhood Health Equity 2014
-<!--                   <a target="blank" href="/wizard#datasets=jeffschools" title="data visualization wizard for this dataset"><i class="fa fa-magic fa-fw"></i></a>
- -->                </label>
+            <label>
+              <input class='filter-he2014neighborhoodgeojson' type="checkbox" value="true">
+                <img style='width:19px; height:20px; margin-top: -4px;' src='/assets/img/louisvillekygov.png' alt='louisville ky'/> 
+                Neighborhood Health Equity 2014
+             </label>
              <div style="margin-left:35px;">
               <label style="font-weight:normal;"><em>Color areas by:</em>
               <select class='form-control filter-he2014neighborhoodgeojson-colorBy'>
@@ -110,10 +109,24 @@
               </select>
               </label>
               <p style="font-size:80%;">* Age Adjusted death rate per 100,000 population</p>
-
             </div>
-
           </div>
+
+          <div class="checkbox">
+            <label>
+              <input class='filter-trafficcountsgeojson' type="checkbox" value="true">
+                <img style='width:19px; height:20px; margin-top: -4px;' src='/assets/img/kytc.png' alt='kentucky state transportation cabinet'/> 
+                Neighborhood Health Equity 2014
+             </label>
+             <div style="margin-left:35px;">
+              <label style="font-weight:normal;"><em>Color lines by:</em>
+              <select class='form-control filter-trafficcountsgeojson-colorBy'>
+                <option data-higherbetter="true" value="X">X</option>
+              </select>
+              </label>
+            </div>
+          </div>
+
           <div class="checkbox">
               <label>
                 <input class='filter-jeffschools' type="checkbox" value="true">
@@ -122,6 +135,7 @@
                   <a target="blank" href="/wizard#datasets=jeffschools" title="data visualization wizard for this dataset"><i class="fa fa-magic fa-fw"></i></a>
                 </label>
           </div>
+
           <div class="checkbox">
               <label>
                 <input class='filter-nursinghome' type="checkbox" value="true">
@@ -130,6 +144,7 @@
                 <a target="blank" href="/wizard#datasets=nursinghome" title="data visualization wizard for this dataset"><i class="fa fa-magic fa-fw"></i></a>
               </label>
           </div>
+
           <div class="checkbox">
               <label>
                 <input class='filter-famallergy' type="checkbox" value="true">
@@ -145,6 +160,7 @@
                 <a target="blank" href="/wizard#datasets=food" title="data visualization wizard for this dataset"><i class="fa fa-magic fa-fw"></i></a>
               </label>
           </div> -->
+
           <div class="checkbox">
               <label><input class='filter-parks' type="checkbox" value="true">
                 <img style='width:20px; height:20px; margin-top: -4px;' src='/assets/img/urbanpark_icon.png' alt='park'/> 
@@ -152,6 +168,7 @@
                 <a target="blank" href="/wizard#datasets=parks" title="data visualization wizard for this dataset"><i class="fa fa-magic fa-fw"></i></a>
               </label>
           </div>
+
           <div class="checkbox">
               <label><input class='filter-wupws' type="checkbox" value="true">
                 <img style='width:20px; height:20px; margin-top: -4px;' src='/assets/img/weather_station_icon.png' alt='weather station'/> 
@@ -159,6 +176,7 @@
                 <a target="blank" href="/wizard#datasets=wupws" title="data visualization wizard for this dataset"><i class="fa fa-magic fa-fw"></i></a>
               </label>
           </div>
+          
       </div>
 
       <button style="width:100%;" class="btn btn-default submit-map-filters">Apply Filters to Map</button>
