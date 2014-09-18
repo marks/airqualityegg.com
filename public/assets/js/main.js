@@ -469,9 +469,9 @@ var AQE = (function ( $ ) {
     else if(item.type == "trafficcountsgeojson"){
       var html = "<div><h4>Traffic Flow Information for Route #"+item.RT_NE_UNIQ+"</h4>"
       html += "<table class='table table-striped'>"
-      html += "<tr><td>Traffic Count Station ID</td><td>"+item.ADTSTATN+" </td></tr>"
-      html += "<tr><td>Begin Point Description @ Milepost</td><td>"+item.BEGDESC+" @ MP"+item.BEGIN_MP+" </td></tr>"
-      html += "<tr><td>End Point Description @ Milepost</td><td>"+item.ENDDESC+" @ MP"+item.END_MP+" </td></tr>"
+      html += "<tr><td>Traffic Count Station ID</td><td>"+item.ADTSTATN+" (<a href='http://datamart.business.transportation.ky.gov/EDSB_SOLUTIONS/CTS/stationdetail.aspx?STATION="+item.ADTSTATN+"' target='blank'>history</a>)</td></tr>"
+      html += "<tr><td>Begin Point Description @ Milepost</td><td>"+item.BEGDESC+" @ MP "+item.BEGIN_MP+" </td></tr>"
+      html += "<tr><td>End Point Description @ Milepost</td><td>"+item.ENDDESC+" @ MP "+item.END_MP+" </td></tr>"
       html += "<tr><td>Last Actual AADT Count</td><td>"+item.LASTCNT+" </td></tr>"
       html += "<tr><td>Year of Last Actual ADT Count</td><td>"+item.LASTCNTYR+" </td></tr>"
       html += "<tr><td>K Factor</td><td>"+item.K_FACTOR+" </td></tr>"
