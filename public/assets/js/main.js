@@ -648,7 +648,7 @@ var AQE = (function ( $ ) {
     geoJsonLayers[key] = L.geoJson(layersData[key], {
       onEachFeature: onEachFeature,
       filter: filterFeatures,
-      style: polygonStyle
+      style: geoJsonStyle
     }).addTo(map);
 
     breakpoints = [] // reset breakpoints to null
@@ -663,7 +663,7 @@ var AQE = (function ( $ ) {
   }
 
 
-  function polygonStyle(feature) {
+  function geoJsonStyle(feature) {
     var style = {}
     if(breakpoints.length != 0){
       if(filter_selections["he2014neighborhoodgeojson_higherBetter"] == true){
