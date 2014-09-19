@@ -635,10 +635,18 @@ var AQE = (function ( $ ) {
     }
     update_filters()
 
-    // special for geojson polygon layers
+    // special for geojson polygon and line layers -- TODO refactor!
     if(key == "he2014neighborhoodgeojson" && filter_selections["he2014neighborhoodgeojson"] == "true" && filter_selections["he2014neighborhoodgeojson_colorBy"] != undefined){
       var array_of_values = layersData[key].features.map(function(i){
         return i.properties[filter_selections["he2014neighborhoodgeojson_colorBy"]]
+      })
+      var s1 = new Stats().push(array_of_values);
+      breakpoints = [s1.percentile(80), s1.percentile(60), s1.percentile(40), s1.percentile(20), s1.percentile(0)]
+      legend.addTo(map)
+    } 
+    else if(key == "trafficcountsgeojson" && filter_selections["trafficcountsgeojson"] == "true" && filter_selections["trafficcountsgeojson_colorBy"] != undefined){
+      var array_of_values = layersData[key].features.map(function(i){
+        return i.properties[filter_selections["trafficcountsgeojson_colorBy"]]
       })
       var s1 = new Stats().push(array_of_values);
       breakpoints = [s1.percentile(80), s1.percentile(60), s1.percentile(40), s1.percentile(20), s1.percentile(0)]
@@ -665,7 +673,7 @@ var AQE = (function ( $ ) {
 
   function geoJsonStyle(feature) {
     var style = {}
-    if(breakpoints.length != 0){
+    if(filter_selections["he2014neighborhoodgeojson"] == "true" && breakpoints.length != 0){
       if(filter_selections["he2014neighborhoodgeojson_higherBetter"] == true){
         var colorsArray = breakpointColorsHigherIsBetter
       } else {
@@ -677,6 +685,9 @@ var AQE = (function ( $ ) {
       style.color = 'white'
       style.dashArray = '3'
       style.fillOpacity = 0.7
+    } else if(filter_selections["trafficcountsgeojson"] == "true" && breakpoints.length != 0){
+      var colorsArray = breakpointColorsHigherIsBetter
+      style.color = getColorByBreakpoint(feature.properties[filter_selections["trafficcountsgeojson_colorBy"]], colorsArray)
     }
     return style;
   }

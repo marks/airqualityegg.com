@@ -9,13 +9,13 @@
             <a target="blank" href="/wizard#datasets=aqe" title="data visualization wizard for this dataset"><i class="fa fa-magic fa-fw"></i></a>
           </label>
           <div class="checkbox">
-              <label><input class='filter-indoor-eggs filter-aqe' type="checkbox" value="true" checked>Indoor Eggs</label>
+              <label><input class='filter-indoor-eggs filter-aqe' type="checkbox" value="true" <%= "checked" unless params[:load_datasets] == "none" %>>Indoor Eggs</label>
           </div>
           <div class="checkbox">
-              <label><input class='filter-outdoor-eggs filter-aqe' type="checkbox" value="true" checked>Outdoor Eggs</label>
+              <label><input class='filter-outdoor-eggs filter-aqe' type="checkbox" value="true" <%= "checked" unless params[:load_datasets] == "none" %>>Outdoor Eggs</label>
           </div>
           <div class="checkbox">
-              <label><input class='filter-last-datapoint-within-6-hours filter-aqe' type="checkbox" value="true" checked>Last updated w/i 6 hours</label>
+              <label><input class='filter-last-datapoint-within-6-hours filter-aqe' type="checkbox" value="true" <%= "checked" unless params[:load_datasets] == "none" %>>Last updated w/i 6 hours</label>
           </div>
           <div class="checkbox">
               <label><input class='filter-last-datapoint-within-24-hours filter-aqe' type="checkbox" value="true">Last updated w/i 24 hours</label>
@@ -49,7 +49,7 @@
             <a target="blank" href="/wizard#datasets=aqs" title="data visualization wizard for this dataset"><i class="fa fa-magic fa-fw"></i></a>
           </label>
           <div class="checkbox">
-              <label><input class='filter-active-sites filter-aqs' type="checkbox" value="true" checked>Active sites</label>
+              <label><input class='filter-active-sites filter-aqs' type="checkbox" value="true" <%= "checked" unless params[:load_datasets] == "none" %>>Active sites</label>
           </div>
       </div>
       <div class="form-group">
@@ -121,7 +121,8 @@
              <div style="margin-left:35px;">
               <label style="font-weight:normal;"><em>Color lines by:</em>
               <select class='form-control filter-trafficcountsgeojson-colorBy'>
-                <option data-higherbetter="true" value="X" disabled>Coming Soon</option>
+                <option data-higherbetter="true" value="LASTCNT">Annual Average Daily Traffic (AADT)</option>
+                <option data-higherbetter="true" value="LASTCNTYR">Year of Last Data Collection</option>
               </select>
               </label>
             </div>
