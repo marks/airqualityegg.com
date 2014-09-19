@@ -1,4 +1,4 @@
-var map, in_bounds, drawn, filter_selections = {}, loaded_at = new Date(), breakpoints = [];
+var map, in_bounds, drawn, filter_selections = {}, loaded_at = new Date(), breakpoints = [], legend_html = '';
 var geoJsonLayers = {}, layersData = {}
 
 var AQE = (function ( $ ) {
@@ -63,11 +63,11 @@ var AQE = (function ( $ ) {
   ]
 
   var breakpointWidthHigherIsBetter = [
-    10, // 80% and higher
-    8, // 60% and higher
+    13, // 80% and higher
+    9, // 60% and higher
     6, // 40% and hight
-    4, // 20% and higher
-    2 // anything else (below 20%)
+    3, // 20% and higher
+    1 // anything else (below 20%)
   ]
 
   var healthEquity2014NeighborhoodStyle = {color: "#dbb67a",opacity: 0.7,fillOpacity:0.2,weight:3}
@@ -172,6 +172,11 @@ var AQE = (function ( $ ) {
           var dataset_variable = dataset_name+"-"+variable_name
           div_html += "<img src='/assets/img/map_legends/"+dataset_variable+".png' alt='legend for "+dataset_variable+"'/>"
         })
+
+        // add legend_html and then clear it
+        div_html += legend_html
+        legend_html = ''
+
 
         div_html += "</div></div></div>"
         div.innerHTML = div_html
@@ -654,10 +659,15 @@ var AQE = (function ( $ ) {
     else if(key == "trafficcountsgeojson" && filter_selections["trafficcountsgeojson"] == "true" && filter_selections["trafficcountsgeojson_colorBy"] != undefined){
       var array_of_values = layersData[key].features.map(function(i){
         var value = i.properties[filter_selections["trafficcountsgeojson_colorBy"]]
-        if(value != 0){ return value }
+        if(value != 0 && value != undefined){ return value }
       })
       var s1 = new Stats().push(array_of_values);
-      breakpoints = [s1.percentile(80), s1.percentile(60), s1.percentile(40), s1.percentile(20), s1.percentile(0)]
+      if(filter_selections["trafficcountsgeojson_colorBy"] == "LASTCNTYR"){
+        var this_year = new Date().getUTCFullYear()
+        breakpoints = [this_year, this_year-1, this_year-3, this_year-5]  
+      } else {
+        breakpoints = [s1.percentile(80), s1.percentile(60), s1.percentile(40), s1.percentile(20), s1.percentile(0)]
+      }
       legend.addTo(map)
     } 
 
@@ -671,11 +681,11 @@ var AQE = (function ( $ ) {
   }
 
   function getDisplayValueByBreakpoint(value, displayValues) {
-      return value > breakpoints[0] ? displayValues[0]: 
-             value > breakpoints[1] ? displayValues[1]: 
-             value > breakpoints[2] ? displayValues[2]: 
-             value > breakpoints[3] ? displayValues[3]: 
-                                      displayValues[4]; 
+      return value >= breakpoints[0] ? displayValues[0]: 
+             value >= breakpoints[1] ? displayValues[1]: 
+             value >= breakpoints[2] ? displayValues[2]: 
+             value >= breakpoints[3] ? displayValues[3]: 
+                                       displayValues[4]; 
   }
 
   function geoJsonStyle(feature) {
@@ -694,7 +704,11 @@ var AQE = (function ( $ ) {
       style.fillOpacity = 0.7
     } else if(filter_selections["trafficcountsgeojson"] == "true" && breakpoints.length != 0){
       if(filter_selections["trafficcountsgeojson_colorBy"] == "LASTCNT"){
+        style.color = '#333'
+        style.opacity = 0.8
         style.weight = getDisplayValueByBreakpoint(feature.properties[filter_selections["trafficcountsgeojson_colorBy"]], breakpointWidthHigherIsBetter)  
+      } else if(filter_selections["trafficcountsgeojson_colorBy"] == "LASTCNTYR"){
+        style.color = getDisplayValueByBreakpoint(feature.properties[filter_selections["trafficcountsgeojson_colorBy"]], breakpointColorsHigherIsBetter)  
       } 
       
     }
