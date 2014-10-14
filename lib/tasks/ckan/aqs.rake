@@ -238,7 +238,7 @@ namespace :ckan do
                 end
               end
             rescue => e
-              puts "ERROR: #{file} -- #{e} / #{e.message}"
+              puts "ERROR: #{file} -- #{e} / #{e.message}" unless e.message.scan(/No such file or directory/)
             end
           end
         end
