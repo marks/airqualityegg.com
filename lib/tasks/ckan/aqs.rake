@@ -54,12 +54,12 @@ namespace :ckan do
             {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
           create_results = JSON.parse(create_raw)
           resource_id = create_results["result"]["resource_id"]
-          puts "Created a new resource named '#{ENV['CKAN_AQS_SITE_RESOURCE_NAME']}'"
+          # puts "Created a new resource named '#{ENV['CKAN_AQS_SITE_RESOURCE_NAME']}'"
         else
           resource_id = resource["id"]
-          puts "Resource named '#{ENV['CKAN_AQS_SITE_RESOURCE_NAME']}' already existed"
+          # puts "Resource named '#{ENV['CKAN_AQS_SITE_RESOURCE_NAME']}' already existed"
         end
-        puts "Resource ID = #{resource_id}"
+        # puts "Resource ID = #{resource_id}"
         # invoke upsert rake task
         Rake.application.invoke_task("ckan:airnow:sites:upsert[#{resource_id}]")
       end
@@ -74,11 +74,11 @@ namespace :ckan do
         ftp = Net::FTP.new('ftp.airnowapi.org')
         ftp.login(ENV['AIRNOW_USER'], ENV['AIRNOW_PASS'])
         ftp.passive = true
-        puts "Opening file from FTP..."
+        # puts "Opening file from FTP..."
         data = ftp.getbinaryfile('Locations/monitoring_site_locations.dat', nil, 1024)
         ftp.close
 
-        puts "Parsing sites file and upserting rows..."
+        # puts "Parsing sites file and upserting rows..."
         CSV.parse(data, :col_sep => "|", :encoding => 'UTF-8') do |row|
           site_data = {
             :aqs_id => row[0],
@@ -108,7 +108,7 @@ namespace :ckan do
           upsert_result = JSON.parse(upsert_raw)
         end
 
-        puts "\nAQS Monitoring Sites data upserts complete"
+        # puts "\nAQS Monitoring Sites data upserts complete"
       end
     end
 
@@ -156,7 +156,7 @@ namespace :ckan do
         rescue
           resource_id = resource["id"]
         end
-        puts "Created/updated a new resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
+        # puts "Created/updated a new resource named '#{ENV['CKAN_AQS_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
 
         # invoke upsert rake tasks
         Rake.application.invoke_task("ckan:airnow:data:upsert_daily[#{resource_id}]")
@@ -172,12 +172,12 @@ namespace :ckan do
         ftp = Net::FTP.new('ftp.airnowapi.org')
         ftp.login(ENV['AIRNOW_USER'], ENV['AIRNOW_PASS'])
         ftp.passive = true # for Heroku
-        puts "Opening file from FTP..."
+        # puts "Opening file from FTP..."
         begin
           data = ftp.getbinaryfile("DailyData/#{TODAY}-peak.dat", nil, 1024)
           ftp.close
 
-          puts "Parsing daily file and upserting rows..."
+          # puts "Parsing daily file and upserting rows..."
           CSV.parse(data, :col_sep => "|", :encoding => 'UTF-8') do |row|
             monitoring_data = {
               :aqs_id => row[1],
@@ -199,7 +199,7 @@ namespace :ckan do
           puts "ERROR: rescued from AQS daily file"
         end
 
-        puts "\nAQS Monitoring daily data upserts complete"
+        # puts "\nAQS Monitoring daily data upserts complete"
       end
 
       desc "Open file that has hourly monitoring data from FTP and import into CKAN"
@@ -216,9 +216,9 @@ namespace :ckan do
           HOURS.each do |hour|
             file = "HourlyData/#{day}#{hour}.dat"
             begin
-              puts "Getting #{file}"
+              # puts "Getting #{file}"
               data = ftp.getbinaryfile(file, nil, 1024)
-              puts "Processing #{file}"
+              # puts "Processing #{file}"
               CSV.parse(data, :col_sep => "|", :encoding => 'ISO8859-1') do |row|
                 if ["NO2T","NO2","NO2Y","CO","CO-8HR","RHUM","TEMP","PM2.5","WS","WD","PM2.5-24HR","SO2-24HR","SO2","PM10","PM10-24HR"].include?(row[5].upcase)
                   monitoring_data = {
@@ -245,7 +245,7 @@ namespace :ckan do
 
         ftp.close
 
-        puts "\nAQS Monitoring hourly data upserts complete"
+        # puts "\nAQS Monitoring hourly data upserts complete"
       end
 
 

@@ -50,12 +50,12 @@ namespace :ckan do
             {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
           create_results = JSON.parse(create_raw)
           resource_id = create_results["result"]["resource_id"]
-          puts "Created a new resource named '#{ENV['CKAN_AQE_SITE_RESOURCE_NAME']}'"
+          # puts "Created a new resource named '#{ENV['CKAN_AQE_SITE_RESOURCE_NAME']}'"
         else
           resource_id = resource["id"]
-          puts "Resource named '#{ENV['CKAN_AQE_SITE_RESOURCE_NAME']}' already existed"
+          # puts "Resource named '#{ENV['CKAN_AQE_SITE_RESOURCE_NAME']}' already existed"
         end
-        puts "Resource ID = #{resource_id}"
+        # puts "Resource ID = #{resource_id}"
         # invoke upsert rake task
         Rake.application.invoke_task("ckan:airqualityeggs:sites:upsert[#{resource_id}]")
       end
@@ -66,9 +66,9 @@ namespace :ckan do
         raise "CKAN resource ID not set" if args[:resource_id].nil?
         raise "Xively credentials not set (see README)" unless ENV['XIVELY_API_KEY'] && ENV['XIVELY_PRODUCT_ID']
 
-        puts "Fetching metadata of all eggs..."
+        # puts "Fetching metadata of all eggs..."
         all_eggs = JSON.parse(fetch_all_feeds)
-        puts "Upserting egg site data..."
+        # puts "Upserting egg site data..."
         allowed_fields = AQE_SITE_FIELDS.map{|f| f[:id]}
         all_eggs.each do |egg|
           egg.delete_if{|k,v| !allowed_fields.include?(k)} # delete rare metadata fields we don't want to store
@@ -79,7 +79,7 @@ namespace :ckan do
           upsert_result = JSON.parse(upsert_raw)
         end
 
-        puts "\nAQE sites meta upserts complete"
+        # puts "\nAQE sites meta upserts complete"
       end
     end
 
@@ -117,7 +117,7 @@ namespace :ckan do
           {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
         create_results = JSON.parse(create_raw)
         resource_id = create_results["result"]["resource_id"]
-        puts "Created or updated a new resource named '#{ENV['CKAN_AQE_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
+        # puts "Created or updated a new resource named '#{ENV['CKAN_AQE_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
 
 
         else # update existing resource
@@ -133,11 +133,11 @@ namespace :ckan do
         raise "CKAN resource ID not set" if args[:resource_id].nil?
         raise "Xively credentials not set (see README)" unless ENV['XIVELY_PRODUCT_ID'] && ENV['XIVELY_API_KEY']
 
-        puts "Fetching all eggs..."
+        # puts "Fetching all eggs..."
         all_eggs = JSON.parse(fetch_all_feeds) # TODO - get list of eggs from CKAN, not Xively again
         all_eggs.each do |egg|
           feed_id = egg["id"]
-          puts "Upserting data for Xively feed #{feed_id}... "
+          # puts "Upserting data for Xively feed #{feed_id}... "
           egg_history = Xively::Client.get("https://api.xively.com/v2/feeds/#{feed_id}.json?interval=3600&duration=2days&limit=1000", :headers => {"X-ApiKey" => $api_key}).parsed_response
           egg_history["datastreams"].to_a.select{|d| !d["tags"].nil? && d["tags"].to_s.match(/computed/)}.each do |datastream|
             datastream_records = []
@@ -151,7 +151,7 @@ namespace :ckan do
             # batch upload datastream_records 
             if datastream_records != []
               post_data = {:resource_id => args[:resource_id], :records => datastream_records, :method => 'upsert'}.to_json
-              puts post_data
+              # puts post_data
               upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
               upsert_result = JSON.parse(upsert_raw)
               sleep 2
@@ -159,7 +159,7 @@ namespace :ckan do
           end
         end
 
-        puts "\nAQE data upserts complete"
+        # puts "\nAQE data upserts complete"
       end
 
     end
