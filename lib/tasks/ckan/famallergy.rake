@@ -48,12 +48,12 @@ namespace :ckan do
             {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
           create_results = JSON.parse(create_raw)
           resource_id = create_results["result"]["resource_id"]
-          puts "Created a new resource named '#{ENV['CKAN_FAMALLERGY_DATA_RESOURCE_NAME']}'"
+          # puts "Created a new resource named '#{ENV['CKAN_FAMALLERGY_DATA_RESOURCE_NAME']}'"
         else
           resource_id = resource["id"]
-          puts "Resource named '#{ENV['CKAN_FAMALLERGY_DATA_RESOURCE_NAME']}' already existed"
+          # puts "Resource named '#{ENV['CKAN_FAMALLERGY_DATA_RESOURCE_NAME']}' already existed"
         end
-        puts "Resource ID = #{resource_id}"
+        # puts "Resource ID = #{resource_id}"
         # invoke upsert rake task
         Rake.application.invoke_task("ckan:famallergy:sites:upsert[#{resource_id}]")
       end
@@ -75,7 +75,7 @@ namespace :ckan do
           upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
           upsert_result = JSON.parse(upsert_raw)
         end
-        puts "\nSites meta upserts complete"
+        # puts "\nSites meta upserts complete"
       end
     end
 
@@ -113,7 +113,7 @@ namespace :ckan do
           {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
         create_results = JSON.parse(create_raw)
         resource_id = create_results["result"]["resource_id"]
-        puts "Created or updated a new resource named '#{ENV['CKAN_FAMALLERGY_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
+        # puts "Created or updated a new resource named '#{ENV['CKAN_FAMALLERGY_DATA_RESOURCE_NAME']}' (resource id = #{resource_id}"
         # invoke upsert rake tasks
         Rake.application.invoke_task("ckan:famallergy:data:upsert[#{resource_id}]")
       end
@@ -137,7 +137,7 @@ namespace :ckan do
           upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
           upsert_result = JSON.parse(upsert_raw)
         end
-        puts "\nFAMALLERGY data upserts complete"
+        # puts "\nFAMALLERGY data upserts complete"
       end
 
     end
