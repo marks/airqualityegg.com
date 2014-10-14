@@ -31,7 +31,7 @@ module AppHelpers
   def sql_search_ckan(sql_query)
     results = []
     uri = "#{ENV['CKAN_HOST']}/api/3/action/datastore_search_sql?sql=#{URI.escape(sql_query)}"
-    puts uri
+    # puts uri
     raw = RestClient.get(uri,{"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
     response = JSON.parse(raw)
     if response["success"]

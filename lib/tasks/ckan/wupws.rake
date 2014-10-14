@@ -48,12 +48,12 @@ namespace :ckan do
             {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
           create_results = JSON.parse(create_raw)
           resource_id = create_results["result"]["resource_id"]
-          puts "Created a new resource named '#{ENV['CKAN_WUPWS_SITE_RESOURCE_NAME']}'"
+          # puts "Created a new resource named '#{ENV['CKAN_WUPWS_SITE_RESOURCE_NAME']}'"
         else
           resource_id = resource["id"]
-          puts "Resource named '#{ENV['CKAN_WUPWS_SITE_RESOURCE_NAME']}' already existed"
+          # puts "Resource named '#{ENV['CKAN_WUPWS_SITE_RESOURCE_NAME']}' already existed"
         end
-        puts "Resource ID = #{resource_id}"
+        # puts "Resource ID = #{resource_id}"
         # invoke upsert rake task
         Rake.application.invoke_task("ckan:wupws:sites:upsert[#{resource_id}]")
       end
@@ -65,7 +65,7 @@ namespace :ckan do
 
         wupws_sites = []
 
-        puts "Getting list of all PWS sites in #{ENV['FOCUS_CITY_STATE']}"
+        # puts "Getting list of all PWS sites in #{ENV['FOCUS_CITY_STATE']}"
         wupws_site_list_html = RestClient.get(WUPWS_SITE_LIST_URL)
         wupws_site_list_doc = Nokogiri::HTML(wupws_site_list_html)
         wupws_site_list = wupws_site_list_doc.xpath("//table[@id='pwsTable']/tbody/tr[td]")
@@ -79,7 +79,7 @@ namespace :ckan do
           }
           
           if site_data[:city].match(/#{ENV['FOCUS_CITY']}/)
-            puts "  Processing PWS ID #{site_data[:id]}"
+            # puts "  Processing PWS ID #{site_data[:id]}"
             wupws_site_details_raw = RestClient.get("http://api.wunderground.com/api/#{ENV['WEATHER_UNDERGROUND_API_KEY']}/geolookup/q/pws:#{site_data[:id]}.json")
             wupws_site_details = JSON.parse(wupws_site_details_raw)
 
@@ -106,7 +106,7 @@ namespace :ckan do
         post_data = {:resource_id => args[:resource_id], :records => wupws_sites, :method => 'upsert'}.to_json
         upsert_raw = RestClient.post("#{ENV['CKAN_HOST']}/api/3/action/datastore_upsert", post_data, {"X-CKAN-API-KEY" => ENV['CKAN_API_KEY']})
         upsert_result = JSON.parse(upsert_raw)
-        puts "\nSites upserts complete"
+        # puts "\nSites upserts complete"
       end
     end
 
