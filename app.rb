@@ -142,11 +142,7 @@ class AirQualityEgg < Sinatra::Base
   get '/aqe/dashboard' do
     dataset_key = "aqe"
 
-    if params["focus_ids"] 
-      focus_ids = params["focus_ids"]
-    else
-      focus_ids = META[dataset_key]["extras_hash"]["Focus IDs"]
-    end
+    focus_ids = params["focus_ids"].nil? ? META[dataset_key]["extras_hash"]["Focus IDs"] : params["focus_ids"]
     
     @sql = <<-EOS
       SELECT site_table.id, site_table.created, site_table.description, site_table.feed, site_table.location_domain, site_table.location_ele, site_table.location_exposure, site_table.location_lat, site_table.location_lon, site_table.status, site_table.title,
@@ -158,8 +154,48 @@ class AirQualityEgg < Sinatra::Base
     @focus_ids = focus_ids.split(",")
     @results = sql_search_ckan(@sql)
 
-    @custom_js = ["//cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.min.js", "/assets/js/dashboard.js" ]
+    @custom_js = ["//cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.min.js", "/assets/js/aqe_dashboard.js" ]
     erb :dashboard_aqe
+  end
+
+  get '/aqs/dashboard' do
+    dataset_key = "aqs"
+
+    focus_city = params["focus_city"].nil? ? ENV["FOCUS_CITY"] : params["focus_city"]
+    focus_param = params["focus_param"].nil? ? "PM2.5" : params["focus_param"]
+
+    initial_sql = <<-EOS
+      SELECT
+        s.site_name, s.aqs_id, s.msa_name, s.cmsa_name, s.lat, s.lon,
+        (ldp).datetime, (ldp)."date", (ldp).parameter, (ldp).unit, (ldp).value, (ldp).computed_aqi
+      FROM
+        (
+          SELECT
+            (
+              SELECT
+                d
+              FROM
+                \"#{META[dataset_key]["data_resource_id"]}\" d
+              WHERE
+                s.aqs_id = d.aqs_id
+                AND d. PARAMETER = 'PM2.5'
+              ORDER BY
+                d.datetime desc nulls last
+              LIMIT 1
+            ) AS ldp,
+            s.*
+          FROM
+            "b1b1e239-f5e2-4bc0-9572-6056fac5257b" s
+        ) s
+      WHERE
+        (ldp).aqs_Id is not null
+        AND s.msa_name LIKE '%#{focus_city}%'
+    EOS
+    @detail_sql = ""
+
+    @custom_js = ["//cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.min.js", "/assets/js/aqs_dashboard.js" ]
+    erb :dashboard_aqe
+
   end
 
 
