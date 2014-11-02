@@ -1,6 +1,13 @@
 // var map;
 
 $(function() {
+    Highcharts.setOptions({
+        global: {
+            timezoneOffset: Math.abs(gmt_offset) * 60
+        }
+    });
+
+
     $(".momentify").each(function(n,item){
       var original = $(item).html()
       var from_now = moment(original).fromNow()
@@ -18,11 +25,11 @@ $(function() {
         chart: { type: 'column' },
         credits: { enabled: false },
         legend: { enabled: false },
-        title: { text: 'AQI for the Past 24 Hours at '+site_name +' (in GMT)'},
+        title: { text: 'AQI for the Past 24 Hours at '+site_name +' (in GMT '+gmt_offset+')'},
         xAxis: { type: 'datetime' },
         yAxis: { min: 0, title: {enabled: false} },
         tooltip: {
-          headerFormat: '<span style="font-size:10px">{point.key} GMT</span><table>',
+          headerFormat: '<span style="font-size:10px">{point.key} (GMT '+gmt_offset+')</span><table>',
           pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
               '<td style="padding:0"><b> {point.y}</b></td></tr>',
           footerFormat: '</table>',
