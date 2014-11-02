@@ -25,9 +25,23 @@ $(function() {
         chart: { type: 'column' },
         credits: { enabled: false },
         legend: { enabled: false },
-        title: { text: 'AQI for the Past 24 Hours at '+site_name +' (in GMT '+gmt_offset+')'},
+        title: { text: 'AQI for the Past 24 Hours at '+site_name +' (in GMT '+gmt_offset+')', style:{"fontSize": "13px" }},
         xAxis: { type: 'datetime' },
-        yAxis: { min: 0, title: {enabled: false} },
+        yAxis: {
+          endOnTick: false,
+          min: 0,
+          max: 110,
+          title: {enabled: false},
+          
+  gridLineWidth: 0,
+  minorGridLineWidth: 0,
+
+          plotLines:[
+            { value:50, color: '#FFFF00', width:2, dashStyle: 'Dash', zIndex:99},
+            { value:99, color: '#FF7E00', width:2, dashStyle: 'Dash', zIndex:99},
+            { value:150, color: '#FF0000', width:2, dashStyle: 'Dash', zIndex:99},
+          ]
+        },
         tooltip: {
           headerFormat: '<span style="font-size:10px">{point.key} (GMT '+gmt_offset+')</span><table>',
           pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
