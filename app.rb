@@ -86,7 +86,7 @@ class AirQualityEgg < Sinatra::Base
     def sql_for_aqs_datastreams(id)
       <<-EOS
         SELECT
-          data_table.aqs_id,data_table.date, data_table.time,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
+          data_table.aqs_id,data_table.date,data_table.datetime, data_table.time,data_table.parameter,data_table.value,data_table.unit,data_table.computed_aqi
         FROM "#{META["aqs"]["data_resource_id"]}" data_table
         WHERE data_table.aqs_id = '#{id}'
         ORDER BY date desc,time desc
@@ -161,40 +161,28 @@ class AirQualityEgg < Sinatra::Base
   get '/aqs/dashboard' do
     dataset_key = "aqs"
 
-    focus_city = params["focus_city"].nil? ? ENV["FOCUS_CITY"] : params["focus_city"]
-    focus_param = params["focus_param"].nil? ? "PM2.5" : params["focus_param"]
+    @focus_city = params["focus_city"].nil? ? ENV["FOCUS_CITY"] : params["focus_city"]
+    @focus_param = params["focus_param"].nil? ? "PM2.5" : params["focus_param"]
 
-    initial_sql = <<-EOS
-      SELECT
-        s.site_name, s.aqs_id, s.msa_name, s.cmsa_name, s.lat, s.lon,
-        (ldp).datetime, (ldp)."date", (ldp).parameter, (ldp).unit, (ldp).value, (ldp).computed_aqi
-      FROM
-        (
-          SELECT
-            (
-              SELECT
-                d
-              FROM
-                \"#{META[dataset_key]["data_resource_id"]}\" d
-              WHERE
-                s.aqs_id = d.aqs_id
-                AND d. PARAMETER = 'PM2.5'
-              ORDER BY
-                d.datetime desc nulls last
-              LIMIT 1
-            ) AS ldp,
-            s.*
-          FROM
-            "b1b1e239-f5e2-4bc0-9572-6056fac5257b" s
-        ) s
-      WHERE
-        (ldp).aqs_Id is not null
-        AND s.msa_name LIKE '%#{focus_city}%'
+    @sql = <<-EOS
+SELECT
+  s.site_name, s.aqs_id, s.msa_name, s.cmsa_name, s.lat, s.lon, s.gmt_offset,
+  (ldp).datetime, (ldp).date, (ldp).time, (ldp).parameter, (ldp).unit, (ldp).value, (ldp).computed_aqi
+FROM
+  ( SELECT ( SELECT d FROM \"#{META[dataset_key]["data_resource_id"]}\" d
+    WHERE s.aqs_id = d.aqs_id AND d. PARAMETER = \'#{@focus_param}\'
+    ORDER BY d.datetime desc nulls last LIMIT 1 ) AS ldp, s.*
+    FROM \"#{META[dataset_key]["site_resource_id"]}\" s
+  ) s
+WHERE
+  (ldp).aqs_Id is not null
+  AND s.msa_name LIKE '%#{@focus_city}%'
     EOS
-    @detail_sql = ""
-
+    @results = sql_search_ckan(@sql)
+    require 'pp'
+    pp @results
     @custom_js = ["//cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.min.js", "/assets/js/aqs_dashboard.js" ]
-    erb :dashboard_aqe
+    erb :dashboard_aqs
 
   end
 
@@ -337,6 +325,22 @@ class AirQualityEgg < Sinatra::Base
       end
     end
     return data.to_json
+  end
+
+  get '/aqs/:id/:param/past_24h_aqi_chart.json' do
+    content_type :json
+    sql = <<-EOS
+      SELECT * from \"#{META["aqs"]["data_resource_id"]}\"
+      WHERE aqs_id = '#{params[:id]}' AND "parameter" = '#{params[:param]}' AND datetime > (now() - interval '24 hour')
+      ORDER BY date, time 
+    EOS
+    results = sql_search_ckan(sql)
+
+    data = results.map do |result|
+      {:y => result["computed_aqi"], :color => result["aqi_cat"][:color], :x => result["datetime"].to_time.utc.change(:zone_offset => '0').to_i*1000}
+    end
+
+    return [{:name => "#{params[:param]} AQI", :data => data}].to_json
   end
 
   get '/aqs/:id' do

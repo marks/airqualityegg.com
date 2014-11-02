@@ -95,7 +95,7 @@
 
           </div>
           <div class="panel-footer text-right">
-            <span class="text-muted"><%= @datastreams[ds] ? "Updated <span class='momentify'>#{@datastreams[ds]["date"].to_time.change(:hour => data["time"], :offset => @site["gmt_offset"])}</span>": ''%></span>
+            <span class="text-muted"><%= @datastreams[ds] ? "Updated <span class='momentify'>#{data["datetime"]}Z": ''%></span>
           </div>
         </div>
       </div>

@@ -344,6 +344,8 @@ module AppHelpers
       return calculate_aqi_from_PM10_24hr(value)
     when "PM2.5-24HR"
       return calculate_aqi_from_PM25_24hr(value)
+    when "PM2.5" # CAREFUL
+      return calculate_aqi_from_PM25_24hr(value)
     when "CO"
       value = value/1000.00 if unit.upcase == "PPB"
       return calculate_aqi_from_CO(value)
