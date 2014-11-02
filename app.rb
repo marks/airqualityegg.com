@@ -337,7 +337,7 @@ WHERE
     results = sql_search_ckan(sql)
 
     data = results.map do |result|
-      {:y => result["computed_aqi"], :color => result["aqi_cat"][:color], :x => result["datetime"].to_time.utc.change(:zone_offset => '0').to_i*1000}
+      {:y => result["computed_aqi"], :color => result["aqi_cat"][:color], :x => (result["datetime"]+"Z").to_time.to_i*1000}
     end
 
     return [{:name => "#{params[:param]} AQI", :data => data}].to_json

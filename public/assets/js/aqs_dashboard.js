@@ -18,11 +18,11 @@ $(function() {
         chart: { type: 'column' },
         credits: { enabled: false },
         legend: { enabled: false },
-        title: { text: 'AQI for the Past 24 Hours at '+site_name +' (GMT)'},
+        title: { text: 'AQI for the Past 24 Hours at '+site_name +' (in GMT)'},
         xAxis: { type: 'datetime' },
         yAxis: { min: 0, title: {enabled: false} },
         tooltip: {
-          headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+          headerFormat: '<span style="font-size:10px">{point.key} GMT</span><table>',
           pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
               '<td style="padding:0"><b> {point.y}</b></td></tr>',
           footerFormat: '</table>',
