@@ -34,6 +34,8 @@ CKAN_AQS_DATA_RESOURCE_NAME:  AirNow AQS Monitoring Data
 CKAN_AQE_DATASET_ID:          # URL slug of your CKAN data set (created through CKAN web GUI) for AQE data
 CKAN_AQE_SITE_RESOURCE_NAME:  Air Quality Egg Sites
 CKAN_AQE_DATA_RESOURCE_NAME:  Air Quality Egg Data
+CKAN_DATASET_KEYS=AQS,AQE     # Needed so rb script can find CKAN* env vars
+CKAN_DATASET_KEYS_SITES_JOINABLE=AQS,AQE  # Needed so rb script can find CKAN* env vars
 WEATHER_UNDERGROUND_API_KEY:  # API key for Weather Underground
 CONSTANTCONTACT_API_KEY:	  # Mashery API key
 CONSTANTCONTACT_ACCESS_TOKEN: # Access token granting access to CC account
