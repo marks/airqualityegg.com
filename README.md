@@ -17,35 +17,35 @@ The Air Quality Egg dashboard is a [Ruby](http://www.ruby-lang.org/),
 
 ```bash
 # Sample .env file
-XIVELY_PRODUCT_ID:            # get this by logging into Xively.com and creating a product batch (Manage > Add Product Batch)
-XIVELY_API_KEY:               # get this by logging into Xively.com and creating a master key (Settings > Master Keys > Add Master Key
-AIRNOW_USER:                  # get this from airnowapi.org - required for fetching EPA air quality data
-AIRNOW_PASS:                  # same as AIRNOW_USER
-AIRNOW_API_KEY:               # API key from airnowapi.org
-GOOGLE_ANALYTICS_TRACKING_ID: # get from analytics.google.com or don't include and google analytics wont be used
-GOOGLE_ANALYTICS_DOMAIN:      # same as GOOGLE_ANALYTICS_TRACKING_ID
-HTTP_BASIC_USER:              # username to protect some pages with
-HTTP_BASIC_PASS:              # password to protect some pages with
-CKAN_HOST:                    # http://url-to-ckan.tld:port
-CKAN_API_KEY:                 # CKAN API key for a user with the appropriate rights to data sets named below
-CKAN_AQS_DATASET_ID:          # URL slug of your CKAN data set (created through CKAN web GUI) for AQS data
-CKAN_AQS_SITE_RESOURCE_NAME:  AirNow AQS Monitoring Sites
-CKAN_AQS_DATA_RESOURCE_NAME:  AirNow AQS Monitoring Data
-CKAN_AQE_DATASET_ID:          # URL slug of your CKAN data set (created through CKAN web GUI) for AQE data
-CKAN_AQE_SITE_RESOURCE_NAME:  Air Quality Egg Sites
-CKAN_AQE_DATA_RESOURCE_NAME:  Air Quality Egg Data
-CKAN_DATASET_KEYS=AQS,AQE     # Needed so rb script can find CKAN* env vars
-CKAN_DATASET_KEYS_SITES_JOINABLE=AQS,AQE  # Needed so rb script can find CKAN* env vars
-WEATHER_UNDERGROUND_API_KEY:  # API key for Weather Underground
+XIVELY_PRODUCT_ID:                # get this by logging into Xively.com and creating a product batch (Manage > Add Product Batch)
+XIVELY_API_KEY:                   # get this by logging into Xively.com and creating a master key (Settings > Master Keys > Add Master Key
+AIRNOW_USER:                      # get this from airnowapi.org - required for fetching EPA air quality data
+AIRNOW_PASS:                      # same as AIRNOW_USER
+AIRNOW_API_KEY:                   # API key from airnowapi.org
+GOOGLE_ANALYTICS_TRACKING_ID:     # get from analytics.google.com or don't include and google analytics wont be used
+GOOGLE_ANALYTICS_DOMAIN:          # same as GOOGLE_ANALYTICS_TRACKING_ID
+HTTP_BASIC_USER:                  # username to protect some pages with
+HTTP_BASIC_PASS:                  # password to protect some pages with
+CKAN_HOST:                        # http://url-to-ckan.tld:port
+CKAN_API_KEY:                     # CKAN API key for a user with the appropriate rights to data sets named below
+CKAN_AQS_DATASET_ID:              # URL slug of your CKAN data set (created through CKAN web GUI) for AQS data
+CKAN_AQS_SITE_RESOURCE_NAME:      AirNow AQS Monitoring Sites Loading
+CKAN_AQS_DATA_RESOURCE_NAME:      AirNow AQS Monitoring Data Loading
+CKAN_AQE_DATASET_ID:              # URL slug of your CKAN data set (created through CKAN web GUI) for AQE data
+CKAN_AQE_SITE_RESOURCE_NAME:      Air Quality Egg Sites Loading
+CKAN_AQE_DATA_RESOURCE_NAME:      Air Quality Egg Data Loading
+CKAN_DATASET_KEYS:                AQS,AQE     # Needed so rb script can find CKAN* env vars
+CKAN_DATASET_KEYS_SITES_JOINABLE: AQS,AQE  # Needed so rb script can find CKAN* env vars
+WEATHER_UNDERGROUND_API_KEY:      # API key for Weather Underground
 CONSTANTCONTACT_API_KEY:	  # Mashery API key
-CONSTANTCONTACT_ACCESS_TOKEN: # Access token granting access to CC account
-CONSTANTCONTACT_LIST_ID:      # ID of contact list emails should go to
-FOCUS_CITY:							Louisville
-FOCUS_CITY_NAME:					Louisville, KY
-FOCUS_CITY_LAT:						38.22847167526397
-FOCUS_CITY_LON:						-85.76099395751953
-FOCUS_CITY_ZOOM:					10
-FOCUS_CITY_STATE:					KY
+CONSTANTCONTACT_ACCESS_TOKEN:     # Access token granting access to CC account
+CONSTANTCONTACT_LIST_ID:          # ID of contact list emails should go to
+FOCUS_CITY:                       Louisville
+FOCUS_CITY_NAME:                  Louisville, KY
+FOCUS_CITY_LAT:                   38.22847167526397
+FOCUS_CITY_LON:                   -85.76099395751953
+FOCUS_CITY_ZOOM:                  10
+FOCUS_CITY_STATE:                 KY
 ```
 
 The values in this file are required to interact with Xively, but some value
