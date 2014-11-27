@@ -2,7 +2,7 @@ namespace :mailer do
 
   namespace :institute_messages do
 
-    CKAN_INSTITUTE_MESSAGES_RESOURCE_ID = META["institute_messages"]["resources"].first["id"]
+    CKAN_INSTITUTE_MESSAGES_RESOURCE_ID = META["institute_messages"]["resources"].first["id"] if META["institute_messages"]
     CTCT_LIST_ID = ENV['CONSTANTCONTACT_LIST_ID']
 
     EPA_HOW_YOU_CAN_HELP_HTML = <<-EOS
