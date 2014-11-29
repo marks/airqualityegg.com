@@ -315,12 +315,14 @@ WHERE
     end
 
     if params[:include_recent_history]
+
       series = []
       recent_history_sql = "SELECT * from \"#{META["aqs"]["data_resource_id"]}\" WHERE aqs_id = '#{params[:id]}' and date > current_date - 45 order by date, time "
       recent_history = sql_search_ckan(recent_history_sql)
       series_names = recent_history.map{|x| x["parameter"]}.uniq
       series_names.each do |series_name|
         series_datapoints = recent_history.select{|x| x["parameter"] == series_name}
+        data[:datastreams][series_name.to_sym] = {} if data[:datastreams][series_name.to_sym].nil?
         data[:datastreams][series_name.to_sym][:recent_history] = series_datapoints.map {|x| [x["date"].to_time.utc.change(:hour => x["time"], :zone_offset => '0').to_i*1000,x["value"].to_f] }
       end
     end
@@ -336,7 +338,7 @@ WHERE
     EOS
     results = sql_search_ckan(sql)
 
-    data = results.map do |result|
+    data = results.select{|result| !result["computed_aqi"].nil? }.map do |result|
       {:y => result["computed_aqi"], :color => result["aqi_cat"][:color], :x => (result["datetime"]+"Z").to_time.to_i*1000}
     end
 
