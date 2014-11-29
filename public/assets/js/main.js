@@ -62,6 +62,22 @@ var AQE = (function ( $ ) {
     '#2c7bb6' // anything else (below 20%)
   ]
 
+  var breakpointColorsHigherIsBetterByLachel = [
+    '#FF0000', // 80% and higher
+    '#1F5BFF', // 60% and higher
+    '#F29600', // 40% and hight
+    '#C000E7', // 20% and higher
+    '#00F312' // anything else (below 20%)
+  ]
+  var breakpointColorsLowerIsBetterByLachel = [
+    '#00F312', // 80% and higher
+    '#C000E7', // 60% and higher
+    '#F29600', // 40% and hight
+    '#1F5BFF', // 20% and higher
+    '#FF0000' // anything else (below 20%)
+  ]
+
+
   var breakpointWidthHigherIsBetter = [
     13, // 80% and higher
     9, // 60% and higher
@@ -689,19 +705,20 @@ var AQE = (function ( $ ) {
   }
 
   function geoJsonStyle(feature) {
-    var style = {}
+    console.log(feature)
+    var style = {className: 'type-'+feature.properties.type}
     if(filter_selections["he2014neighborhoodgeojson"] == "true" && breakpoints.length != 0){
       if(filter_selections["he2014neighborhoodgeojson_higherBetter"] == true){
-        var colorsArray = breakpointColorsHigherIsBetter
+        var colorsArray = breakpointColorsHigherIsBetterByLachel
       } else {
-        var colorsArray = breakpointColorsLowerIsBetter
+        var colorsArray = breakpointColorsHigherIsBetterByLachel
       }
-      style.fillColor = getDisplayValueByBreakpoint(feature.properties[filter_selections["he2014neighborhoodgeojson_colorBy"]], colorsArray)
+      var codedColor = getDisplayValueByBreakpoint(feature.properties[filter_selections["he2014neighborhoodgeojson_colorBy"]], colorsArray)
       style.weight = 2
       style.opacity = 1
-      style.color = 'white'
-      style.dashArray = '3'
-      style.fillOpacity = 0.7
+      style.color = '#000'
+      style.fillOpacity = 1
+      style.className = style.className + ' svgCrossHatch-'+codedColor.replace('#','')
     } else if(filter_selections["trafficcountsgeojson"] == "true" && breakpoints.length != 0){
       if(filter_selections["trafficcountsgeojson_colorBy"] == "LASTCNT"){
         style.color = '#333'
