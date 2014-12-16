@@ -8,6 +8,11 @@ The Air Quality Egg dashboard is a [Ruby](http://www.ruby-lang.org/),
 
 ## Development
 
+### Get the code
+`git clone https://github.com/amcgail/louisvilleairmap.com.git && cd louisvilleairmap.com`
+`git submodule init`
+`git submodule update`
+
 ### Prerequisites
 
 * A working Ruby environment. The app should work in all common flavours
